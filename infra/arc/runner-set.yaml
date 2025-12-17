@@ -1,0 +1,53 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: gitea-runner
+  namespace: arc-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: 1
+  template:
+    spec:
+      organization: gao
+      labels:
+        - arc
+        - docker
+        - linux
+        - self-hosted
+      dockerdWithinRunnerContainer: true
+      image: summerwind/actions-runner-dind:ubuntu-22.04
+      env:
+        - name: DOCKER_HOST
+          value: unix:///var/run/docker.sock
+        - name: RUNNER_ENTERPRISE_URL
+          value: http://192.168.1.83:33000
+      dockerEnv:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+      resources:
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: gitea-runner-autoscaler
+  namespace: arc-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  scaleTargetRef:
+    name: gitea-runner
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: PercentageRunnersBusy
+      scaleUpThreshold: "0.75"
+      scaleDownThreshold: "0.25"
+      scaleUpFactor: "2"
+      scaleDownFactor: "0.5"
