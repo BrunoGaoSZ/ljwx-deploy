@@ -14,6 +14,8 @@ kind: RunnerDeployment
 metadata:
   name: org-runner
   namespace: arc-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   replicas: 1
   template:
@@ -31,7 +33,6 @@ spec:
       dockerEnv:
         - name: DOCKER_TLS_CERTDIR
           value: ""
-      privileged: true
       volumeMounts:
         - name: docker-config
           mountPath: /etc/docker
