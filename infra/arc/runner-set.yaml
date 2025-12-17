@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docker-daemon-config
+  namespace: arc-system
+data:
+  daemon.json: |
+    {
+      "insecure-registries": ["harbor.eu.lingjingwanxiang.cn:8080"]
+    }
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: org-runner
+  namespace: arc-system
+spec:
+  replicas: 1
+  template:
+    spec:
+      organization: BrunoGaoSZ
+      labels:
+        - arc
+        - docker
+        - linux
+      dockerdWithinRunnerContainer: true
+      image: summerwind/actions-runner-dind:ubuntu-22.04
+      env:
+        - name: DOCKER_HOST
+          value: unix:///var/run/docker.sock
+      dockerEnv:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+      privileged: true
+      volumeMounts:
+        - name: docker-config
+          mountPath: /etc/docker
+      volumes:
+        - name: docker-config
+          configMap:
+            name: docker-daemon-config
