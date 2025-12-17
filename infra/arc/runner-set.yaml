@@ -1,14 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: docker-daemon-config
-  namespace: arc-system
-data:
-  daemon.json: |
-    {
-      "insecure-registries": ["harbor.eu.lingjingwanxiang.cn:8080"]
-    }
----
 apiVersion: actions.summerwind.dev/v1alpha1
 kind: RunnerDeployment
 metadata:
@@ -25,6 +14,7 @@ spec:
         - arc
         - docker
         - linux
+        - self-hosted
       dockerdWithinRunnerContainer: true
       image: summerwind/actions-runner-dind:ubuntu-22.04
       env:
@@ -33,10 +23,29 @@ spec:
       dockerEnv:
         - name: DOCKER_TLS_CERTDIR
           value: ""
-      volumeMounts:
-        - name: docker-config
-          mountPath: /etc/docker
-      volumes:
-        - name: docker-config
-          configMap:
-            name: docker-daemon-config
+      resources:
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: org-runner-autoscaler
+  namespace: arc-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  scaleTargetRef:
+    name: org-runner
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: PercentageRunnersBusy
+      scaleUpThreshold: "0.75"
+      scaleDownThreshold: "0.25"
+      scaleUpFactor: "2"
+      scaleDownFactor: "0.5"
