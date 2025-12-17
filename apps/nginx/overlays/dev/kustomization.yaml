@@ -1,0 +1,5 @@
+resources:
+  - ../../base
+images:
+  - name: nginx
+    newTag: "1.27"
