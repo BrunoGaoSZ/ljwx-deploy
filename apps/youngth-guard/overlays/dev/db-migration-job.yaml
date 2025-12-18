@@ -73,6 +73,9 @@ spec:
             - |
               set -e
 
+              # 构建 Flyway 连接 URL
+              export FLYWAY_URL="jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+
               echo "============================================"
               echo "Database Migration with Flyway"
               echo "============================================"
@@ -100,8 +103,6 @@ spec:
 
           env:
             # Flyway 配置
-            - name: FLYWAY_URL
-              value: "jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
             - name: FLYWAY_USER
               valueFrom:
                 secretKeyRef:
