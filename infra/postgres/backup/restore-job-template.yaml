@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-restore-TIMESTAMP  # Replace TIMESTAMP with actual time
+  namespace: infra
+  labels:
+    app: postgres
+    component: restore
+    managed-by: manual
+spec:
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: restore
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: restore
+          image: pgbackrest/pgbackrest:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              # IMPORTANT: This will OVERWRITE existing data!
+              # Make sure postgres is stopped before running this
+
+              echo "Starting restore at $(date)"
+              echo "Target time: ${RESTORE_TARGET_TIME}"
+
+              # Stop postgres first (should be done externally)
+              # kubectl scale statefulset postgres --replicas=0 -n infra
+
+              # Restore to specific point in time
+              if [ -n "${RESTORE_TARGET_TIME}" ]; then
+                echo "Performing Point-In-Time Recovery to ${RESTORE_TARGET_TIME}"
+                pgbackrest --stanza=postgres \
+                  --type=time \
+                  --target="${RESTORE_TARGET_TIME}" \
+                  --delta \
+                  restore
+              else
+                echo "Performing full restore to latest backup"
+                pgbackrest --stanza=postgres \
+                  --delta \
+                  restore
+              fi
+
+              echo "Restore completed at $(date)"
+              echo "Next steps:"
+              echo "1. Start postgres: kubectl scale statefulset postgres --replicas=1 -n infra"
+              echo "2. Verify data integrity"
+              echo "3. Test application connections"
+
+          env:
+            - name: PGBACKREST_CONFIG
+              value: /etc/pgbackrest/pgbackrest.conf
+            - name: RESTORE_TARGET_TIME
+              value: ""  # Format: "2025-12-18 10:30:00+00"
+
+          volumeMounts:
+            - name: pgbackrest-config
+              mountPath: /etc/pgbackrest
+              readOnly: true
+            - name: pgbackrest-repo
+              mountPath: /pgbackrest/repo
+              readOnly: true
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+
+      volumes:
+        - name: pgbackrest-config
+          configMap:
+            name: pgbackrest-config
+        - name: pgbackrest-repo
+          persistentVolumeClaim:
+            claimName: pgbackrest-repo
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data-postgres-0

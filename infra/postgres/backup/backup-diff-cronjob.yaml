@@ -1,0 +1,114 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup-diff
+  namespace: infra
+  labels:
+    app: postgres
+    component: backup
+    backup-type: diff
+    managed-by: gitops
+spec:
+  # Run differential backup every 6 hours
+  schedule: "0 */6 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      labels:
+        app: postgres
+        component: backup
+        backup-type: diff
+    spec:
+      template:
+        metadata:
+          labels:
+            app: postgres
+            component: backup
+            backup-type: diff
+        spec:
+          restartPolicy: OnFailure
+
+          initContainers:
+            - name: wait-for-postgres
+              image: postgres:16-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  until pg_isready -h postgres-lb.infra.svc.cluster.local -p 5432 -U postgres; do
+                    echo "Waiting for postgres..."
+                    sleep 5
+                  done
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-admin
+                      key: POSTGRES_PASSWORD
+
+          containers:
+            - name: backup
+              image: pgbackrest/pgbackrest:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  echo "Starting differential backup at $(date)"
+
+                  # Run differential backup
+                  pgbackrest --stanza=postgres --type=diff backup
+
+                  # Show backup info
+                  pgbackrest --stanza=postgres info
+
+                  echo "Differential backup completed at $(date)"
+
+              env:
+                - name: PGBACKREST_CONFIG
+                  value: /etc/pgbackrest/pgbackrest.conf
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-admin
+                      key: POSTGRES_USER
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-admin
+                      key: POSTGRES_PASSWORD
+                - name: PGHOST
+                  value: postgres-lb.infra.svc.cluster.local
+                - name: PGPORT
+                  value: "5432"
+
+              volumeMounts:
+                - name: pgbackrest-config
+                  mountPath: /etc/pgbackrest
+                  readOnly: true
+                - name: pgbackrest-repo
+                  mountPath: /pgbackrest/repo
+                - name: postgres-data
+                  mountPath: /var/lib/postgresql/data
+                  readOnly: true
+
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
+
+          volumes:
+            - name: pgbackrest-config
+              configMap:
+                name: pgbackrest-config
+            - name: pgbackrest-repo
+              persistentVolumeClaim:
+                claimName: pgbackrest-repo
+            - name: postgres-data
+              persistentVolumeClaim:
+                claimName: postgres-data-postgres-0
