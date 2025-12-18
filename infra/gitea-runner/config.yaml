@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runner-config
+  namespace: gitea-runner
+data:
+  config.yaml: |
+    log:
+      level: info
+    runner:
+      name: k8s-runner-${HOSTNAME}
+      fetch_timeout: 5s
+      fetch_interval: 2s
+      labels:
+        - ubuntu-latest
+        - ubuntu-22.04
+        - docker
+        - self-hosted
+    cache:
+      enabled: true
+      dir: /data/cache
+    container:
+      network: bridge
+      privileged: false
+      options: -v /workspace:/workspace
+      valid_volumes:
+        - /workspace
+      docker_host: ""
+    host:
+      workdir_parent: /data/runner

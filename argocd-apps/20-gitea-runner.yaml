@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra-arc
+  name: gitea-runner
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: http://192.168.1.83:33000/gao/ljwx-deploy.git
     targetRevision: main
-    path: infra/arc
+    path: infra/gitea-runner
   destination:
     server: https://kubernetes.default.svc
-    namespace: arc-system
+    namespace: gitea-runner
   syncPolicy:
     automated:
       prune: true
