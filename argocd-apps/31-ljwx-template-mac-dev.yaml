@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-template-mac-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: mac-dev
+    project: ljwx-template
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: ljwx
+
+  # 多源配置：从两个 repo 拉取配置
+  sources:
+    # 源 1: Helm Chart（代码仓库）
+    - repoURL: 'https://github.com/BrunoGaoSZ/ljwx-template.git'
+      targetRevision: main
+      path: deploy/helm/app
+      helm:
+        valueFiles:
+          - $values/apps/ljwx-template/base/values-common.yaml
+          - $values/apps/ljwx-template/overlays/mac-dev/values.yaml
+
+    # 源 2: Values 文件（GitOps 仓库）
+    - repoURL: 'https://github.com/BrunoGaoSZ/ljwx-deploy.git'
+      targetRevision: main
+      ref: values
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev  # Mac k3s 也使用 dev 命名空间
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-template-eu-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: eu-dev
+    project: ljwx-template
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: ljwx
+
+  # 多源配置：从两个 repo 拉取配置
+  sources:
+    # 源 1: Helm Chart（代码仓库）
+    - repoURL: 'https://github.com/BrunoGaoSZ/ljwx-template.git'
+      targetRevision: main
+      path: deploy/helm/app
+      helm:
+        valueFiles:
+          # 引用源 2 的 values 文件
+          - $values/apps/ljwx-template/base/values-common.yaml
+          - $values/apps/ljwx-template/overlays/eu-dev/values.yaml
+
+    # 源 2: Values 文件（GitOps 仓库）
+    - repoURL: 'https://github.com/BrunoGaoSZ/ljwx-deploy.git'
+      targetRevision: main
+      ref: values  # 定义引用名称
+
+  # 目标配置：部署到哪个集群和命名空间
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev  # 使用已有的 dev 命名空间
+
+  # 同步策略
+  syncPolicy:
+    automated:
+      prune: true      # 自动删除 Git 中不存在的资源
+      selfHeal: true   # 自动修复手动更改
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=false  # dev 命名空间已存在
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true          # 先部署新资源，再删除旧资源
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # 忽略某些字段的差异（避免误报）
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas  # 如果使用 HPA，忽略 replicas 差异

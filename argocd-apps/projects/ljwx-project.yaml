@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ljwx
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: LJWX Template Applications
+
+  # 允许的源代码仓库（分离后需要两个 repo）
+  sourceRepos:
+    # 代码仓库（Helm chart）
+    - 'https://github.com/BrunoGaoSZ/ljwx-template.git'
+    - 'git@github.com:BrunoGaoSZ/ljwx-template.git'
+    # GitOps 仓库（部署配置）
+    - 'https://github.com/BrunoGaoSZ/ljwx-deploy.git'
+    - 'git@github.com:BrunoGaoSZ/ljwx-deploy.git'
+
+  # 允许部署的目标集群和命名空间
+  destinations:
+    - namespace: 'ljwx-*'
+      server: 'https://kubernetes.default.svc'
+    - namespace: 'argocd'
+      server: 'https://kubernetes.default.svc'
+    - namespace: 'dev'  # 已有的 dev 命名空间
+      server: 'https://kubernetes.default.svc'
+
+  # 允许创建的集群级资源（谨慎开放）
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+
+  # 允许的命名空间级资源
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # 孤立资源策略（删除 Application 时的行为）
+  orphanedResources:
+    warn: true
+
+  # 角色（可选，用于细粒度权限控制）
+  roles:
+    - name: developer
+      description: Developer role with read-only access
+      policies:
+        - p, proj:ljwx:developer, applications, get, ljwx/*, allow
+        - p, proj:ljwx:developer, applications, sync, ljwx/*, deny
+      groups:
+        - ljwx-developers
+
+    - name: operator
+      description: Operator role with sync permissions
+      policies:
+        - p, proj:ljwx:operator, applications, get, ljwx/*, allow
+        - p, proj:ljwx:operator, applications, sync, ljwx/*, allow
+        - p, proj:ljwx:operator, applications, override, ljwx/*, allow
+      groups:
+        - ljwx-operators
