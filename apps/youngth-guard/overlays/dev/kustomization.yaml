@@ -1,0 +1,9 @@
+resources:
+  - ../../base
+
+namespace: dev
+
+images:
+  - name: ghcr.io/brunogaosz/youngth-guard-backend
+    newName: ghcr.io/brunogaosz/youngth-guard-backend
+    newTag: "latest"
