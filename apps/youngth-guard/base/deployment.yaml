@@ -12,6 +12,8 @@ spec:
       labels:
         app: youngth-guard-backend
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: backend
           image: ghcr.io/brunogaosz/youngth-guard-backend:latest
