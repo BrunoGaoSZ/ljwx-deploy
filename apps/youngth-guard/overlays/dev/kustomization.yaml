@@ -6,4 +6,4 @@ namespace: dev
 images:
   - name: ghcr.io/brunogaosz/youngth-guard-backend
     newName: ghcr.io/brunogaosz/youngth-guard-backend
-    newTag: "dev-ecdd5cd"
+    newTag: "dev-7638905"
