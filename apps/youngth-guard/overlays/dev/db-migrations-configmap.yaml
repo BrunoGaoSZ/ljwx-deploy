@@ -1,0 +1,140 @@
+apiVersion: v1
+data:
+  V1__initial_schema.sql: |
+    -- ============================================
+    -- Migration: V1__initial_schema
+    -- Description: 初始化 youngth-guard 数据库 Schema
+    -- Author: System
+    -- Date: 2025-01-18
+    -- ============================================
+    -- Description:
+    --   创建 youngth-guard 应用的初始数据库结构
+    --   包括用户表、评估记录表等核心表
+    --
+    -- Rollback Strategy:
+    --   如需回滚，创建 V2 迁移删除这些表
+    --
+    -- Performance Impact:
+    --   预估执行时间：< 5 秒
+    --   无锁表操作
+    --   对应用无影响（首次创建）
+    -- ============================================
+
+    -- ============================================
+    -- Step 1: 创建用户表
+    -- ============================================
+
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+
+    COMMENT ON TABLE users IS '用户表';
+    COMMENT ON COLUMN users.id IS '用户 ID（主键）';
+    COMMENT ON COLUMN users.username IS '用户名（唯一）';
+    COMMENT ON COLUMN users.email IS '邮箱（唯一）';
+    COMMENT ON COLUMN users.created_at IS '创建时间';
+    COMMENT ON COLUMN users.updated_at IS '更新时间';
+
+    -- ============================================
+    -- Step 2: 创建心理评估记录表
+    -- ============================================
+
+    CREATE TABLE IF NOT EXISTS assessments (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        score INTEGER NOT NULL CHECK (score >= 0 AND score <= 100),
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        assessment_type VARCHAR(50) NOT NULL DEFAULT 'general',
+        notes TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assessments_user_id ON assessments(user_id);
+    CREATE INDEX IF NOT EXISTS idx_assessments_status ON assessments(status);
+    CREATE INDEX IF NOT EXISTS idx_assessments_type ON assessments(assessment_type);
+    CREATE INDEX IF NOT EXISTS idx_assessments_created_at ON assessments(created_at);
+
+    COMMENT ON TABLE assessments IS '心理评估记录表';
+    COMMENT ON COLUMN assessments.id IS '评估 ID（主键）';
+    COMMENT ON COLUMN assessments.user_id IS '用户 ID（外键）';
+    COMMENT ON COLUMN assessments.score IS '评估分数（0-100）';
+    COMMENT ON COLUMN assessments.status IS '评估状态：pending/completed/cancelled';
+    COMMENT ON COLUMN assessments.assessment_type IS '评估类型：general/anxiety/depression等';
+    COMMENT ON COLUMN assessments.notes IS '评估备注';
+    COMMENT ON COLUMN assessments.created_at IS '创建时间';
+    COMMENT ON COLUMN assessments.updated_at IS '更新时间';
+
+    -- ============================================
+    -- Step 3: 创建审计日志表
+    -- ============================================
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+        id BIGSERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        action VARCHAR(50) NOT NULL,
+        entity_type VARCHAR(50) NOT NULL,
+        entity_id INTEGER,
+        changes JSONB,
+        ip_address INET,
+        user_agent TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
+
+    COMMENT ON TABLE audit_logs IS '审计日志表';
+    COMMENT ON COLUMN audit_logs.id IS '日志 ID（主键）';
+    COMMENT ON COLUMN audit_logs.user_id IS '操作用户 ID';
+    COMMENT ON COLUMN audit_logs.action IS '操作类型：create/update/delete/login等';
+    COMMENT ON COLUMN audit_logs.entity_type IS '实体类型：user/assessment等';
+    COMMENT ON COLUMN audit_logs.entity_id IS '实体 ID';
+    COMMENT ON COLUMN audit_logs.changes IS '变更内容（JSON 格式）';
+    COMMENT ON COLUMN audit_logs.ip_address IS '操作 IP 地址';
+    COMMENT ON COLUMN audit_logs.user_agent IS '用户代理';
+    COMMENT ON COLUMN audit_logs.created_at IS '创建时间';
+
+    -- ============================================
+    -- Verification
+    -- ============================================
+
+    -- 验证表已创建
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'users') THEN
+            RAISE EXCEPTION 'Table users was not created!';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'assessments') THEN
+            RAISE EXCEPTION 'Table assessments was not created!';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'audit_logs') THEN
+            RAISE EXCEPTION 'Table audit_logs was not created!';
+        END IF;
+
+        RAISE NOTICE 'All tables created successfully!';
+    END $$;
+
+    -- ============================================
+    -- Notes:
+    --   - 所有表都使用 IF NOT EXISTS 确保幂等性
+    --   - 索引已根据常用查询场景优化
+    --   - 审计日志表使用 BIGSERIAL 应对大量日志
+    --   - 使用 JSONB 类型存储灵活的变更数据
+    -- ============================================
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: db-migrations

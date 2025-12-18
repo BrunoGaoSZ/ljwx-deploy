@@ -1,5 +1,7 @@
 resources:
   - ../../base
+  - db-migration-job.yaml
+  - db-migrations-configmap.yaml
 
 namespace: dev
 
