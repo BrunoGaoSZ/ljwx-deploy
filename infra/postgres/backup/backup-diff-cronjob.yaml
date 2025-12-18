@@ -1,36 +1,37 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: postgres-backup-diff
+  name: postgres-backup-incremental
   namespace: infra
   labels:
     app: postgres
     component: backup
-    backup-type: diff
+    backup-type: incremental
     managed-by: gitops
 spec:
-  # Run differential backup every 6 hours
+  # Run incremental backup every 6 hours
   schedule: "0 */6 * * *"
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
   jobTemplate:
     metadata:
       labels:
         app: postgres
         component: backup
-        backup-type: diff
+        backup-type: incremental
     spec:
       template:
         metadata:
           labels:
             app: postgres
             component: backup
-            backup-type: diff
+            backup-type: incremental
         spec:
           restartPolicy: OnFailure
 
           initContainers:
+            # Wait for postgres to be ready
             - name: wait-for-postgres
               image: postgres:16-alpine
               command:
@@ -41,6 +42,7 @@ spec:
                     echo "Waiting for postgres..."
                     sleep 5
                   done
+                  echo "Postgres is ready!"
               env:
                 - name: PGPASSWORD
                   valueFrom:
@@ -50,25 +52,79 @@ spec:
 
           containers:
             - name: backup
-              image: pgbackrest/pgbackrest:latest
+              image: postgres:16-alpine
               command:
-                - /bin/bash
+                - /bin/sh
                 - -c
                 - |
                   set -e
-                  echo "Starting differential backup at $(date)"
 
-                  # Run differential backup
-                  pgbackrest --stanza=postgres --type=diff backup
+                  # Backup configuration
+                  BACKUP_DIR="/backup"
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  RETENTION_DAYS=2
 
-                  # Show backup info
-                  pgbackrest --stanza=postgres info
+                  echo "============================================"
+                  echo "PostgreSQL Incremental Backup"
+                  echo "============================================"
+                  echo "Start time: $(date)"
+                  echo "============================================"
 
-                  echo "Differential backup completed at $(date)"
+                  # Create backup directory
+                  mkdir -p ${BACKUP_DIR}
+
+                  # Get list of user databases (excluding system databases)
+                  echo "Fetching database list..."
+                  DATABASES=$(psql -h ${PGHOST} -U ${PGUSER} -t -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres' ORDER BY datname;")
+
+                  if [ -z "${DATABASES}" ]; then
+                    echo "No user databases found to backup"
+                    exit 0
+                  fi
+
+                  echo "Databases to backup:"
+                  echo "${DATABASES}"
+                  echo ""
+
+                  # Backup each database separately
+                  TOTAL_SIZE=0
+                  for DB in ${DATABASES}; do
+                    DB_CLEAN=$(echo ${DB} | tr -d ' ')
+                    BACKUP_FILE="${BACKUP_DIR}/${DB_CLEAN}_${TIMESTAMP}.sql.gz"
+
+                    echo "Backing up database: ${DB_CLEAN}"
+                    pg_dump -h ${PGHOST} -U ${PGUSER} -d ${DB_CLEAN} | gzip > ${BACKUP_FILE}
+
+                    if [ -f "${BACKUP_FILE}" ]; then
+                      SIZE=$(stat -c%s "${BACKUP_FILE}" 2>/dev/null || stat -f%z "${BACKUP_FILE}")
+                      TOTAL_SIZE=$((TOTAL_SIZE + SIZE))
+                      echo "  ✅ Backup size: $(du -h ${BACKUP_FILE} | cut -f1)"
+                    else
+                      echo "  ❌ Backup failed for ${DB_CLEAN}"
+                    fi
+                  done
+
+                  # Convert total size to human readable (simplified)
+                  TOTAL_SIZE_MB=$((TOTAL_SIZE / 1048576))
+                  echo ""
+                  echo "Total backup size: ${TOTAL_SIZE_MB}MB"
+
+                  # Clean up old incremental backups (keep last N days)
+                  echo ""
+                  echo "Cleaning up old backups (keeping last ${RETENTION_DAYS} days)..."
+                  find ${BACKUP_DIR} -name "*_*.sql.gz" -type f -mtime +${RETENTION_DAYS} -delete
+
+                  # List recent backups
+                  echo ""
+                  echo "Recent backups:"
+                  ls -lt ${BACKUP_DIR}/*_*.sql.gz 2>/dev/null | head -10 || echo "No backups found"
+
+                  echo ""
+                  echo "============================================"
+                  echo "Backup completed at $(date)"
+                  echo "============================================"
 
               env:
-                - name: PGBACKREST_CONFIG
-                  value: /etc/pgbackrest/pgbackrest.conf
                 - name: PGUSER
                   valueFrom:
                     secretKeyRef:
@@ -85,30 +141,18 @@ spec:
                   value: "5432"
 
               volumeMounts:
-                - name: pgbackrest-config
-                  mountPath: /etc/pgbackrest
-                  readOnly: true
-                - name: pgbackrest-repo
-                  mountPath: /pgbackrest/repo
-                - name: postgres-data
-                  mountPath: /var/lib/postgresql/data
-                  readOnly: true
+                - name: backup
+                  mountPath: /backup
 
               resources:
                 requests:
                   memory: "256Mi"
-                  cpu: "250m"
+                  cpu: "200m"
                 limits:
                   memory: "512Mi"
                   cpu: "500m"
 
           volumes:
-            - name: pgbackrest-config
-              configMap:
-                name: pgbackrest-config
-            - name: pgbackrest-repo
+            - name: backup
               persistentVolumeClaim:
                 claimName: pgbackrest-repo
-            - name: postgres-data
-              persistentVolumeClaim:
-                claimName: postgres-data-postgres-0

@@ -42,6 +42,7 @@ spec:
                     echo "Waiting for postgres..."
                     sleep 5
                   done
+                  echo "Postgres is ready!"
               env:
                 - name: PGPASSWORD
                   valueFrom:
@@ -51,28 +52,68 @@ spec:
 
           containers:
             - name: backup
-              image: pgbackrest/pgbackrest:latest
+              image: postgres:16-alpine
               command:
-                - /bin/bash
+                - /bin/sh
                 - -c
                 - |
                   set -e
-                  echo "Starting full backup at $(date)"
 
-                  # Create stanza if not exists
-                  pgbackrest --stanza=postgres stanza-create --log-level-console=info || true
+                  # Backup configuration
+                  BACKUP_DIR="/backup"
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="${BACKUP_DIR}/postgres_full_${TIMESTAMP}.sql.gz"
+                  RETENTION_DAYS=7
 
-                  # Run full backup
-                  pgbackrest --stanza=postgres --type=full backup
+                  echo "============================================"
+                  echo "PostgreSQL Full Backup"
+                  echo "============================================"
+                  echo "Start time: $(date)"
+                  echo "Backup file: ${BACKUP_FILE}"
+                  echo "============================================"
 
-                  # Show backup info
-                  pgbackrest --stanza=postgres info
+                  # Create backup directory
+                  mkdir -p ${BACKUP_DIR}
 
-                  echo "Full backup completed at $(date)"
+                  # Get list of all databases (excluding templates and postgres)
+                  echo "Fetching database list..."
+                  DATABASES=$(psql -h ${PGHOST} -U ${PGUSER} -t -c "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres';")
+
+                  echo "Databases to backup:"
+                  echo "${DATABASES}"
+
+                  # Backup all databases
+                  echo ""
+                  echo "Starting pg_dumpall..."
+                  pg_dumpall -h ${PGHOST} -U ${PGUSER} | gzip > ${BACKUP_FILE}
+
+                  # Verify backup file
+                  if [ -f "${BACKUP_FILE}" ]; then
+                    BACKUP_SIZE=$(du -h ${BACKUP_FILE} | cut -f1)
+                    echo "✅ Backup completed successfully"
+                    echo "   File: ${BACKUP_FILE}"
+                    echo "   Size: ${BACKUP_SIZE}"
+                  else
+                    echo "❌ Backup failed - file not created"
+                    exit 1
+                  fi
+
+                  # Clean up old backups (keep last N days)
+                  echo ""
+                  echo "Cleaning up old backups (keeping last ${RETENTION_DAYS} days)..."
+                  find ${BACKUP_DIR} -name "postgres_full_*.sql.gz" -type f -mtime +${RETENTION_DAYS} -delete
+
+                  # List all backups
+                  echo ""
+                  echo "Available backups:"
+                  ls -lh ${BACKUP_DIR}/postgres_full_*.sql.gz 2>/dev/null || echo "No backups found"
+
+                  echo ""
+                  echo "============================================"
+                  echo "Backup completed at $(date)"
+                  echo "============================================"
 
               env:
-                - name: PGBACKREST_CONFIG
-                  value: /etc/pgbackrest/pgbackrest.conf
                 - name: PGUSER
                   valueFrom:
                     secretKeyRef:
@@ -89,30 +130,18 @@ spec:
                   value: "5432"
 
               volumeMounts:
-                - name: pgbackrest-config
-                  mountPath: /etc/pgbackrest
-                  readOnly: true
-                - name: pgbackrest-repo
-                  mountPath: /pgbackrest/repo
-                - name: postgres-data
-                  mountPath: /var/lib/postgresql/data
-                  readOnly: true
+                - name: backup
+                  mountPath: /backup
 
               resources:
                 requests:
                   memory: "256Mi"
                   cpu: "250m"
                 limits:
-                  memory: "512Mi"
-                  cpu: "500m"
+                  memory: "1Gi"
+                  cpu: "1000m"
 
           volumes:
-            - name: pgbackrest-config
-              configMap:
-                name: pgbackrest-config
-            - name: pgbackrest-repo
+            - name: backup
               persistentVolumeClaim:
                 claimName: pgbackrest-repo
-            - name: postgres-data
-              persistentVolumeClaim:
-                claimName: postgres-data-postgres-0
