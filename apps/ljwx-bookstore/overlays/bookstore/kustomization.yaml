@@ -1,0 +1,9 @@
+resources:
+  - ../../base
+
+namespace: bookstore
+
+images:
+  - name: ghcr.io/brunogaosz/ljwx-bookstore/bookstore
+    newName: ghcr.io/brunogaosz/ljwx-bookstore/bookstore
+    newTag: "bookstore-latest"
