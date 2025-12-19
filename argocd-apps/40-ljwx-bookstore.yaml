@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-bookstore
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: bookstore
+    project: ljwx-bookstore
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: ljwx
+
+  # 多源配置：从两个 repo 拉取配置
+  sources:
+    # 源 1: Helm Chart（bookstore 代码仓库）
+    - repoURL: 'https://github.com/BrunoGaoSZ/ljwx-bookstore.git'
+      targetRevision: main
+      path: helm
+      helm:
+        valueFiles:
+          # 引用源 2 的 values 文件
+          - $values/apps/ljwx-bookstore/base/values-common.yaml
+          - $values/apps/ljwx-bookstore/overlays/bookstore/values.yaml
+
+    # 源 2: Values 文件（GitOps 仓库）
+    - repoURL: 'https://github.com/BrunoGaoSZ/ljwx-deploy.git'
+      targetRevision: main
+      ref: values
+
+  # 目标配置：部署到 bookstore 命名空间
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: bookstore
+
+  # 同步策略
+  syncPolicy:
+    automated:
+      prune: true      # 自动删除 Git 中不存在的资源
+      selfHeal: true   # 自动修复手动更改
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true  # 自动创建 bookstore 命名空间
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # 忽略某些字段的差异
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

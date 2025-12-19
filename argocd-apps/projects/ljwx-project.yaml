@@ -13,6 +13,8 @@ spec:
     # 代码仓库（Helm chart）
     - 'https://github.com/BrunoGaoSZ/ljwx-template.git'
     - 'git@github.com:BrunoGaoSZ/ljwx-template.git'
+    - 'https://github.com/BrunoGaoSZ/ljwx-bookstore.git'
+    - 'git@github.com:BrunoGaoSZ/ljwx-bookstore.git'
     # GitOps 仓库（部署配置）
     - 'https://github.com/BrunoGaoSZ/ljwx-deploy.git'
     - 'git@github.com:BrunoGaoSZ/ljwx-deploy.git'
@@ -24,6 +26,8 @@ spec:
     - namespace: 'argocd'
       server: 'https://kubernetes.default.svc'
     - namespace: 'dev'  # 已有的 dev 命名空间
+      server: 'https://kubernetes.default.svc'
+    - namespace: 'bookstore'  # bookstore 命名空间
       server: 'https://kubernetes.default.svc'
 
   # 允许创建的集群级资源（谨慎开放）
