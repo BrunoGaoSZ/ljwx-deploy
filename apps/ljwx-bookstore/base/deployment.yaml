@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookstore
+  labels:
+    app: bookstore
+    managed-by: argocd
+    project: ljwx-bookstore
 spec:
   replicas: 2
   selector:
@@ -11,6 +15,8 @@ spec:
     metadata:
       labels:
         app: bookstore
+        project: ljwx-bookstore
+        version: v0.1.4
     spec:
       imagePullSecrets:
         - name: ghcr-secret
