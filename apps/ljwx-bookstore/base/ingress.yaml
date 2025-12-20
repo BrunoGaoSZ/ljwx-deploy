@@ -7,6 +7,8 @@ metadata:
     # Traefik annotations
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/redirect-to-https: "true"
+    # Redirect root path to /fiction/index
+    traefik.ingress.kubernetes.io/router.middlewares: bookstore-redirect-root@kubernetescrd
     # cert-manager annotation for automatic TLS certificate
     cert-manager.io/cluster-issuer: dnspod-letsencrypt
 spec:
@@ -26,3 +28,14 @@ spec:
             name: bookstore
             port:
               number: 8080
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-root
+  namespace: bookstore
+spec:
+  redirectRegex:
+    regex: "^https?://[^/]+/$"
+    replacement: "https://bookstore.lingjingwanxiang.cn/fiction/index"
+    permanent: false
