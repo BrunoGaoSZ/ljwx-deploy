@@ -40,6 +40,15 @@ spec:
                 secretKeyRef:
                   name: bookstore-db-credentials
                   key: SPRING_DATASOURCE_PASSWORD
+            # Redis configuration
+            - name: SPRING_DATA_REDIS_HOST
+              value: "redis-service.ljwx-health.svc.cluster.local"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "6379"
+            - name: SPRING_DATA_REDIS_PASSWORD
+              value: ""
+            - name: SPRING_DATA_REDIS_DATABASE
+              value: "0"
           livenessProbe:
             httpGet:
               path: /fiction/actuator/health
