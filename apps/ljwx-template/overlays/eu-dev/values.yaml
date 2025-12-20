@@ -5,7 +5,7 @@ apiFast:
   enabled: true
   replicaCount: 1 # dev 环境资源有限
   image:
-    tag: "main-48f1281" # CI 会自动更新为 Git SHA
+    tag: "main-5205c31" # CI 会自动更新为 Git SHA
   resources:
     requests:
       memory: "128Mi"
