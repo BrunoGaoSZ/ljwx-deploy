@@ -46,7 +46,10 @@ spec:
             - name: SPRING_DATA_REDIS_PORT
               value: "6379"
             - name: SPRING_DATA_REDIS_PASSWORD
-              value: ""
+              valueFrom:
+                secretKeyRef:
+                  name: redis-credentials
+                  key: REDIS_PASSWORD
             - name: SPRING_DATA_REDIS_DATABASE
               value: "0"
           livenessProbe:
