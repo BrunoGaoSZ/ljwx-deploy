@@ -1,4 +1,5 @@
 resources:
   - namespace-dev.yaml
+  - namespace-ljwx-website-dev.yaml
   - regcred.yaml
   - default-sa.yaml

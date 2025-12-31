@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: http://192.168.1.83:33000/gao/ljwx-deploy.git
     targetRevision: main
-    path: apps/ljwx-website/overlays/dev
+    path: apps/ljwx-website/overlays/ljwx-website-dev
   destination:
     server: https://kubernetes.default.svc
-    namespace: dev
+    namespace: ljwx-website-dev
   syncPolicy:
     automated:
       prune: true
