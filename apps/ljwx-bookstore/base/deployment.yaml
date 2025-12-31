@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-bookstore
+  labels:
+    app: ljwx-bookstore
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ljwx-bookstore
+  template:
+    metadata:
+      labels:
+        app: ljwx-bookstore
+        component: backend
+    spec:
+      containers:
+        - name: ljwx-bookstore
+          image: harbor.omniverseai.net/ljwx/ljwx-bookstore:latest
+          ports:
+            - name: http
+              containerPort: 8844
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: JAVA_OPTS
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+          livenessProbe:
+            httpGet:
+              path: /fiction/actuator/health
+              port: 8844
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /fiction/actuator/health
+              port: 8844
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
