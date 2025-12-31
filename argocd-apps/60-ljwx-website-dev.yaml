@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-website-dev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://192.168.1.83:33000/gao/ljwx-deploy.git
+    targetRevision: main
+    path: apps/ljwx-website/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
