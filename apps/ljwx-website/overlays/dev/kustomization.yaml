@@ -5,7 +5,7 @@ resources:
   - ../../base
 images:
   - name: harbor.omniverseai.net/ljwx/ljwx-website
-    newTag: "main-dd3f946"
+    newTag: "main-abde1fb"
 replicas:
   - name: ljwx-website
     count: 1
