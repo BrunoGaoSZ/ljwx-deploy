@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-bootstrap
+  namespace: argocd
+  # This finalizer ensures Application cascading delete
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  # Source: argocd-apps directory contains all Application manifests
+  source:
+    repoURL: http://192.168.1.83:33000/gao/ljwx-deploy.git
+    targetRevision: main
+    path: argocd-apps
+
+    # Only include Application resources, exclude this bootstrap file
+    directory:
+      recurse: false
+      include: '*-dev.yaml'  # Only auto-create *-dev.yaml applications
+
+  # Destination: Create Applications in argocd namespace
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  # Sync policy: Auto-create/delete Applications based on Git
+  syncPolicy:
+    automated:
+      prune: true       # Auto-delete Applications removed from Git
+      selfHeal: true    # Auto-fix manual changes
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=false  # argocd namespace already exists
