@@ -176,14 +176,24 @@ jobs:
 
 #### 1.2 配置 Gitea Secrets
 
-```bash
-# 在 Gitea 项目设置中添加以下 Secrets:
-# Settings → Secrets → Add Secret
+**推荐方式: 使用 Organization Secrets (一次配置，所有项目共享)**
 
-# 1. HARBOR_USERNAME: Harbor 用户名
-# 2. HARBOR_PASSWORD: Harbor 密码
-# 3. DEPLOY_REPO_TOKEN: Gitea 访问令牌 (用于更新 ljwx-deploy 仓库)
+详细配置步骤请参考: **[GITEA-SECRETS-SETUP.md](GITEA-SECRETS-SETUP.md)**
+
+```bash
+# Organization 级别配置 (推荐):
+# http://192.168.1.83:33000/gao/settings/secrets
+# 添加以下 3 个 Secrets，所有项目自动可用:
+# - HARBOR_USERNAME: Harbor 用户名
+# - HARBOR_PASSWORD: Harbor 密码
+# - DEPLOY_REPO_TOKEN: Gitea 访问令牌 (用于更新 ljwx-deploy 仓库)
+
+# 或者项目级别配置 (不推荐):
+# http://192.168.1.83:33000/gao/my-app/settings/secrets
+# 需要为每个项目单独配置
 ```
+
+> 💡 **提示**: 如果已经配置了 Organization Secrets，可以跳过此步骤
 
 #### 1.3 确保 Dockerfile 存在
 
