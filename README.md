@@ -111,3 +111,4 @@ kubectl -n gitea-runner run test --rm -it --image=curlimages/curl -- \
 ### Docker 权限问题
 
 Runner 使用宿主机 Docker socket，确保有权限访问。
+# Test stability
