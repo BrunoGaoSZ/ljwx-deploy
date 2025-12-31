@@ -1,15 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: dev
-
 resources:
   - ../../base
-
 images:
   - name: harbor.omniverseai.net/ljwx/ljwx-website
-    newTag: "latest"
-
+    newTag: "main-dd3f946"
 replicas:
   - name: ljwx-website
     count: 1
