@@ -1,6 +1,8 @@
 ---
 # =============================================================================
 # ljwx-bookstore Ingress Configuration
+# 域名: book.omniverseai.net
+# SSL证书: 通过 cert-manager + Cloudflare 自动获取
 # =============================================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -16,13 +18,44 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    # SSL 配置
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+    # SSL 配置 - 强制HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
     # 健康检查
     nginx.ingress.kubernetes.io/health-check-path: "/fiction/actuator/health"
+
+    # cert-manager 自动证书管理
+    cert-manager.io/cluster-issuer: "cloudflare-letsencrypt"
+
+    # CORS 配置（如果需要）
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://book.omniverseai.net"
 spec:
   ingressClassName: nginx
+
+  # TLS 配置
+  tls:
+    - hosts:
+        - book.omniverseai.net
+      secretName: ljwx-bookstore-tls  # cert-manager 自动创建和更新
+
+  # 路由规则
   rules:
+    # 生产域名
+    - host: book.omniverseai.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-bookstore
+                port:
+                  number: 80
+
+    # 保留本地测试域名（可选）
     - host: bookstore.192.168.1.83.nip.io
       http:
         paths:
