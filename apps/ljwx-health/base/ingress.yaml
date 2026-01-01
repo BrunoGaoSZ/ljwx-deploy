@@ -14,11 +14,6 @@ metadata:
   labels:
     app: ljwx-health
   annotations:
-    # Cert-manager 自动 TLS 证书
-    cert-manager.io/cluster-issuer: "cloudflare-letsencrypt"
-    # HTTPS 重定向
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # CORS 配置
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
@@ -32,13 +27,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - health-admin.omniverseai.net
-      secretName: ljwx-health-admin-tls
-    - hosts:
-        - health-dashboard.omniverseai.net
-      secretName: ljwx-health-dashboard-tls
   rules:
     # =========================================================================
     # Rule 1: health-admin.omniverseai.net
