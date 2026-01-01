@@ -8,7 +8,7 @@ resources:
 
 images:
   - name: harbor.omniverseai.net/ljwx/ljwx-bookstore
-    newTag: "main-ac40aa9"
+    newTag: "main-c44aa1d"
 
 replicas:
   - name: ljwx-bookstore
