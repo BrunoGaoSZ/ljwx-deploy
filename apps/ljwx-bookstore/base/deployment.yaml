@@ -51,10 +51,10 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 64Mi
+              memory: 128Mi
             limits:
               cpu: 100m
-              memory: 128Mi
+              memory: 256Mi
 
       # 主容器
       containers:
@@ -158,11 +158,11 @@ spec:
           # 资源配置
           resources:
             requests:
-              cpu: 500m
-              memory: 1Gi
+              cpu: 250m
+              memory: 512Mi
             limits:
-              cpu: 2000m
-              memory: 2Gi
+              cpu: 1000m
+              memory: 1Gi
 
           # 健康检查
           livenessProbe:
