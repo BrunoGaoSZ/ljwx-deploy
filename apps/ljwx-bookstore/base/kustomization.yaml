@@ -1,6 +1,33 @@
+---
+# =============================================================================
+# Kustomize Base Configuration for ljwx-bookstore
+# =============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: ljwx-bookstore
+
 resources:
+  - namespace.yaml
+  - secret.yaml
+  - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - ingress.yaml
+  - db-init-job.yaml
+
+commonLabels:
+  app: ljwx-bookstore
+  managed-by: kustomize
+
+# 镜像替换（将由 CD 流程动态更新）
+images:
+  - name: harbor.omniverseai.net/ljwx/ljwx-bookstore
+    newTag: latest
+
+# 配置生成器行为
+generatorOptions:
+  disableNameSuffixHash: true
+
+# 构建元数据
+buildMetadata: [originAnnotations, transformerAnnotations]

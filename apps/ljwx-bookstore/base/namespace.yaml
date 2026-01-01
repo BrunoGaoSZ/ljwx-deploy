@@ -1,0 +1,13 @@
+---
+# =============================================================================
+# ljwx-bookstore Namespace
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-bookstore
+  labels:
+    name: ljwx-bookstore
+    project: ljwx
+    environment: production
+    managed-by: argocd
