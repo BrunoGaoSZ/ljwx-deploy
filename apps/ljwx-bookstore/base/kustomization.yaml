@@ -9,7 +9,8 @@ namespace: ljwx-bookstore
 
 resources:
   - namespace.yaml
-  - secret.yaml
+  # Secret 由 infra 团队手动创建，不在 Git 中管理
+  # TODO: 后续迁移到 External Secrets Operator 实现完全 GitOps
   - configmap.yaml
   - deployment.yaml
   - service.yaml
