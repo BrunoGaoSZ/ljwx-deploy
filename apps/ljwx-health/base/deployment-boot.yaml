@@ -33,6 +33,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9998"
         prometheus.io/path: "/actuator/prometheus"
+        kubectl.kubernetes.io/restartedAt: "20260103-072537"
     spec:
       # Harbor 镜像拉取凭证
       imagePullSecrets:

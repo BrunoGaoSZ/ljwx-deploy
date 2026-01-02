@@ -29,6 +29,8 @@ spec:
         app: ljwx-admin
         component: frontend
         version: v1.0.0
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "20260103-072537"
     spec:
       # Harbor 镜像拉取凭证
       imagePullSecrets:
