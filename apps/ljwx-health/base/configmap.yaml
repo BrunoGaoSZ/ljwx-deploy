@@ -20,10 +20,20 @@ data:
   DB_NAME: "ljwx_health"
   DB_USER: "root"
 
+  # Spring DataSource 配置
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-infra.infra.svc.cluster.local:3306/ljwx_health?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+
   # Redis 配置（连接 infra namespace）
   REDIS_HOST: "redis-infra.infra.svc.cluster.local"
   REDIS_PORT: "6379"
   REDIS_DB: "1"
+
+  # Spring Redis 配置
+  SPRING_REDIS_HOST: "redis-infra.infra.svc.cluster.local"
+  SPRING_REDIS_PORT: "6379"
+  SPRING_REDIS_DATABASE: "1"
 
   # 日志配置
   LOG_LEVEL: "info"
