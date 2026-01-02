@@ -9,4 +9,4 @@ resources:
 
 images:
   - name: harbor.omniverseai.net/ljwx-health/ljwx-bigscreen
-    newTag: "latest"
+    newTag: "main-92b44cf"
