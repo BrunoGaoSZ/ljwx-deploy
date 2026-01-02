@@ -8,6 +8,7 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - job-init-db.yaml
+  - job-flyway-repair.yaml
   - deployment-boot.yaml
   - deployment-admin.yaml
   - deployment-bigscreen.yaml
