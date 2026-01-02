@@ -7,6 +7,7 @@ namespace: ljwx-health
 resources:
   - namespace.yaml
   - configmap.yaml
+  - job-init-db.yaml
   - deployment-boot.yaml
   - deployment-admin.yaml
   - deployment-bigscreen.yaml

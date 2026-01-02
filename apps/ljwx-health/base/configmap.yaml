@@ -53,3 +53,8 @@ data:
 
   # 时区配置
   TZ: "Asia/Shanghai"
+
+  # Flyway 数据库迁移配置
+  SPRING_FLYWAY_ENABLED: "true"
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+  SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
