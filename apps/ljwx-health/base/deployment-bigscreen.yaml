@@ -30,6 +30,10 @@ spec:
         component: dashboard
         version: v1.0.0
     spec:
+      # Harbor 镜像拉取凭证
+      imagePullSecrets:
+        - name: harbor-registry
+
       # 初始化容器 - 等待数据库就绪
       initContainers:
         - name: wait-for-mysql

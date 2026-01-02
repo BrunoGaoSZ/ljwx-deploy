@@ -30,6 +30,10 @@ spec:
         component: frontend
         version: v1.0.0
     spec:
+      # Harbor 镜像拉取凭证
+      imagePullSecrets:
+        - name: harbor-registry
+
       containers:
         - name: ljwx-admin
           image: harbor.omniverseai.net/ljwx-health/ljwx-admin:latest
