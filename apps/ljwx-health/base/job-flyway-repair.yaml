@@ -45,14 +45,12 @@ spec:
               AND table_name = 'flyway_schema_history';
 
               -- 显示所有迁移记录
-              SELECT * FROM flyway_schema_history ORDER BY installed_rank;
+              SELECT CONCAT('Total migrations before cleanup: ', COUNT(*)) AS count FROM flyway_schema_history;
 
-              -- 删除失败的迁移记录 (success = 0)
-              DELETE FROM flyway_schema_history WHERE success = 0;
+              -- 完全删除 flyway_schema_history 表，让 Flyway 重新开始
+              DROP TABLE IF EXISTS flyway_schema_history;
 
-              -- 显示清理后的记录
-              SELECT CONCAT('Cleaned up failed migrations. Remaining records: ', COUNT(*)) AS result
-              FROM flyway_schema_history;
+              SELECT 'Flyway schema history table dropped. Flyway will recreate it on next run.' AS result;
 
               EOF
 
