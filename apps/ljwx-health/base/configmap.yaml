@@ -55,5 +55,10 @@ data:
   TZ: "Asia/Shanghai"
 
   # Flyway 数据库迁移配置
-  # 暂时禁用 Flyway，迁移脚本有问题需要在本地环境修复
-  SPRING_FLYWAY_ENABLED: "false"
+  # ✅ 启用 Flyway - 使用新基线 V1.0.0（2026-01-03）
+  SPRING_FLYWAY_ENABLED: "true"
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"  # 已有数据库从 baseline 开始
+  SPRING_FLYWAY_BASELINE_VERSION: "0"
+  SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
+  SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "true"
+  SPRING_FLYWAY_CLEAN_DISABLED: "true"  # 生产环境禁用 clean
