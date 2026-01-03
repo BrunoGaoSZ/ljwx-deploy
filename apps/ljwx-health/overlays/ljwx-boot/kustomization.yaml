@@ -9,4 +9,4 @@ resources:
 
 images:
   - name: harbor.omniverseai.net/ljwx-health/ljwx-boot
-    newTag: "main-3b41829"
+    newTag: "main-1f8b811"
