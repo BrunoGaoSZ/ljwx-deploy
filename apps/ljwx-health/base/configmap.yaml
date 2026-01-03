@@ -26,12 +26,12 @@ data:
   SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
 
   # Redis 配置（连接 infra namespace）
-  REDIS_HOST: "redis-infra.infra.svc.cluster.local"
+  REDIS_HOST: "redis-infra-master.infra.svc.cluster.local"
   REDIS_PORT: "6379"
   REDIS_DB: "1"
 
   # Spring Redis 配置
-  SPRING_REDIS_HOST: "redis-infra.infra.svc.cluster.local"
+  SPRING_REDIS_HOST: "redis-infra-master.infra.svc.cluster.local"
   SPRING_REDIS_PORT: "6379"
   SPRING_REDIS_DATABASE: "1"
 
