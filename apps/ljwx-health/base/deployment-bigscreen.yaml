@@ -65,7 +65,7 @@ spec:
           imagePullPolicy: Always
           ports:
             - name: http
-              containerPort: 5001
+              containerPort: 5225
               protocol: TCP
 
           # 环境变量 - 从 ConfigMap
@@ -92,7 +92,7 @@ spec:
 
             # Redis 配置
             - name: REDIS_HOST
-              value: "redis-infra.infra.svc.cluster.local"
+              value: "redis-infra-master.infra.svc.cluster.local"
             - name: REDIS_PORT
               value: "6379"
             - name: REDIS_PASSWORD
@@ -120,7 +120,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 5001
+              port: 5225
               scheme: HTTP
             initialDelaySeconds: 60
             periodSeconds: 30
@@ -131,7 +131,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 5001
+              port: 5225
               scheme: HTTP
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -142,7 +142,7 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: 5001
+              port: 5225
               scheme: HTTP
             initialDelaySeconds: 15
             periodSeconds: 10
