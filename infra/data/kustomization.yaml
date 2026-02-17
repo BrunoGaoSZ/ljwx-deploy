@@ -4,19 +4,3 @@ kind: Kustomization
 resources:
   - ../postgres
   - ../redis
-
-patches:
-  - target:
-      kind: StatefulSet
-      name: postgres
-      namespace: infra
-    patch: |-
-      - op: remove
-        path: /spec/template/spec/nodeSelector
-  - target:
-      kind: Deployment
-      name: redis
-      namespace: infra
-    patch: |-
-      - op: remove
-        path: /spec/template/spec/nodeSelector

@@ -19,14 +19,8 @@ spec:
         app: redis
         component: cache
     spec:
-      nodeSelector: {}
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
-        - key: node.kubernetes.io/disk-pressure
-          operator: Exists
-          effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/worker: "true"
       containers:
         - name: redis
           image: redis:7.2-alpine
