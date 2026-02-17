@@ -9,9 +9,3 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-
-commonLabels:
-  app.kubernetes.io/name: redis
-  app.kubernetes.io/component: cache
-  app.kubernetes.io/managed-by: gitops
-

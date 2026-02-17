@@ -20,6 +20,7 @@ spec:
         app: postgres
         component: database
     spec:
+      nodeSelector: {}
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
