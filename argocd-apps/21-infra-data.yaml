@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:BrunoGaoSZ/ljwx-deploy.git
+    repoURL: https://github.com/BrunoGaoSZ/ljwx-deploy.git
     targetRevision: main
     path: infra/data
   destination:
@@ -18,4 +18,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-

@@ -11,7 +11,7 @@ metadata:
 spec:
   project: ljwx
   source:
-    repoURL: git@github.com:BrunoGaoSZ/ljwx-deploy.git
+    repoURL: https://github.com/BrunoGaoSZ/ljwx-deploy.git
     targetRevision: main
     path: apps/ljwx-platform/overlays/prod
   destination:
@@ -32,4 +32,3 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m
-
