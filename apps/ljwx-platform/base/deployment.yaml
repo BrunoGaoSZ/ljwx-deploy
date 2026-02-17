@@ -16,6 +16,8 @@ spec:
         app: ljwx-platform
         project: ljwx-platform
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: ljwx-platform
           image: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform:latest
@@ -67,4 +69,3 @@ spec:
             limits:
               cpu: "1"
               memory: "1Gi"
-
