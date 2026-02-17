@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-platform
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: prod
+    project: ljwx-platform
+spec:
+  project: ljwx
+  source:
+    repoURL: git@github.com:BrunoGaoSZ/ljwx-deploy.git
+    targetRevision: main
+    path: apps/ljwx-platform/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ljwx-platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+

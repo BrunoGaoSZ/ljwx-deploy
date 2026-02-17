@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ljwx-platform
+
+resources:
+  - ../../base
+
+images:
+  - name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
+    newName: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
+    newTag: latest
+
