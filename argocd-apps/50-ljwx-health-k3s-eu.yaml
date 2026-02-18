@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-health-k3s-eu
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    environment: k3s-eu
+    project: ljwx-health
+spec:
+  project: ljwx
+  source:
+    repoURL: "https://github.com/BrunoGaoSZ/ljwx-deploy.git"
+    targetRevision: main
+    path: apps/ljwx-health/overlays/k3s-eu
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: ljwx-health
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
