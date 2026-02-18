@@ -9,5 +9,5 @@ resources:
 images:
   - name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
     newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
-    newTag: sha-c37c4732773c
+    newTag: sha-eecae29405ff
 
