@@ -292,14 +292,24 @@ spec:
           value: '6379'
         - name: SPRING_REDIS_DATABASE
           value: '1'
+        - name: SPRING_REDIS_PASSWORD
+          value: '123456'
+        - name: REDIS_HOST
+          value: redis-lb.infra.svc.cluster.local
+        - name: REDIS_PORT
+          value: '6379'
+        - name: REDIS_DB
+          value: '1'
+        - name: REDIS_PASSWORD
+          value: '123456'
         - name: LOG_LEVEL
           value: INFO
         - name: SPRING_FLYWAY_ENABLED
-          value: 'true'
+          value: 'false'
         - name: SPRING_FLYWAY_BASELINE_ON_MIGRATE
           value: 'true'
         - name: SPRING_FLYWAY_LOCATIONS
-          value: classpath:db/migration
+          value: classpath:db/baseline
         - name: OTEL_SERVICE_NAME
           value: ljwx-boot
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
