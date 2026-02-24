@@ -1,0 +1,60 @@
+name: Deploy Hard Guard
+
+on:
+  pull_request:
+    paths:
+      - 'apps/**/release-values.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**/release-values.yaml'
+
+jobs:
+  validate-release-values:
+    runs-on: ubuntu-latest
+    env:
+      FIXED_OTEL_ENDPOINT: otel-collector-opentelemetry-collector.tracing.svc.cluster.local:4317
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: Validate changed release values
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+          HEAD_SHA="${{ github.sha }}"
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -E '^apps/.+/release-values\.yaml$' || true)
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No release-values.yaml changed; skip"
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            if [ ! -f "$file" ]; then
+              echo "Skip deleted file: $file"
+              continue
+            fi
+            before_file="/tmp/before-$(basename "$file").yaml"
+            if git cat-file -e "$BASE_SHA:$file" 2>/dev/null; then
+              git show "$BASE_SHA:$file" > "$before_file"
+            else
+              : > "$before_file"
+            fi
+            bash scripts/ci/validate-deploy-values.sh \
+              --file "$file" \
+              --before "$before_file" \
+              --fixed-otel-endpoint "$FIXED_OTEL_ENDPOINT"
+          done <<< "$CHANGED_FILES"

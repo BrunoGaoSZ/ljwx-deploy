@@ -1,0 +1,4 @@
+image: ghcr.io/brunogao/ljwx-platform-app:main-latest
+deploymentId: bootstrap-000000000000
+serviceVersion: bootstrap
+imageDigest: sha256:0000000000000000000000000000000000000000000000000000000000000000
