@@ -13,6 +13,12 @@ spec:
     targetRevision: 0.23.3
     helm:
       values: |
+        # Secret naming strategy:
+        # - ARC controller always reads credentials from secret `arc-github-token`.
+        # - `arc-github-token` must contain one of:
+        #   - github_token (PAT), or
+        #   - github_app_id + github_app_installation_id + github_app_private_key.
+        # - Do not rename this secret without updating this Application.
         authSecret:
           enabled: true
           create: false
@@ -27,3 +33,34 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: horizontalrunnerautoscalers.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+        - /metadata/annotations
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runnerdeployments.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+        - /metadata/annotations
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runnerreplicasets.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+        - /metadata/annotations
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runners.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+        - /metadata/annotations
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runnersets.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+        - /metadata/annotations
