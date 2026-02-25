@@ -68,14 +68,12 @@ spec:
                   name: ljwx-platform-app
                   key: JWT_SECRET
           livenessProbe:
-            httpGet:
-              path: /actuator/health
+            tcpSocket:
               port: http
             initialDelaySeconds: 90
             periodSeconds: 30
           readinessProbe:
-            httpGet:
-              path: /actuator/health
+            tcpSocket:
               port: http
             initialDelaySeconds: 45
             periodSeconds: 10
