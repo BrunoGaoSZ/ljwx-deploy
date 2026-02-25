@@ -1,0 +1,70 @@
+# ljwx-website EU Development Environment Configuration
+# This file is automatically updated by CI/CD pipeline
+
+website:
+  enabled: true
+  replicaCount: 1
+  
+  image:
+    repository: harbor.eu.lingjingwanxiang.cn:8080/ljwx/ljwx-website
+    tag: "main-latest"  # Updated by CI
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+  
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "25m"
+    limits:
+      memory: "64Mi"
+      cpu: "50m"
+  
+  autoscaling:
+    enabled: false
+  
+  probes:
+    liveness:
+      path: /
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readiness:
+      path: /
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik  # k3s default ingress controller
+  
+  # Fixed subdomain
+  host: "website.lingjingwanxiang.cn"
+  baseDomain: "lingjingwanxiang.cn"
+  
+  path: /
+  pathType: Prefix
+  
+  annotations:
+    # Traefik annotations
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  
+  tls:
+    enabled: true
+    secretName: "website-tls"
+    # clusterIssuer: "letsencrypt-prod"
+
+# ServiceMonitor (Prometheus Operator)
+serviceMonitor:
+  enabled: false
+  interval: 30s
+
+# Namespace labels
+namespaceLabels:
+  project: ljwx-website
+  managed-by: argocd
+  environment: dev-eu

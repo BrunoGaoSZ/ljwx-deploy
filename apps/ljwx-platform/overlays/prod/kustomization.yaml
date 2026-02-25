@@ -10,4 +10,9 @@ images:
   - name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
     newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
     newTag: sha-eecae29405ff
-
+  - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui
+    newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui
+    newTag: latest
+  - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-screen
+    newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-screen
+    newTag: latest

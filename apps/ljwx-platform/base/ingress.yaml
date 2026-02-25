@@ -12,10 +12,20 @@ spec:
     - hosts:
         - platform.lingjingwanxiang.cn
       secretName: ljwx-platform-tls
+    - hosts:
+        - platform-screen.lingjingwanxiang.cn
+      secretName: ljwx-platform-screen-tls
   rules:
     - host: platform.lingjingwanxiang.cn
       http:
         paths:
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-platform-admin-ui
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
@@ -23,4 +33,13 @@ spec:
                 name: ljwx-platform
                 port:
                   number: 8080
-
+    - host: platform-screen.lingjingwanxiang.cn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-platform-screen
+                port:
+                  number: 80

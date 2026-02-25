@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-platform-admin-ui
+  labels:
+    app: ljwx-platform-admin-ui
+    project: ljwx-platform
+    component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ljwx-platform-admin-ui
+  template:
+    metadata:
+      labels:
+        app: ljwx-platform-admin-ui
+        project: ljwx-platform
+        component: frontend
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: ljwx-platform-admin-ui
+          image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: ljwx-platform-admin-ui-nginx

@@ -3,8 +3,13 @@ kind: Kustomization
 
 resources:
   - deployment.yaml
+  - deployment-admin-ui.yaml
+  - deployment-screen.yaml
   - service.yaml
+  - service-admin-ui.yaml
+  - service-screen.yaml
   - ingress.yaml
+  - configmap-nginx.yaml
   - secret.yaml
   - regcred.yaml
   - networkpolicy.yaml
