@@ -1,13 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: ljwx-platform
-
 resources:
-  - ../../base
-
+- ../../base
 images:
-  - name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
-    newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
-    newTag: sha-eecae29405ff
-
+- name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
+  newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
+  newTag: sha-eecae29405ff
+image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform:f23ebc6d159756fb0c2852a84c210fdadd5a46a4
+deploymentId: f23ebc6-71292ef3b666
+serviceVersion: f23ebc6d159756fb0c2852a84c210fdadd5a46a4
+imageDigest: sha256:71292ef3b6663c16880c39a0cda91a277b073750c39f6344670067e99a01a56a
