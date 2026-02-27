@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: youngth-guard
+    component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+      app.kubernetes.io/name: backend
+      app.kubernetes.io/part-of: youngth-guard
+  template:
+    metadata:
+      labels:
+        app: backend
+        app.kubernetes.io/name: backend
+        app.kubernetes.io/part-of: youngth-guard
+        component: api
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/brunogao/ljwx-shiti:sha-dcff12f
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              python -V
+              echo "ljwx-shiti e2e deployment ready"
+              sleep 3600
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: dev
+            - name: LOG_LEVEL
+              value: info
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
