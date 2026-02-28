@@ -25,6 +25,9 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          volumeMounts:
+            - name: app-logs
+              mountPath: /workspace/logs
           env:
             - name: APP_PORT
               value: "8080"
@@ -84,3 +87,6 @@ spec:
             limits:
               cpu: "1"
               memory: "1Gi"
+      volumes:
+        - name: app-logs
+          emptyDir: {}
