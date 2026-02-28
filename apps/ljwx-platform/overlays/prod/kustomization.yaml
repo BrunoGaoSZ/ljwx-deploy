@@ -6,10 +6,10 @@ resources:
 images:
 - name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
   newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
-  newTag: sha-b7766e9
+  newTag: f2cb2e37dffdc21fac413f001b3059758083ef67
 - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui
   newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui
-  newTag: sha-b7766e9
+  newTag: f2cb2e37dffdc21fac413f001b3059758083ef67
 - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-screen
   newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-screen
-  newTag: sha-b7766e9
+  newTag: f2cb2e37dffdc21fac413f001b3059758083ef67
