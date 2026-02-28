@@ -39,6 +39,11 @@ spec:
                 secretKeyRef:
                   name: agent-platform-app
                   key: ANTHROPIC_AUTH_TOKEN
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agent-platform-app
+                  key: JWT_SECRET_KEY
             - name: MILVUS_HOST
               value: ""
             - name: MILVUS_PORT
