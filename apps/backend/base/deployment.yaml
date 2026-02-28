@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/brunogao/ljwx-shiti:sha-017e695
+          image: ghcr.io/brunogao/ljwx-shiti:sha-775861d
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
