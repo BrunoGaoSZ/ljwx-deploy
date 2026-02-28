@@ -29,6 +29,8 @@ spec:
       server: 'https://kubernetes.default.svc'
     - namespace: 'bookstore'  # bookstore 命名空间
       server: 'https://kubernetes.default.svc'
+    - namespace: 'agent-platform'
+      server: 'https://kubernetes.default.svc'
 
   # 允许创建的集群级资源（谨慎开放）
   clusterResourceWhitelist:
