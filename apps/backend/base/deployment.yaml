@@ -22,9 +22,11 @@ spec:
         app.kubernetes.io/part-of: youngth-guard
         component: api
     spec:
+      imagePullSecrets:
+        - name: harbor-registry
       containers:
         - name: backend
-          image: ghcr.io/brunogao/ljwx-shiti:sha-775861d
+          image: harbor.omniverseai.net/ljwx/ljwx-shiti:sha-775861d
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
