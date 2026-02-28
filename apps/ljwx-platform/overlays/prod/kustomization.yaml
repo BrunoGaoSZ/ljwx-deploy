@@ -6,7 +6,7 @@ resources:
 images:
 - name: harbor.eu.lingjingwanxiang.cn/ljwx-platform/ljwx-platform
   newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
-  newTag: sha-b7766e9
+  newTag: sha-e0c0ab76
 - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui
   newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform-admin-ui
   newTag: sha-b7766e9
