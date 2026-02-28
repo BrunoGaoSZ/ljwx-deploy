@@ -5,4 +5,4 @@ resources:
 - ../../base
 images:
 - name: harbor.eu.lingjingwanxiang.cn/ljwx/agent-platform-api
-  newTag: sha-dec280a
+  newTag: sha-d8237ae
