@@ -1,0 +1,19 @@
+{
+  "pending": [
+    {
+      "id": "frontend-dev-20260302-001",
+      "service": "frontend",
+      "environment": "dev",
+      "image": {
+        "repository": "harbor.omniverseai.net/ljwx/frontend-dashboard",
+        "tag": "dev"
+      },
+      "created_at": "2026-03-02T00:00:00Z",
+      "attempts": 0,
+      "max_attempts": 3,
+      "last_error": ""
+    }
+  ],
+  "promoted": [],
+  "failed": []
+}
