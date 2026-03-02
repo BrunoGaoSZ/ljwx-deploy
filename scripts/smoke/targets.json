@@ -1,0 +1,34 @@
+{
+  "targets": [
+    {
+      "service": "frontend",
+      "environment": "dev",
+      "argocd_app": "frontend-dev",
+      "endpoint": "http://frontend.dev.svc.cluster.local/"
+    },
+    {
+      "service": "backend",
+      "environment": "dev",
+      "argocd_app": "backend-dev",
+      "endpoint": "http://backend.dev.svc.cluster.local/health"
+    },
+    {
+      "service": "quality-dashboard",
+      "environment": "dev",
+      "argocd_app": "quality-dashboard-dev",
+      "endpoint": "http://quality-dashboard.dev.svc.cluster.local/health"
+    },
+    {
+      "service": "ljwx-website",
+      "environment": "dev",
+      "argocd_app": "ljwx-website-dev",
+      "endpoint": "http://ljwx-website.ljwx-website-dev.svc.cluster.local/health"
+    },
+    {
+      "service": "ljwx-bookstore",
+      "environment": "dev",
+      "argocd_app": "ljwx-bookstore",
+      "endpoint": "http://ljwx-bookstore.ljwx-bookstore.svc.cluster.local/fiction/actuator/health"
+    }
+  ]
+}

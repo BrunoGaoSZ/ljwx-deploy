@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: smoke-runner
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: smoke-runner
+    app.kubernetes.io/part-of: bid-mvp-factory
+spec:
+  schedule: "*/15 * * * *"
+  timeZone: Asia/Tokyo
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: smoke-runner
+              image: python:3.11-alpine
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: GIT_BRANCH
+                  value: main
+                - name: ARGOCD_SERVER
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: argocd_server
+                - name: ARGOCD_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: argocd_token
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: github_token
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+                  apk add --no-cache git openssh-client
+                  rm -rf /work/repo
+                  git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
+                  cd /work/repo
+                  python3 scripts/smoke/run_smoke.py
+                  python3 scripts/evidence/collect.py --out evidence/index.json
+                  if git diff --quiet; then
+                    echo "No smoke updates"
+                    exit 0
+                  fi
+                  git config user.name "smoke-runner[bot]"
+                  git config user.email "smoke-runner[bot]@users.noreply.github.com"
+                  git add evidence/records evidence/index.json
+                  git commit -m "chore(smoke): update smoke evidence"
+                  git push origin "HEAD:${GIT_BRANCH}"
