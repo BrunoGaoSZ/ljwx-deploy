@@ -33,7 +33,7 @@ jobs:
           import json, pathlib, sys
 
           allowed = (
-              'envs/', 'release/', 'evidence/', 'docs/', 'scripts/', 'pages/', '.github/'
+              'envs/', 'release/', 'evidence/', 'docs/', 'scripts/', 'pages/', '.github/', 'k8s/'
           )
           changed = [line.strip() for line in pathlib.Path('.changed-files.txt').read_text(encoding='utf-8').splitlines() if line.strip()]
           event = json.loads(pathlib.Path('${{ github.event_path }}').read_text(encoding='utf-8'))
@@ -56,6 +56,9 @@ jobs:
 
       - name: Install deps
         run: pip install --disable-pip-version-check pyyaml jsonschema
+
+      - name: Validate release queue structure
+        run: python3 scripts/promoter/validate_queue.py
 
       - name: Evidence validate + collect (dry run)
         run: |
