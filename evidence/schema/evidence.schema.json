@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/evidence.schema.json",
+  "title": "Bid-MVP Evidence Record",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "evidenceId",
+    "service",
+    "env",
+    "source",
+    "image",
+    "deploy"
+  ],
+  "properties": {
+    "evidenceId": { "type": "string", "minLength": 3 },
+    "service": { "type": "string", "minLength": 1 },
+    "env": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "required": ["repo", "commit"],
+      "additionalProperties": true,
+      "properties": {
+        "repo": { "type": "string", "minLength": 3 },
+        "commit": { "type": "string", "minLength": 1 },
+        "workflowRun": { "type": ["string", "null"] }
+      }
+    },
+    "image": {
+      "type": "object",
+      "required": ["harbor"],
+      "additionalProperties": true,
+      "properties": {
+        "ghcr": { "type": ["string", "null"] },
+        "harbor": { "type": "string", "minLength": 3 }
+      }
+    },
+    "deploy": {
+      "type": "object",
+      "required": ["deployRepoCommit"],
+      "additionalProperties": true,
+      "properties": {
+        "deployRepoCommit": { "type": "string", "minLength": 1 },
+        "argocdApp": { "type": ["string", "null"] },
+        "syncedAt": { "type": ["string", "null"] }
+      }
+    },
+    "promotedAt": { "type": ["string", "null"] },
+    "tests": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "smoke": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "status": { "type": ["string", "null"] },
+            "details": { "type": ["string", "null"] },
+            "url": { "type": ["string", "null"] }
+          }
+        },
+        "e2e": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "status": { "type": ["string", "null"] },
+            "url": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "approvals": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "specPr": { "type": ["string", "null"] },
+        "archPr": { "type": ["string", "null"] },
+        "demoPr": { "type": ["string", "null"] },
+        "uatPr": { "type": ["string", "null"] },
+        "releasePr": { "type": ["string", "null"] },
+        "prs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

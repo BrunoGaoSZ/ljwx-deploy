@@ -1,0 +1,36 @@
+name: nightly-auto-repair
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths-ignore: ['**']
+  schedule:
+    # 01:30 Asia/Tokyo (JST) = 16:30 UTC previous day
+    - cron: "30 16 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run auto-repair loop
+        run: |
+          bash scripts/repair/run.sh \
+            --allow-main \
+            --check-cmd "bash scripts/ci/run_checks.sh" \
+            --max-attempts 3 \
+            --recipes repairs/recipes.yaml \
+            --issue-repo "${{ github.repository }}"
