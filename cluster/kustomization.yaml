@@ -1,4 +1,0 @@
-resources:
-  - namespace-dev.yaml
-  - regcred.yaml
-  - default-sa.yaml

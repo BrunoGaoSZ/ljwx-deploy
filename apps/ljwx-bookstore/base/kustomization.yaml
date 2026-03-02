@@ -1,6 +1,0 @@
-resources:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
-  - ghcr-secret.yaml
-  - redis-secret.yaml
