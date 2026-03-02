@@ -35,7 +35,7 @@ spec:
             - -c
             - |
               set -e
-              
+
               # 注册 runner（如果未注册）
               if [ ! -f /data/.runner ]; then
                 echo "Registering runner..."
@@ -46,7 +46,7 @@ spec:
                   --labels ubuntu-latest,ubuntu-22.04,docker,self-hosted \
                   --no-interactive
               fi
-              
+
               # 启动 runner
               echo "Starting runner..."
               act_runner daemon --config /config/config.yaml

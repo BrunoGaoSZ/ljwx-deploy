@@ -76,10 +76,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest  # 或 docker, self-hosted
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: 构建镜像
         run: |
           docker build -t myapp:${{ gitea.sha }} .

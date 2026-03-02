@@ -1,0 +1,9 @@
+$ cat '.factory/repair/main/20260302T170949Z/attempt-1/check.log' && false
+
+stdout:
+PyYAML is required. Install with: pip3 install pyyaml
+No module named 'yaml'
+
+
+stderr:
+
