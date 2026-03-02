@@ -1,0 +1,82 @@
+name: nightly-evidence
+
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths-ignore: ['**']
+  schedule:
+    # 02:00 Asia/Tokyo (JST) = 17:00 UTC previous day
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-evidence-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install --disable-pip-version-check pyyaml jsonschema
+
+      - name: Validate and collect evidence
+        run: |
+          python3 scripts/evidence/validate.py
+          python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+
+      - name: Build publish payload (atomic staging)
+        run: |
+          rm -rf .publish-tmp
+          mkdir -p .publish-tmp/evidence/summary
+          cp pages/index.html pages/app.js .publish-tmp/
+          cp evidence/index.json .publish-tmp/evidence/index.json
+          cp evidence/summary/latest.md .publish-tmp/evidence/summary/latest.md
+          python3 - <<'PY'
+          import json, pathlib
+          feed = pathlib.Path('.publish-tmp/evidence/index.json')
+          data = json.loads(feed.read_text(encoding='utf-8'))
+          if not isinstance(data, list):
+              raise SystemExit('evidence/index.json must be an array')
+          print(f'staged records: {len(data)}')
+          PY
+
+      - name: Publish to gh-pages branch
+        run: |
+          set -euo pipefail
+          rm -rf .gh-pages-wt
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git worktree add --force -B gh-pages .gh-pages-wt origin/gh-pages
+          else
+            git worktree add --force -B gh-pages .gh-pages-wt
+          fi
+
+          rsync -a --delete .publish-tmp/ .gh-pages-wt/
+
+          cd .gh-pages-wt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No changes to publish"
+            exit 0
+          fi
+
+          git add -A
+          git commit -m "pages: update evidence feed [skip ci]"
+          git push origin HEAD:gh-pages
