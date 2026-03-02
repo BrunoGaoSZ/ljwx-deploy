@@ -2,6 +2,14 @@
 
 GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 
+## Bid-MVP Factory Control Plane
+
+- 运行验证：`bash scripts/verify.sh`
+- Harbor 复制：`docs/harbor-replication-ghcr.md`
+- Promoter/Argo/Smoke 运维：`docs/ops-runbook.md`
+- 服务仓 enqueue 工作流片段：`docs/service-repo-workflow-snippet.md`
+- Argo dev 自动同步说明：`docs/argocd-dev-autosync.md`
+
 ## 目录结构
 
 - `infra/` - 基础设施组件（Gitea Runner 等）

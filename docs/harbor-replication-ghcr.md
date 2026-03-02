@@ -1,41 +1,62 @@
-# Harbor Pull Replication (GHCR -> Harbor)
+# Harbor Pull Replication Runbook (GHCR -> Harbor `app`)
 
-This runbook configures Harbor pull replication from GHCR while keeping GitHub as source of truth.
+Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for replication.
 
-## Goal
+## Target behavior
 
-- CI pushes images to GHCR.
-- Harbor pulls from GHCR by replication policy.
-- Promoter does not assume replication timing; it verifies Harbor manifest availability via v2 HEAD/GET before digest pinning.
+1. Service CI pushes `ghcr.io/<org>/<svc>:sha-*` or `v*`.
+2. Harbor policy pulls into local project `app`.
+3. Promoter checks Harbor v2 manifest API.
+4. Only when manifest exists, promoter updates deploy repo.
 
-## Setup
+## Harbor UI steps
 
-1. In Harbor, add a remote registry endpoint for `ghcr.io` using robot/token credentials.
-2. Create pull replication policy:
-   - Name: `ghcr-to-harbor-ljwx`
-   - Source registry: GHCR endpoint
-   - Destination projects: `ljwx`, `ljwx-health` (as needed)
-   - Trigger: scheduled or event-based
-   - Filters: only required repositories
-3. Enable policy and run initial replication.
-4. Verify expected repositories exist in Harbor.
+1. `Administration -> Registries -> New Endpoint`
+   - Provider: `GitHub Container Registry`
+   - URL: `https://ghcr.io`
+   - Credential: GHCR PAT/robot with pull scope
+2. `Administration -> Replications -> New Replication Rule`
+   - Name: `ghcr-to-app`
+   - Direction: `Pull-based`
+   - Source registry: the GHCR endpoint above
+   - Destination namespace/project: `app`
+   - Trigger mode: `Scheduled`
+   - Cron: `*/1 * * * *` (every 1 minute)
+   - Resource filters:
+     - Repository: only required service repos
+     - Tag: `sha-*`
+     - Tag: `v*`
+3. Enable rule and execute once for bootstrap.
 
-## Verification
+## Verification commands
 
 ```bash
-# replace <repo> and <tag>
-curl -sSI \
-  -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-  "https://harbor.omniverseai.net/v2/<repo>/manifests/<tag>"
+# by digest (preferred by promoter)
+curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
+  -H "Accept: application/vnd.oci.image.manifest.v1+json" \
+  "https://harbor.omniverseai.net/v2/app/<svc>/manifests/sha256:<digest>"
+
+# by tag (manual verification)
+curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
+  -H "Accept: application/vnd.oci.image.manifest.v1+json" \
+  "https://harbor.omniverseai.net/v2/app/<svc>/manifests/sha-<shortsha>"
 ```
 
 Expected:
 
-- HTTP status `200`
-- response header `Docker-Content-Digest: sha256:...`
+- HTTP `200`
+- `Docker-Content-Digest: sha256:...`
 
-## Failure Behavior in Promoter
+## Troubleshooting
 
-- If manifest is missing, queue item stays pending and `attempts` increments.
-- After `max_attempts`, item moves to `failed` with `last_error`.
-- Resolve replication policy/credentials and re-queue with a new queue id.
+1. `401/403` from Harbor:
+   - Check robot user/password in promoter secret.
+   - Validate Harbor project permission for `app/<svc>`.
+2. `404` manifest:
+   - Replication not finished yet, source tag missing, or filter mismatch.
+   - Verify rule execution history in Harbor UI.
+3. Queue stuck in `pending`:
+   - Confirm digest in queue entry equals GHCR build digest.
+   - Run verification curl manually.
+4. Queue moved to `failed`:
+   - Fix root cause, then re-enqueue with a new `id`.

@@ -33,7 +33,7 @@ jobs:
           import json, pathlib, sys
 
           allowed = (
-              'envs/', 'release/', 'evidence/', 'docs/', 'scripts/', 'pages/', '.github/', 'k8s/'
+              'envs/', 'release/'
           )
           changed = [line.strip() for line in pathlib.Path('.changed-files.txt').read_text(encoding='utf-8').splitlines() if line.strip()]
           event = json.loads(pathlib.Path('${{ github.event_path }}').read_text(encoding='utf-8'))

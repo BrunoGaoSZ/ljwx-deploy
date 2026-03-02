@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: http://192.168.1.83:33000/gao/ljwx-deploy.git
+    repoURL: https://github.com/BrunoGaoSZ/ljwx-deploy.git
     targetRevision: main
     path: infra/arc
   destination:

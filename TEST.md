@@ -18,6 +18,7 @@ Note: `npm run docs:build` currently fails on existing repo dead links unrelated
 ```bash
 cd ../ljwx-deploy
 test -f PLAN.md
+bash scripts/verify.sh
 python3 scripts/evidence/validate.py
 python3 scripts/evidence/collect.py --out evidence/index.json
 python3 -m json.tool evidence/index.json >/dev/null
