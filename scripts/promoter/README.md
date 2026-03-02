@@ -1,42 +1,41 @@
-# Deploy Promoter
+# Deploy Promoter (Method-1)
 
-Promotes `release/queue.yaml` pending entries into digest-pinned dev environment manifests.
+Promoter reads `release/queue.yaml` and auto-promotes ready dev releases.
 
-## Behavior
+## Guarantees
 
-- Reads queue state from `release/queue.yaml`.
-- Keeps only newest pending item per service; older pending items are superseded.
-- Checks Harbor v2 manifest availability by HEAD/GET before promotion.
-- Pins `envs/dev/<service>.yaml` image to `harbor...@sha256:<digest>`.
-- Writes/updates evidence records in `evidence/records/` with `tests.smoke` placeholder.
-- Moves entries to `promoted` or keeps retry metadata; after max attempts moves to `failed`.
+- Per-service serialization: at most one pending entry per `service+env`.
+- Older pending entries are moved to `superseded` (not failed).
+- Promotion only happens after Harbor manifest HEAD/GET returns HTTP 200.
+- Idempotent rerun: already-promoted items are not promoted again.
 
-## Commands
+## Main Command
 
 ```bash
-# Dry run for local verification (no network requirement)
-python3 scripts/promoter/deploy_promoter.py --dry-run --skip-registry-check
+# Dry run (no commit/push)
+bash scripts/promoter/promote.sh --dry-run
 
-# Real promotion run (requires Harbor access)
-HARBOR_USERNAME=*** HARBOR_PASSWORD=*** \
-python3 scripts/promoter/deploy_promoter.py
+# Normal run (token + Harbor credentials required)
+DEPLOY_REPO_TOKEN=*** HARBOR_USER=*** HARBOR_PASS=*** \
+  bash scripts/promoter/promote.sh
 ```
 
-## Queue File Contract
+## Environment variables
 
-`release/queue.yaml` uses a JSON-compatible YAML structure:
+- `DEPLOY_REPO_URL` (default: `https://github.com/BrunoGaoSZ/ljwx-deploy.git`)
+- `DEPLOY_REPO_TOKEN` (required unless using `--local-repo-dir`)
+- `HARBOR_URL` (default: `https://harbor.omniverseai.net`)
+- `HARBOR_USER`, `HARBOR_PASS`
+- `RETRY_MAX` (default: `10`)
+- `DRY_RUN` (`1` or `0`)
 
-- `pending`: list of to-be-promoted entries.
-- `promoted`: list of successful entries.
-- `failed`: list of exhausted or superseded entries.
+## Queue file
 
-Required per `pending` entry:
+`release/queue.yaml` must contain:
 
-- `id`
-- `service`
-- `environment`
-- `image.repository`
-- `image.tag` or `image.digest`
-- `attempts`
-- `max_attempts`
-- `created_at`
+- `pending`
+- `promoted`
+- `failed`
+- `superseded`
+
+Each entry includes `id/service/env/source/*/status/attempts/timestamps` fields described in `release/README.md`.

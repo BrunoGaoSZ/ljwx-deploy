@@ -1,0 +1,4 @@
+service: <svc>
+image: harbor.omniverseai.net/app/<svc>@sha256:__DIGEST__
+replicas: 1
+resourcesProfile: mvp-small

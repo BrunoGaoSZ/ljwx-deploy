@@ -26,11 +26,11 @@ python3 -m json.tool evidence/index.json >/dev/null
 ## 3. Promoter Dry Run
 
 ```bash
-python3 scripts/promoter/deploy_promoter.py --help
-python3 scripts/promoter/deploy_promoter.py --dry-run --skip-registry-check
+python3 scripts/promoter/validate_queue.py
+bash scripts/promoter/promote.sh --dry-run
 ```
 
-Expected: queue item processed in dry-run summary; no file mutation.
+Expected: script reports normalization/promotion simulation without commit/push.
 
 ## 4. Smoke Runner Dry Run
 
