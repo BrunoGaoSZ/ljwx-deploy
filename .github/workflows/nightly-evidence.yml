@@ -66,13 +66,34 @@ jobs:
             git worktree add --force -B gh-pages .gh-pages-wt
           fi
 
-          rsync -a --delete .publish-tmp/ .gh-pages-wt/
-
           cd .gh-pages-wt
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -R ../.publish-tmp/. .
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          index_path = Path("evidence/index.json")
+          if not index_path.exists():
+              raise SystemExit("missing evidence/index.json in gh-pages payload")
+          data = json.loads(index_path.read_text(encoding="utf-8"))
+          if not isinstance(data, list):
+              raise SystemExit("evidence/index.json in gh-pages payload must be an array")
+          print(f"publish records: {len(data)}")
+          PY
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
+          extra_tracked="$(git ls-files | grep -Ev '^(index\.html|app\.js|evidence/index\.json|evidence/summary/latest\.md)$' || true)"
+          if [ -n "${extra_tracked}" ]; then
+            echo "Unexpected tracked files in gh-pages branch:"
+            echo "${extra_tracked}"
+            exit 1
+          fi
+
           if git diff --cached --quiet; then
             echo "No changes to publish"
             exit 0

@@ -27,3 +27,12 @@ Example for `BrunoGaoSZ/ljwx-deploy`:
 - Public repo: feed is public.
 - Private/internal repo: GitHub Pages visibility depends on plan/policy.
 - Keep records free of secrets/internal-only endpoints.
+
+## gh-pages Content Contract
+
+`nightly-evidence` now publishes with an explicit branch-content contract:
+
+- only `index.html`, `app.js`, `evidence/index.json`, `evidence/summary/latest.md` are kept in `gh-pages`
+- all other files in `gh-pages` root are deleted before each publish
+
+This prevents deployment manifests or source files from being accidentally retained in the Pages branch.
