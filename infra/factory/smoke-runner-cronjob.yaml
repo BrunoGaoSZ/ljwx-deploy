@@ -44,18 +44,23 @@ spec:
                 - -c
                 - |
                   set -euo pipefail
-                  apk add --no-cache git openssh-client
+                  apk add --no-cache git openssh-client py3-pip
+                  pip install --break-system-packages --no-cache-dir pyyaml jsonschema
                   rm -rf /work/repo
                   git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
                   cd /work/repo
+                  set +e
                   python3 scripts/smoke/run_smoke.py
-                  python3 scripts/evidence/collect.py --out evidence/index.json
+                  SMOKE_EXIT=$?
+                  set -e
+                  python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
                   if git diff --quiet; then
                     echo "No smoke updates"
-                    exit 0
+                    exit "${SMOKE_EXIT}"
                   fi
                   git config user.name "smoke-runner[bot]"
                   git config user.email "smoke-runner[bot]@users.noreply.github.com"
-                  git add evidence/records evidence/index.json
-                  git commit -m "chore(smoke): update smoke evidence"
+                  git add evidence/records evidence/index.json evidence/summary/latest.md
+                  git commit -m "chore(smoke): update smoke evidence [skip ci]"
                   git push origin "HEAD:${GIT_BRANCH}"
+                  exit "${SMOKE_EXIT}"

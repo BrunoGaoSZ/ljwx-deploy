@@ -262,12 +262,14 @@ def process_pending(
             },
             "deploy": {
                 "deployRepoCommit": "__PENDING_COMMIT__",
+                "queueId": entry_id(entry),
                 "argocdApp": existing.get("deploy", {}).get("argocdApp", f"{service}-dev") if isinstance(existing.get("deploy"), dict) else f"{service}-dev",
                 "syncedAt": promoted_at
             },
             "tests": {
                 "smoke": {
-                    "status": "pending"
+                    "status": "pending",
+                    "checkedAt": ""
                 }
             },
             "approvals": existing.get("approvals", {}) if isinstance(existing.get("approvals"), dict) else {}

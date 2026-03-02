@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke runner that updates evidence records after promotion."""
+"""Smoke runner that updates YAML evidence records after promotion."""
 
 from __future__ import annotations
 
@@ -14,6 +14,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+try:
+    import yaml
+except Exception as exc:  # noqa: BLE001
+    raise SystemExit(f"PyYAML is required. Install with: pip3 install pyyaml\n{exc}")
+
 
 def now_utc() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -23,38 +28,70 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def write_json(path: Path, payload: Any) -> None:
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+def read_yaml(path: Path) -> dict[str, Any]:
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        raise ValueError(f"evidence record root must be mapping: {path}")
+    return raw
 
 
-def parse_iso(value: str) -> str:
-    return value or ""
+def write_yaml(path: Path, payload: dict[str, Any]) -> None:
+    path.write_text(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+
+def parse_ts(value: Any) -> datetime:
+    if not isinstance(value, str) or not value:
+        return datetime.min.replace(tzinfo=timezone.utc)
+    txt = value.strip().replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(txt)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except ValueError:
+        return datetime.min.replace(tzinfo=timezone.utc)
+
+
+def record_timestamp(record: dict[str, Any]) -> datetime:
+    deploy = record.get("deploy", {})
+    synced_at = deploy.get("syncedAt") if isinstance(deploy, dict) else None
+    promoted_at = record.get("promotedAt")
+    ts = parse_ts(synced_at)
+    if ts != datetime.min.replace(tzinfo=timezone.utc):
+        return ts
+    return parse_ts(promoted_at)
 
 
 def record_files(evidence_dir: Path) -> list[Path]:
-    return sorted([p for p in evidence_dir.glob("*.json") if p.is_file()])
+    return sorted([p for p in evidence_dir.glob("*.yaml") if p.is_file()])
 
 
 def find_record_path(evidence_dir: Path, service: str, environment: str, queue_id: str | None) -> Path | None:
-    candidates: list[tuple[str, Path]] = []
+    candidates: list[tuple[datetime, Path]] = []
     for path in record_files(evidence_dir):
         try:
-            record = read_json(path)
+            record = read_yaml(path)
         except Exception:  # noqa: BLE001
             continue
 
-        if record.get("service") != service or record.get("environment") != environment:
+        if record.get("service") != service or record.get("env") != environment:
             continue
 
         deploy = record.get("deploy", {})
-        if queue_id and deploy.get("queue_id") != queue_id:
+        if queue_id and isinstance(deploy, dict) and str(deploy.get("queueId", "")) != str(queue_id):
             continue
 
-        if record.get("status") != "promoted":
+        smoke_status = (
+            record.get("tests", {}).get("smoke", {}).get("status")
+            if isinstance(record.get("tests"), dict)
+            else None
+        )
+        if smoke_status not in {"pending", "pass", "fail", "unknown", None}:
             continue
 
-        updated = parse_iso(record.get("timestamps", {}).get("updated_at", ""))
-        candidates.append((updated, path))
+        candidates.append((record_timestamp(record), path))
 
     if not candidates:
         return None
@@ -127,20 +164,19 @@ def wait_for_endpoint(endpoint: str, timeout_seconds: int, interval_seconds: int
 
 
 def update_smoke_record(path: Path, ok: bool, details: str, dry_run: bool) -> None:
-    record = read_json(path)
+    record = read_yaml(path)
     tests = record.setdefault("tests", {})
     smoke = tests.setdefault("smoke", {})
     smoke["status"] = "pass" if ok else "fail"
-    smoke["checked_at"] = now_utc()
+    smoke["checkedAt"] = now_utc()
     smoke["details"] = details
 
-    timestamps = record.setdefault("timestamps", {})
-    if "created_at" not in timestamps:
-        timestamps["created_at"] = now_utc()
-    timestamps["updated_at"] = now_utc()
+    deploy = record.setdefault("deploy", {})
+    if isinstance(deploy, dict):
+        deploy["smokedAt"] = now_utc()
 
     if not dry_run:
-        write_json(path, record)
+        write_yaml(path, record)
 
 
 def run_target(target: dict[str, Any], args: argparse.Namespace) -> tuple[str, str]:

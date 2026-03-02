@@ -22,18 +22,16 @@ spec:
               image: python:3.11-alpine
               imagePullPolicy: IfNotPresent
               env:
-                - name: GIT_REPO
-                  value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
                 - name: GIT_BRANCH
                   value: main
                 - name: HARBOR_URL
                   value: https://harbor.omniverseai.net
-                - name: HARBOR_USERNAME
+                - name: HARBOR_USER
                   valueFrom:
                     secretKeyRef:
                       name: deploy-promoter-secret
                       key: harbor_username
-                - name: HARBOR_PASSWORD
+                - name: HARBOR_PASS
                   valueFrom:
                     secretKeyRef:
                       name: deploy-promoter-secret
@@ -48,18 +46,20 @@ spec:
                 - -c
                 - |
                   set -euo pipefail
-                  apk add --no-cache git openssh-client
+                  apk add --no-cache bash git openssh-client py3-pip
+                  pip install --break-system-packages --no-cache-dir pyyaml jsonschema
                   rm -rf /work/repo
                   git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
                   cd /work/repo
-                  python3 scripts/promoter/deploy_promoter.py
-                  python3 scripts/evidence/collect.py --out evidence/index.json
+                  export LOCAL_REPO_DIR=/work/repo
+                  bash scripts/promoter/promote.sh
+                  python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
                   if git diff --quiet; then
                     echo "No promoter changes"
                     exit 0
                   fi
                   git config user.name "deploy-promoter[bot]"
                   git config user.email "deploy-promoter[bot]@users.noreply.github.com"
-                  git add release/queue.yaml envs/dev evidence/records evidence/index.json
-                  git commit -m "chore(promoter): auto promote pending services"
+                  git add release/queue.yaml envs/dev evidence/records evidence/index.json evidence/summary/latest.md
+                  git commit -m "chore(promoter): auto promote pending services [skip ci]"
                   git push origin "HEAD:${GIT_BRANCH}"
