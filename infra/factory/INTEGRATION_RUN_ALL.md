@@ -17,7 +17,7 @@ The script will:
 1. Push current feature branch.
 2. Create (or reuse) PR against `main`.
 3. Wait for check results.
-4. On failure, run `scripts/repair/run_repair.py` for one repair attempt.
+4. On failure, run `scripts/repair/diagnose.py` (local log + `gh pr checks`) and `scripts/repair/run.sh` for deterministic repair.
 5. Commit/push auto-fix changes.
 6. Re-wait checks until success or attempts exhausted.
 7. Merge PR automatically on success.
@@ -30,3 +30,7 @@ When attempts are exhausted, auto-repair writes failure summary under `.factory/
 - attempt logs
 - truncated last check output
 - timestamps and context
+
+## Recipe Source
+
+- Canonical deterministic recipe file: `repairs/recipes.yaml`

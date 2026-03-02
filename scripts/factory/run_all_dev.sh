@@ -28,11 +28,12 @@ while [[ "$ATTEMPT" -le "$MAX_ATTEMPTS" ]]; do
     exit 0
   fi
 
-  python3 scripts/repair/run_repair.py \
-    --recipes scripts/repair/recipes.yaml \
-    --check-cmd "$CHECK_CMD" \
+  bash scripts/repair/run.sh \
     --max-attempts 1 \
-    --log-dir ".factory/repair/${BRANCH}/attempt-${ATTEMPT}" || true
+    --check-cmd "$CHECK_CMD" \
+    --recipes repairs/recipes.yaml \
+    --pr-url "$PR_URL" \
+    --no-open-issue || true
 
   if git diff --quiet; then
     echo "No auto-fix changes produced"
@@ -46,13 +47,12 @@ while [[ "$ATTEMPT" -le "$MAX_ATTEMPTS" ]]; do
   ATTEMPT=$((ATTEMPT + 1))
 done
 
-python3 scripts/repair/run_repair.py \
-  --recipes scripts/repair/recipes.yaml \
-  --check-cmd "bash -lc 'exit 1'" \
+bash scripts/repair/run.sh \
   --max-attempts 1 \
-  --log-dir ".factory/repair/${BRANCH}/final" \
+  --check-cmd "bash -lc 'exit 1'" \
+  --recipes repairs/recipes.yaml \
+  --pr-url "$PR_URL" \
   --issue-repo "$ISSUE_REPO" \
-  --issue-title "Auto-repair exhausted for ${BRANCH}" \
-  --open-issue-on-failure
+  --allow-main || true
 
 exit 1

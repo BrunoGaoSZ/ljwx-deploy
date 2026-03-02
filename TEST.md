@@ -45,11 +45,18 @@ Expected: skips targets when no promoted records exist yet.
 
 ```bash
 python3 scripts/repair/run_repair.py --help
+python3 scripts/repair/diagnose.py --help
 python3 scripts/repair/run_repair.py \
-  --recipes scripts/repair/recipes.yaml \
+  --recipes repairs/recipes.yaml \
   --check-cmd "bash scripts/ci/run_checks.sh" \
   --max-attempts 1 \
   --log-dir .factory/repair/dryrun \
+  --dry-run
+bash scripts/repair/run.sh \
+  --allow-main \
+  --max-attempts 1 \
+  --check-cmd "bash scripts/ci/run_checks.sh" \
+  --recipes repairs/recipes.yaml \
   --dry-run
 ```
 

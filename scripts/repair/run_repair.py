@@ -181,7 +181,7 @@ def open_issue(repo: str, title: str, body: str, labels: list[str], dry_run: boo
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Auto-repair common failures and retry checks")
-    parser.add_argument("--recipes", type=Path, default=Path("scripts/repair/recipes.yaml"))
+    parser.add_argument("--recipes", type=Path, default=Path("repairs/recipes.yaml"))
     parser.add_argument("--check-cmd", default="bash scripts/ci/run_checks.sh")
     parser.add_argument("--max-attempts", type=int, default=3)
     parser.add_argument("--log-dir", type=Path, default=Path(".factory/repair"))
@@ -196,6 +196,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = Path.cwd()
+    if not args.recipes.exists():
+        legacy = Path("scripts/repair/recipes.yaml")
+        if legacy.exists():
+            args.recipes = legacy
 
     config = read_json(args.recipes)
     recipes = list(config.get("recipes", []))

@@ -1,0 +1,32 @@
+{
+  "recipes": [
+    {
+      "id": "format-json",
+      "description": "Pretty-format JSON payloads for queue/evidence/env files.",
+      "trigger_keywords": ["json", "parse", "decode", "unexpected token"],
+      "action": "format_json",
+      "default_on_unknown": true
+    },
+    {
+      "id": "strip-trailing-whitespace",
+      "description": "Remove trailing whitespace from source/docs files.",
+      "trigger_keywords": ["whitespace", "lint", "format"],
+      "action": "strip_trailing_whitespace",
+      "default_on_unknown": true
+    },
+    {
+      "id": "regen-evidence-index",
+      "description": "Regenerate evidence/index.json from evidence/records.",
+      "trigger_keywords": ["evidence/index.json", "generated", "out of date"],
+      "action": "regenerate_evidence_index",
+      "default_on_unknown": true
+    },
+    {
+      "id": "normalize-queue-shape",
+      "description": "Ensure release queue has pending/promoted/failed lists.",
+      "trigger_keywords": ["queue", "pending", "promoted", "failed"],
+      "action": "normalize_queue_shape",
+      "default_on_unknown": true
+    }
+  ]
+}
