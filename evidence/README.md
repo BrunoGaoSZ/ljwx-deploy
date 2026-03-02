@@ -1,38 +1,55 @@
-# Evidence Control Plane
+# Evidence Model
 
-This directory is the Git-tracked evidence source for Bid-MVP factory promotion and smoke outcomes.
+`evidence/records/*.yaml` is the source-of-truth evidence feed for promotion and verification.
 
-## Structure
+## Required fields
 
-- `evidence/records/*.json`: immutable-ish evidence records (append/update by automation).
-- `evidence/schema/evidence-record.schema.json`: canonical record schema.
-- `evidence/index.json`: generated feed consumed by GitHub Pages dashboard.
+- `evidenceId`
+- `service`
+- `env`
+- `source.repo`
+- `source.commit`
+- `image.harbor`
+- `deploy.deployRepoCommit`
 
-## Record Lifecycle
+## Optional fields
 
-1. Promoter creates or updates a record with queue/promotion data.
-2. Smoke runner appends smoke status under `tests.smoke` in the same record identity.
-3. Nightly workflow validates records and regenerates `evidence/index.json`.
-4. Workflow publishes dashboard and feed to `gh-pages` branch root.
+- `source.workflowRun`
+- `image.ghcr`
+- `deploy.argocdApp`
+- `deploy.syncedAt`
+- `tests.smoke`
+- `tests.e2e`
+- `approvals.*`
 
-## Validation + Collection
+## Lifecycle
 
-```bash
-python3 scripts/evidence/validate.py
-python3 scripts/evidence/collect.py --out evidence/index.json
+1. Queue promoter writes/updates evidence records in `evidence/records/`.
+2. Validation script checks structure and required fields.
+3. Collection script builds `evidence/index.json` and `evidence/summary/latest.md`.
+4. Nightly workflow publishes dashboard and feed to `gh-pages` branch root.
+
+## Example record (YAML)
+
+```yaml
+evidenceId: 2026-03-02-frontend-sha1234
+service: frontend
+env: dev
+source:
+  repo: ghcr.io/example/frontend
+  commit: sha1234
+  workflowRun: https://github.com/example/frontend/actions/runs/123
+image:
+  ghcr: ghcr.io/example/frontend@sha256:1111111111111111111111111111111111111111111111111111111111111111
+  harbor: harbor.omniverseai.net/app/frontend@sha256:2222222222222222222222222222222222222222222222222222222222222222
+deploy:
+  deployRepoCommit: abcdef1234567890
+  argocdApp: frontend-dev
+  syncedAt: 2026-03-02T02:10:00Z
+tests:
+  smoke:
+    status: pass
+    url: https://github.com/example/deploy/actions/runs/456
+approvals:
+  releasePr: https://github.com/example/deploy/pull/789
 ```
-
-## Required Branch/Pages Governance
-
-1. Enable GitHub Pages from `gh-pages` branch root.
-2. Add branch protection rule for `gh-pages`:
-   - Require linear history.
-   - Restrict who can push to automation only.
-   - Allow only GitHub Actions bot/app identity used by workflow.
-3. Keep `gh-pages` write access only through repository workflow token (`GITHUB_TOKEN`).
-4. Never commit manual edits to `gh-pages`; regenerate from `main` workflow only.
-
-## Stable URLs
-
-- Dashboard: `https://brunogaosz.github.io/ljwx-deploy/`
-- Feed: `https://brunogaosz.github.io/ljwx-deploy/evidence/index.json`

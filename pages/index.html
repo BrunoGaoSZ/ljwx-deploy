@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evidence Feed</title>
+    <style>
+      body { font-family: ui-sans-serif, -apple-system, sans-serif; margin: 24px; }
+      .controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; }
+      th, td { border-bottom: 1px solid #e5e7eb; padding: 8px; text-align: left; vertical-align: top; }
+      code { background: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+      .pill { padding: 2px 8px; border-radius: 9999px; font-size: 12px; }
+      .pass { background: #dcfce7; color: #166534; }
+      .fail { background: #fee2e2; color: #991b1b; }
+      .pending, .unknown { background: #fef3c7; color: #92400e; }
+    </style>
+  </head>
+  <body>
+    <h1>Evidence Dashboard</h1>
+    <div class="controls">
+      <label>Env <select id="env-filter"><option value="">All</option></select></label>
+      <label>Test <select id="test-filter"><option value="">All</option><option value="pass">pass</option><option value="fail">fail</option><option value="pending">pending</option><option value="unknown">unknown</option></select></label>
+    </div>
+    <div id="meta"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>evidenceId</th>
+          <th>service</th>
+          <th>env</th>
+          <th>harbor digest</th>
+          <th>syncedAt</th>
+          <th>smoke</th>
+          <th>links</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <script src="./app.js"></script>
+  </body>
+</html>

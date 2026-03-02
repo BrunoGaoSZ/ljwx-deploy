@@ -1,6 +1,9 @@
 name: nightly-auto-repair
 
 on:
+  push:
+    branches-ignore: [gh-pages]
+    paths-ignore: ['**']
   schedule:
     # 01:30 Asia/Tokyo (JST) = 16:30 UTC previous day
     - cron: "30 16 * * *"

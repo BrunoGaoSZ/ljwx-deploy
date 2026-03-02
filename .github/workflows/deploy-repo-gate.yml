@@ -1,0 +1,63 @@
+name: deploy-repo-gate
+
+on:
+  pull_request:
+    branches-ignore: [gh-pages]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changed
+        run: |
+          git fetch --no-tags --prune --depth=1 origin "${{ github.base_ref }}"
+          git diff --name-only "origin/${{ github.base_ref }}...HEAD" > .changed-files.txt
+          cat .changed-files.txt
+
+      - name: Enforce allowed directories (unless platform-admin label)
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+
+          allowed = (
+              'envs/', 'release/', 'evidence/', 'docs/', 'scripts/', 'pages/', '.github/'
+          )
+          changed = [line.strip() for line in pathlib.Path('.changed-files.txt').read_text(encoding='utf-8').splitlines() if line.strip()]
+          event = json.loads(pathlib.Path('${{ github.event_path }}').read_text(encoding='utf-8'))
+          labels = {label.get('name','') for label in event.get('pull_request', {}).get('labels', [])}
+
+          disallowed = [p for p in changed if not p.startswith(allowed)]
+          if disallowed and 'platform-admin' not in labels:
+              print('Disallowed changes detected (missing platform-admin label):')
+              for p in disallowed:
+                  print('-', p)
+              sys.exit(1)
+
+          print('Path gate passed.')
+          PY
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install --disable-pip-version-check pyyaml jsonschema
+
+      - name: Evidence validate + collect (dry run)
+        run: |
+          python3 scripts/evidence/validate.py
+          python3 scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md

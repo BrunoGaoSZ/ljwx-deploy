@@ -1,91 +1,135 @@
 #!/usr/bin/env python3
-"""Collect evidence records into evidence/index.json feed."""
+"""Collect evidence YAML records into JSON feed + markdown summary."""
 
 from __future__ import annotations
 
 import argparse
 import json
-import os
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
-def now_utc() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def read_records(records_dir: Path) -> list[dict[str, Any]]:
-    records: list[dict[str, Any]] = []
-    for path in sorted(records_dir.glob("*.json")):
-        if not path.is_file():
-            continue
-        record = json.loads(path.read_text(encoding="utf-8"))
-        record["_record_path"] = str(path)
-        records.append(record)
-    return records
+try:
+    import yaml
+except Exception as exc:  # noqa: BLE001
+    raise SystemExit(f"PyYAML is required. Install with: pip3 install pyyaml\n{exc}")
 
 
-def sort_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    def key(record: dict[str, Any]) -> str:
-        timestamps = record.get("timestamps", {})
-        return timestamps.get("updated_at") or timestamps.get("created_at") or ""
-
-    return sorted(records, key=key, reverse=True)
-
-
-def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
-    by_service: dict[str, int] = {}
-    by_status: dict[str, int] = {}
-
-    for record in records:
-        service = str(record.get("service", "unknown"))
-        status = str(record.get("status", "unknown"))
-        by_service[service] = by_service.get(service, 0) + 1
-        by_status[status] = by_status.get(status, 0) + 1
-
-    return {
-        "by_service": by_service,
-        "by_status": by_status,
-    }
+def load_yaml(path: Path) -> dict[str, Any]:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        raise ValueError(f"record root must be mapping: {path}")
+    return data
 
 
-def build_index(records: list[dict[str, Any]]) -> dict[str, Any]:
-    return {
-        "schema_version": "1.0.0",
-        "generated_at": now_utc(),
-        "source": {
-            "repository": os.getenv("GITHUB_REPOSITORY", "local/ljwx-deploy"),
-            "ref": os.getenv("GITHUB_REF", "local"),
-        },
-        "total_records": len(records),
-        "summary": summarize(records),
-        "records": records,
-    }
+def parse_ts(value: Any) -> datetime:
+    if not isinstance(value, str) or not value:
+        return datetime.min.replace(tzinfo=timezone.utc)
+    text = value.strip().replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(text)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except ValueError:
+        return datetime.min.replace(tzinfo=timezone.utc)
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Collect evidence records into index feed")
-    parser.add_argument("--records-dir", default="evidence/records", help="directory containing record json files")
-    parser.add_argument("--out", default="evidence/index.json", help="output feed path")
-    return parser.parse_args()
+def record_timestamp(record: dict[str, Any]) -> datetime:
+    deploy = record.get("deploy", {})
+    synced_at = deploy.get("syncedAt") if isinstance(deploy, dict) else None
+    promoted_at = record.get("promotedAt")
+    return parse_ts(synced_at) if parse_ts(synced_at) != datetime.min.replace(tzinfo=timezone.utc) else parse_ts(promoted_at)
+
+
+def short_digest(image_ref: str) -> str:
+    if "@sha256:" in image_ref:
+        return image_ref.split("@sha256:", 1)[1][:16]
+    if "sha256:" in image_ref:
+        return image_ref.split("sha256:", 1)[1][:16]
+    return ""
+
+
+def links_cell(record: dict[str, Any]) -> str:
+    links: list[str] = []
+    src = record.get("source", {})
+    approvals = record.get("approvals", {})
+    if isinstance(src, dict) and src.get("workflowRun"):
+        links.append(f"[run]({src['workflowRun']})")
+
+    if isinstance(approvals, dict):
+        for key in ["specPr", "archPr", "demoPr", "uatPr", "releasePr"]:
+            val = approvals.get(key)
+            if val:
+                links.append(f"[{key}]({val})")
+        prs = approvals.get("prs")
+        if isinstance(prs, list):
+            for idx, pr in enumerate(prs, start=1):
+                if isinstance(pr, str) and pr:
+                    links.append(f"[pr{idx}]({pr})")
+
+    return " ".join(links) if links else "-"
+
+
+def write_summary(records: list[dict[str, Any]], out_path: Path) -> None:
+    lines = [
+        "# Latest Evidence Summary",
+        "",
+        "| service | env | harbor digest | syncedAt | smoke | links |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+
+    for record in records[:50]:
+        service = str(record.get("service", "-"))
+        env = str(record.get("env", "-"))
+        image = record.get("image", {})
+        harbor = image.get("harbor", "") if isinstance(image, dict) else ""
+        digest = short_digest(str(harbor)) or "-"
+        deploy = record.get("deploy", {})
+        synced_at = deploy.get("syncedAt", "-") if isinstance(deploy, dict) else "-"
+        tests = record.get("tests", {})
+        smoke = "unknown"
+        if isinstance(tests, dict):
+            smoke_obj = tests.get("smoke", {})
+            if isinstance(smoke_obj, dict):
+                smoke = str(smoke_obj.get("status", "unknown"))
+
+        lines.append(f"| {service} | {env} | `{digest}` | {synced_at} | {smoke} | {links_cell(record)} |")
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main() -> int:
-    args = parse_args()
-    records_dir = Path(args.records_dir)
-    out_path = Path(args.out)
+    parser = argparse.ArgumentParser(description="Collect evidence YAML records into JSON index")
+    parser.add_argument("--records-dir", default="evidence/records", type=Path)
+    parser.add_argument("--out", default="evidence/index.json", type=Path)
+    parser.add_argument("--summary", default="evidence/summary/latest.md", type=Path)
+    args = parser.parse_args()
 
-    records = read_records(records_dir)
-    records = sort_records(records)
-    index = build_index(records)
+    records: list[dict[str, Any]] = []
+    for path in sorted(args.records_dir.glob("*.yaml")):
+        if not path.is_file():
+            continue
+        try:
+            record = load_yaml(path)
+            record["_recordPath"] = str(path)
+            records.append(record)
+        except Exception as exc:  # noqa: BLE001
+            raise SystemExit(f"failed to load {path}: {exc}")
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"wrote {out_path} with {len(records)} record(s)")
+    records.sort(key=record_timestamp, reverse=True)
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(records, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_summary(records, args.summary)
+
+    print(f"wrote {args.out} ({len(records)} records)")
+    print(f"wrote {args.summary}")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
