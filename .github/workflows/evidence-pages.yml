@@ -1,0 +1,52 @@
+name: evidence-pages
+
+on:
+  schedule:
+    # 01:00 Asia/Tokyo (JST) = 16:00 UTC previous day
+    - cron: "0 16 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evidence-pages-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate evidence records
+        run: python3 scripts/evidence/validate.py
+
+      - name: Build evidence index
+        run: python3 scripts/evidence/collect.py --out evidence/index.json
+
+      - name: Prepare pages payload
+        run: |
+          rm -rf .pages-dist
+          mkdir -p .pages-dist/evidence
+          cp site/index.html site/app.js site/styles.css .pages-dist/
+          cp evidence/index.json .pages-dist/evidence/index.json
+
+      - name: Publish to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./.pages-dist
+          force_orphan: true
+          keep_files: false
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "chore(evidence): publish pages for ${{ github.sha }}"

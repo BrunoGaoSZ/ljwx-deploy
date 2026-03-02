@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brunogaosz.github.io/ljwx-deploy/evidence/schema/evidence-record.schema.json",
+  "title": "Bid-MVP Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "service",
+    "environment",
+    "status",
+    "image",
+    "deploy",
+    "smoke",
+    "attempts",
+    "timestamps"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "service": {
+      "type": "string",
+      "minLength": 2
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 2
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "promoted",
+        "failed",
+        "superseded"
+      ]
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 3
+        },
+        "tag": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "deploy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queue_id"
+      ],
+      "properties": {
+        "queue_id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "promoter": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "promoted_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "smoke": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "pass",
+            "fail"
+          ]
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "error": {
+      "type": "string"
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "queue": {
+          "type": "string"
+        },
+        "env_manifest": {
+          "type": "string"
+        },
+        "pr": {
+          "type": "string"
+        }
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
