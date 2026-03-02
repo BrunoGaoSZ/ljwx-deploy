@@ -15,8 +15,8 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: promoter
-              image: alpine:3.20
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/brunogaosz/ljwx-deploy-promoter:main
+              imagePullPolicy: Always
               env:
                 - name: DEPLOY_REPO_URL
                   value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
@@ -41,15 +41,3 @@ spec:
                     secretKeyRef:
                       name: promoter-secrets
                       key: HARBOR_PASS
-              command:
-                - /bin/sh
-                - -c
-                - |
-                  set -euo pipefail
-                  apk add --no-cache bash git curl python3 py3-pip
-                  pip install --break-system-packages --no-cache-dir pyyaml jsonschema
-                  rm -rf /work/repo
-                  git clone "https://x-access-token:${DEPLOY_REPO_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
-                  cd /work/repo
-                  export LOCAL_REPO_DIR=/work/repo
-                  bash scripts/promoter/promote.sh

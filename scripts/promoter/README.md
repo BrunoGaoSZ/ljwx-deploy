@@ -21,6 +21,27 @@ DEPLOY_REPO_TOKEN=*** HARBOR_USER=*** HARBOR_PASS=*** \
   bash scripts/promoter/promote.sh
 ```
 
+## Prebuilt image
+
+The in-cluster CronJob uses a prebuilt image to avoid `apk/pip` cold start on every minute tick.
+
+```bash
+# Build locally
+docker build -f scripts/promoter/Dockerfile -t ghcr.io/<owner>/ljwx-deploy-promoter:dev .
+
+# Run locally with the container image
+docker run --rm \
+  -e DEPLOY_REPO_TOKEN=*** \
+  -e HARBOR_USER=*** \
+  -e HARBOR_PASS=*** \
+  ghcr.io/<owner>/ljwx-deploy-promoter:dev --dry-run
+```
+
+`build-promoter-image` workflow publishes:
+
+- `ghcr.io/<owner>/ljwx-deploy-promoter:sha-<12>`
+- `ghcr.io/<owner>/ljwx-deploy-promoter:main` (when built from `main`)
+
 ## Environment variables
 
 - `DEPLOY_REPO_URL` (default: `https://github.com/BrunoGaoSZ/ljwx-deploy.git`)

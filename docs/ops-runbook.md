@@ -9,6 +9,7 @@ This runbook covers day-2 operations for the async promotion path:
 ```bash
 # manifests
 kubectl -n shared-platform get cronjob deploy-promoter
+kubectl -n shared-platform get cronjob deploy-promoter -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
 
 # latest job and pod
 kubectl -n shared-platform get jobs --sort-by=.metadata.creationTimestamp | tail -n 5
@@ -20,6 +21,7 @@ Expected:
 
 - If digest is not in Harbor yet: no promotion commit, queue stays in `pending`.
 - If digest exists: queue entry moves to `promoted`, mapped Argo overlay is updated, evidence record written.
+- Promoter job startup should not spend time in `apk/pip` installation (image is prebuilt).
 
 ## 2) Observe ArgoCD sync/deploy
 
