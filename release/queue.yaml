@@ -1,18 +1,4 @@
 pending:
-- id: 2026-03-02T140954Z-ljwx-website-sha-33df580336d0
-  service: ljwx-website
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogaosz/ljwx-website@sha256:5bc5bf692df1ed11bcc4abe7b4223e84c6556ad91368a1e1ecc3384facd07f18
-    tag: sha-33df580336d0
-    digest: sha256:5bc5bf692df1ed11bcc4abe7b4223e84c6556ad91368a1e1ecc3384facd07f18
-  createdAt: '2026-03-02T14:09:54Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
   env: dev
@@ -29,4 +15,19 @@ pending:
   failedAt: ''
 promoted: []
 failed: []
-superseded: []
+superseded:
+- id: 2026-03-02T140954Z-ljwx-website-sha-33df580336d0
+  service: ljwx-website
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogaosz/ljwx-website@sha256:5bc5bf692df1ed11bcc4abe7b4223e84c6556ad91368a1e1ecc3384facd07f18
+    tag: sha-33df580336d0
+    digest: sha256:5bc5bf692df1ed11bcc4abe7b4223e84c6556ad91368a1e1ecc3384facd07f18
+  createdAt: '2026-03-02T14:09:54Z'
+  status: superseded
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: '2026-03-02T15:16:07Z'
+  failedAt: ''
+  reason: replaced by newer pending release for same service+env
