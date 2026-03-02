@@ -19,7 +19,7 @@ kubectl -n shared-platform logs job/<job-name>
 Expected:
 
 - If digest is not in Harbor yet: no promotion commit, queue stays in `pending`.
-- If digest exists: queue entry moves to `promoted`, `envs/dev/<svc>.yaml` updated, evidence record written.
+- If digest exists: queue entry moves to `promoted`, mapped Argo overlay is updated, evidence record written.
 
 ## 2) Observe ArgoCD sync/deploy
 

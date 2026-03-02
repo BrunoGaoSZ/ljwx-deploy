@@ -13,6 +13,7 @@ python3 scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tm
 
 echo "[verify] run promoter dry-run on local repo"
 python3 scripts/promoter/promote.py --dry-run --local-repo-dir .
+echo "[verify] promoter supports local simulation without Harbor via --skip-registry-check"
 
 echo
 echo "[verify] Harbor digest check command:"

@@ -1,6 +1,6 @@
 # Deploy Promoter (Method-1)
 
-Promoter reads `release/queue.yaml` and auto-promotes ready dev releases.
+Promoter reads `release/queue.yaml` and auto-promotes ready releases by mutating Argo-consumed overlay files.
 
 ## Guarantees
 
@@ -8,6 +8,7 @@ Promoter reads `release/queue.yaml` and auto-promotes ready dev releases.
 - Older pending entries are moved to `superseded` (not failed).
 - Promotion only happens after Harbor manifest HEAD/GET returns HTTP 200.
 - Idempotent rerun: already-promoted items are not promoted again.
+- Promotion target resolution is centralized in `release/services.yaml`.
 
 ## Main Command
 
@@ -39,3 +40,5 @@ DEPLOY_REPO_TOKEN=*** HARBOR_USER=*** HARBOR_PASS=*** \
 - `superseded`
 
 Each entry includes `id/service/env/source/*/status/attempts/timestamps` fields described in `release/README.md`.
+
+`release/services.yaml` provides `service+env -> overlay/image/app` mapping so business repos only need to enqueue minimal release metadata.

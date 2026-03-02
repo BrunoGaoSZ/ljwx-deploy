@@ -7,7 +7,7 @@ This queue drives dev auto-promotion in `ljwx-deploy`.
 1. Service repository appends a `pending` entry into `release/queue.yaml`.
 2. Harbor pull replication copies GHCR artifacts into Harbor.
 3. Promoter checks Harbor digest readiness.
-4. If ready, promoter updates `envs/dev/<svc>.yaml`, writes evidence, and moves queue item to `promoted`.
+4. If ready, promoter updates Argo-consumed overlay (`apps/*/overlays/*/kustomization.yaml`), writes evidence, and moves queue item to `promoted`.
 
 ## Superseded Semantics
 
@@ -20,6 +20,17 @@ This queue drives dev auto-promotion in `ljwx-deploy`.
 - Default retry budget `N=10`.
 - Non-ready Harbor digest is skipped (no forced failure on that cycle).
 - Hard processing errors increment `attempts`; once attempts reach `N`, item transitions to `failed` with `failedAt` and `lastError`.
+
+## Service Mapping
+
+Promoter resolves deployment targets from `release/services.yaml`:
+
+- `overlayPath`: Argo application source path file to update.
+- `kustomizeImageName`: image selector in `kustomization.yaml`.
+- `harborImage`: final image repository used by runtime.
+- `argocdApp`: app name written into evidence records.
+
+This mapping is the decoupling boundary. Business repos only enqueue queue entries; they do not need deploy path details.
 
 ## Queue Entry Schema
 

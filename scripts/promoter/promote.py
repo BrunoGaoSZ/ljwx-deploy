@@ -98,11 +98,44 @@ def get_digest(entry: dict[str, Any]) -> str:
     return digest
 
 
-def harbor_manifest_ready(service: str, digest: str, harbor_url: str, harbor_user: str, harbor_pass: str) -> bool:
-    if not service or not digest:
+def host_from_url(url: str) -> str:
+    txt = url.strip()
+    if "://" in txt:
+        txt = txt.split("://", 1)[1]
+    return txt.strip("/")
+
+
+def harbor_repo_path(harbor_image: str, harbor_url: str) -> str:
+    image = harbor_image.strip()
+    if not image:
+        return ""
+
+    if "@" in image:
+        image = image.split("@", 1)[0]
+
+    harbor_host = host_from_url(harbor_url)
+
+    if image.startswith(harbor_host + "/"):
+        return image.split("/", 1)[1]
+
+    if image.startswith("https://") or image.startswith("http://"):
+        stripped = image.split("//", 1)[1]
+        parts = stripped.split("/", 1)
+        return parts[1] if len(parts) > 1 else ""
+
+    first = image.split("/", 1)[0]
+    if "." in first or ":" in first:
+        return image.split("/", 1)[1] if "/" in image else ""
+
+    return image
+
+
+def harbor_manifest_ready(harbor_image: str, digest: str, harbor_url: str, harbor_user: str, harbor_pass: str) -> bool:
+    repo = harbor_repo_path(harbor_image, harbor_url)
+    if not repo or not digest:
         return False
 
-    endpoint = f"{harbor_url.rstrip('/')}/v2/app/{service}/manifests/{digest}"
+    endpoint = f"{harbor_url.rstrip('/')}/v2/{repo}/manifests/{digest}"
     accept = "application/vnd.oci.image.manifest.v1+json"
     base = ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}"]
     if harbor_user or harbor_pass:
@@ -137,6 +170,32 @@ def build_evidence_id(entry: dict[str, Any], promoted_at: str) -> str:
     tag = str(entry.get("source", {}).get("tag", "unknown"))
     date = parse_ts(promoted_at).strftime("%Y%m%d")
     return f"{date}-{service}-{safe_tag(tag)}"
+
+
+def load_service_map(path: Path) -> dict[str, Any]:
+    data = yaml_load(path, default={"services": {}})
+    if not isinstance(data, dict):
+        raise ValueError(f"service map root must be mapping: {path}")
+    services = data.get("services", {})
+    if not isinstance(services, dict):
+        raise ValueError("service map requires 'services' mapping")
+    data["services"] = services
+    return data
+
+
+def resolve_target(service_map: dict[str, Any], service: str, env: str) -> dict[str, Any]:
+    services = service_map.get("services", {})
+    svc = services.get(service, {}) if isinstance(services, dict) else {}
+    if not isinstance(svc, dict):
+        return {}
+
+    envs = svc.get("envs", {})
+    if isinstance(envs, dict):
+        cfg = envs.get(env, {})
+        if isinstance(cfg, dict):
+            return cfg
+
+    return {}
 
 
 def normalize_pending(queue: dict[str, list[dict[str, Any]]], now: str) -> tuple[dict[str, list[dict[str, Any]]], bool]:
@@ -179,34 +238,62 @@ def normalize_pending(queue: dict[str, list[dict[str, Any]]], now: str) -> tuple
     return queue, changed
 
 
-def update_env_manifest(env_dir: Path, service: str, digest: str) -> tuple[Path, bool]:
-    path = env_dir / f"{service}.yaml"
-    data = yaml_load(path, default={})
+def update_overlay_kustomization(
+    overlay_path: Path,
+    image_name: str,
+    harbor_image: str,
+    digest: str,
+) -> tuple[Path, bool, dict[str, Any]]:
+    data = yaml_load(overlay_path, default={})
     if not isinstance(data, dict):
-        data = {}
+        raise ValueError(f"overlay root must be mapping: {overlay_path}")
 
     before = copy.deepcopy(data)
-    data.setdefault("service", service)
-    data["image"] = f"harbor.omniverseai.net/app/{service}@{digest}"
-    data.setdefault("replicas", 1)
-    data.setdefault("resourcesProfile", "mvp-small")
+    images = data.get("images", [])
+    if not isinstance(images, list):
+        images = []
 
+    idx: int | None = None
+    for i, item in enumerate(images):
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        new_name = str(item.get("newName", "")).strip()
+        if image_name in {name, new_name} or harbor_image in {name, new_name}:
+            idx = i
+            break
+
+    target = copy.deepcopy(images[idx]) if idx is not None and isinstance(images[idx], dict) else {}
+    target["name"] = image_name
+    target["newName"] = harbor_image
+    target["digest"] = digest
+    if "newTag" in target:
+        del target["newTag"]
+
+    if idx is None:
+        images.append(target)
+    else:
+        images[idx] = target
+
+    data["images"] = images
     changed = before != data
-    return path, changed, data
+    return overlay_path, changed, data
 
 
 def process_pending(
     queue: dict[str, list[dict[str, Any]]],
     repo_dir: Path,
+    service_map: dict[str, Any],
     retry_max: int,
     harbor_url: str,
     harbor_user: str,
     harbor_pass: str,
+    skip_registry_check: bool,
 ) -> tuple[dict[str, list[dict[str, Any]]], dict[Path, dict[str, Any]], dict[Path, dict[str, Any]], list[dict[str, str]], bool]:
     now = now_rfc3339()
     queue, changed = normalize_pending(queue, now)
 
-    env_changes: dict[Path, dict[str, Any]] = {}
+    overlay_changes: dict[Path, dict[str, Any]] = {}
     evidence_changes: dict[Path, dict[str, Any]] = {}
     promoted_meta: list[dict[str, str]] = []
 
@@ -217,10 +304,19 @@ def process_pending(
         tag = str(source.get("tag", "unknown"))
         digest = get_digest(entry)
 
-        if not service or env != "dev" or not digest:
+        target = resolve_target(service_map, service, env)
+        overlay_rel = str(target.get("overlayPath", "")).strip() if isinstance(target, dict) else ""
+        image_name = str(target.get("kustomizeImageName", "")).strip() if isinstance(target, dict) else ""
+        harbor_image = str(target.get("harborImage", "")).strip() if isinstance(target, dict) else ""
+        argocd_app = str(target.get("argocdApp", "")).strip() if isinstance(target, dict) else ""
+
+        if not harbor_image:
+            harbor_image = f"harbor.omniverseai.net/app/{service}"
+
+        if not service or not env or not digest or not overlay_rel or not image_name:
             attempts = int(entry.get("attempts", 0)) + 1
             entry["attempts"] = attempts
-            entry["lastError"] = "invalid entry: missing service/env/digest"
+            entry["lastError"] = "invalid entry or missing service mapping in release/services.yaml"
             if attempts >= retry_max:
                 entry["status"] = "failed"
                 entry["failedAt"] = now_rfc3339()
@@ -229,15 +325,31 @@ def process_pending(
             changed = True
             continue
 
-        if not harbor_manifest_ready(service, digest, harbor_url, harbor_user, harbor_pass):
-            # Skip silently when Harbor digest is not ready.
+        if not skip_registry_check and not harbor_manifest_ready(harbor_image, digest, harbor_url, harbor_user, harbor_pass):
+            continue
+
+        overlay_path = repo_dir / overlay_rel
+        if not overlay_path.exists():
+            attempts = int(entry.get("attempts", 0)) + 1
+            entry["attempts"] = attempts
+            entry["lastError"] = f"overlay file not found: {overlay_rel}"
+            if attempts >= retry_max:
+                entry["status"] = "failed"
+                entry["failedAt"] = now_rfc3339()
+                queue["pending"] = [e for e in queue["pending"] if entry_id(e) != entry_id(entry)]
+                upsert_entry(queue["failed"], entry)
+            changed = True
             continue
 
         promoted_at = now_rfc3339()
-
-        env_path, env_changed, env_data = update_env_manifest(repo_dir / "envs/dev", service, digest)
-        if env_changed:
-            env_changes[env_path] = env_data
+        o_path, o_changed, o_data = update_overlay_kustomization(
+            overlay_path=overlay_path,
+            image_name=image_name,
+            harbor_image=harbor_image,
+            digest=digest,
+        )
+        if o_changed:
+            overlay_changes[o_path] = o_data
             changed = True
 
         evidence_id = build_evidence_id(entry, promoted_at)
@@ -254,25 +366,26 @@ def process_pending(
             "source": {
                 "repo": ghcr_repo(ghcr_ref) if ghcr_ref else f"ghcr.io/unknown/{service}",
                 "commit": commit_from_tag(tag),
-                "workflowRun": str(source.get("workflowRun", "")) if source.get("workflowRun") else ""
+                "workflowRun": str(source.get("workflowRun", "")) if source.get("workflowRun") else "",
             },
             "image": {
                 "ghcr": ghcr_ref,
-                "harbor": f"harbor.omniverseai.net/app/{service}@{digest}"
+                "harbor": f"{harbor_image}@{digest}",
             },
             "deploy": {
                 "deployRepoCommit": "__PENDING_COMMIT__",
                 "queueId": entry_id(entry),
-                "argocdApp": existing.get("deploy", {}).get("argocdApp", f"{service}-dev") if isinstance(existing.get("deploy"), dict) else f"{service}-dev",
-                "syncedAt": promoted_at
+                "argocdApp": argocd_app or existing.get("deploy", {}).get("argocdApp", f"{service}-{env}") if isinstance(existing.get("deploy"), dict) else f"{service}-{env}",
+                "overlayPath": overlay_rel,
+                "syncedAt": promoted_at,
             },
             "tests": {
                 "smoke": {
                     "status": "pending",
-                    "checkedAt": ""
+                    "checkedAt": "",
                 }
             },
-            "approvals": existing.get("approvals", {}) if isinstance(existing.get("approvals"), dict) else {}
+            "approvals": existing.get("approvals", {}) if isinstance(existing.get("approvals"), dict) else {},
         }
 
         evidence_changes[evidence_path] = record
@@ -284,9 +397,14 @@ def process_pending(
         queue["pending"] = [e for e in queue["pending"] if entry_id(e) != entry_id(entry)]
         upsert_entry(queue["promoted"], entry)
 
-        promoted_meta.append({"service": service, "tag": tag, "evidence_path": str(evidence_path)})
+        promoted_meta.append({
+            "service": service,
+            "tag": tag,
+            "evidence_path": str(evidence_path),
+            "overlay_path": overlay_rel,
+        })
 
-    return queue, env_changes, evidence_changes, promoted_meta, changed
+    return queue, overlay_changes, evidence_changes, promoted_meta, changed
 
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -334,7 +452,9 @@ def commit_and_push(
     run(["git", "config", "user.name", "deploy-promoter[bot]"], cwd=repo_dir)
     run(["git", "config", "user.email", "deploy-promoter[bot]@users.noreply.github.com"], cwd=repo_dir)
 
-    run(["git", "add", "release/queue.yaml", "envs/dev", "evidence/records"], cwd=repo_dir)
+    stage_paths = ["release/queue.yaml", "evidence/records"]
+    stage_paths.extend(item["overlay_path"] for item in promoted_meta if item.get("overlay_path"))
+    run(["git", "add", *sorted(set(stage_paths))], cwd=repo_dir)
     diff = run(["git", "diff", "--cached", "--name-only"], cwd=repo_dir, check=False).stdout.strip()
     if not diff:
         print("No changes to commit")
@@ -350,7 +470,6 @@ def commit_and_push(
     run(["git", "commit", "-m", message], cwd=repo_dir)
     sha = run(["git", "rev-parse", "HEAD"], cwd=repo_dir).stdout.strip()
 
-    # Patch evidence deployRepoCommit with actual commit SHA and amend.
     touched = []
     for item in promoted_meta:
         path = repo_dir / item["evidence_path"]
@@ -373,15 +492,17 @@ def commit_and_push(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Promote ready release queue entries to dev env")
+    parser = argparse.ArgumentParser(description="Promote ready release queue entries to Argo-consumed overlays")
     parser.add_argument("--local-repo-dir", default=os.getenv("LOCAL_REPO_DIR", ""))
     parser.add_argument("--deploy-repo-url", default=os.getenv("DEPLOY_REPO_URL", "https://github.com/BrunoGaoSZ/ljwx-deploy.git"))
     parser.add_argument("--deploy-repo-token", default=os.getenv("DEPLOY_REPO_TOKEN", ""))
+    parser.add_argument("--service-map", default=os.getenv("SERVICE_MAP_PATH", "release/services.yaml"))
     parser.add_argument("--harbor-url", default=os.getenv("HARBOR_URL", "https://harbor.omniverseai.net"))
     parser.add_argument("--harbor-user", default=os.getenv("HARBOR_USER", ""))
     parser.add_argument("--harbor-pass", default=os.getenv("HARBOR_PASS", ""))
     parser.add_argument("--retry-max", type=int, default=int(os.getenv("RETRY_MAX", "10")))
     parser.add_argument("--dry-run", action="store_true", help="simulate without writing/committing")
+    parser.add_argument("--skip-registry-check", action="store_true", help="skip Harbor manifest check (local dry-run only)")
     args = parser.parse_args()
 
     dry_run = bool(args.dry_run) or os.getenv("DRY_RUN", "0") in {"1", "true", "True", "yes", "YES"}
@@ -395,13 +516,17 @@ def main() -> int:
         queue = ensure_queue_shape(queue)
         validate_queue_shape(queue)
 
-        queue, env_changes, evidence_changes, promoted_meta, changed = process_pending(
+        service_map = load_service_map(repo_dir / args.service_map)
+
+        queue, overlay_changes, evidence_changes, promoted_meta, changed = process_pending(
             queue=queue,
             repo_dir=repo_dir,
+            service_map=service_map,
             retry_max=args.retry_max,
             harbor_url=args.harbor_url,
             harbor_user=args.harbor_user,
             harbor_pass=args.harbor_pass,
+            skip_registry_check=args.skip_registry_check,
         )
 
         if not changed:
@@ -410,14 +535,17 @@ def main() -> int:
 
         if dry_run:
             print("DRY_RUN summary:")
-            print(f"- env changes: {len(env_changes)}")
+            print(f"- overlay changes: {len(overlay_changes)}")
             print(f"- evidence changes: {len(evidence_changes)}")
             print(f"- promoted entries: {len(promoted_meta)}")
-            print(f"- pending: {len(queue['pending'])}, promoted: {len(queue['promoted'])}, failed: {len(queue['failed'])}, superseded: {len(queue['superseded'])}")
+            print(
+                f"- pending: {len(queue['pending'])}, promoted: {len(queue['promoted'])}, "
+                f"failed: {len(queue['failed'])}, superseded: {len(queue['superseded'])}"
+            )
             return 0
 
         yaml_dump(queue_path, queue)
-        for path, data in env_changes.items():
+        for path, data in overlay_changes.items():
             yaml_dump(path, data)
         for path, data in evidence_changes.items():
             yaml_dump(path, data)

@@ -26,10 +26,10 @@ All `repoURL` values are set to:
 
 ## How auto-deploy works with promoter
 
-1. Promoter writes `envs/dev/<svc>.yaml` digest pin and evidence.
-2. ArgoCD tracks app manifests in `apps/*/overlays/*`.
-3. Keep app overlay image refs aligned with promoted digest path (`harbor.omniverseai.net/app/<svc>@sha256:...`).
-4. Argo auto-sync applies the new revision.
+1. Promoter resolves service target from `release/services.yaml`.
+2. Promoter updates mapped overlay `apps/*/overlays/*/kustomization.yaml` image digest.
+3. ArgoCD tracks these overlay paths and auto-syncs new revision.
+4. Evidence record stores `argocdApp`, `overlayPath`, and promoted digest.
 
 If auto-sync is disabled, fallback:
 
