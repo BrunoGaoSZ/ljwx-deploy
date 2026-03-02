@@ -8,7 +8,7 @@ Promotes `release/queue.yaml` pending entries into digest-pinned dev environment
 - Keeps only newest pending item per service; older pending items are superseded.
 - Checks Harbor v2 manifest availability by HEAD/GET before promotion.
 - Pins `envs/dev/<service>.yaml` image to `harbor...@sha256:<digest>`.
-- Writes/updates evidence records in `evidence/records/`.
+- Writes/updates evidence records in `evidence/records/` with `tests.smoke` placeholder.
 - Moves entries to `promoted` or keeps retry metadata; after max attempts moves to `failed`.
 
 ## Commands

@@ -2,8 +2,8 @@ name: evidence-pages
 
 on:
   schedule:
-    # 01:00 Asia/Tokyo (JST) = 16:00 UTC previous day
-    - cron: "0 16 * * *"
+    # 02:00 Asia/Tokyo (JST) = 17:00 UTC previous day
+    - cron: "0 17 * * *"
   workflow_dispatch:
 
 permissions:

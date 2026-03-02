@@ -11,7 +11,7 @@ This directory is the Git-tracked evidence source for Bid-MVP factory promotion 
 ## Record Lifecycle
 
 1. Promoter creates or updates a record with queue/promotion data.
-2. Smoke runner appends smoke status to the same record identity.
+2. Smoke runner appends smoke status under `tests.smoke` in the same record identity.
 3. Nightly workflow validates records and regenerates `evidence/index.json`.
 4. Workflow publishes dashboard and feed to `gh-pages` branch root.
 

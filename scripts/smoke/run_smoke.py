@@ -128,7 +128,8 @@ def wait_for_endpoint(endpoint: str, timeout_seconds: int, interval_seconds: int
 
 def update_smoke_record(path: Path, ok: bool, details: str, dry_run: bool) -> None:
     record = read_json(path)
-    smoke = record.setdefault("smoke", {})
+    tests = record.setdefault("tests", {})
+    smoke = tests.setdefault("smoke", {})
     smoke["status"] = "pass" if ok else "fail"
     smoke["checked_at"] = now_utc()
     smoke["details"] = details

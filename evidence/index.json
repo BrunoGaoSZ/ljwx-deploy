@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-03-02T04:44:00Z",
+  "generated_at": "2026-03-02T04:54:26Z",
   "source": {
     "repository": "local/ljwx-deploy",
     "ref": "local"
@@ -29,9 +29,11 @@
         "promoter": "bootstrap",
         "commit": "0000000"
       },
-      "smoke": {
-        "status": "unknown",
-        "details": "seed record"
+      "tests": {
+        "smoke": {
+          "status": "unknown",
+          "details": "seed record"
+        }
       },
       "attempts": 0,
       "error": "",

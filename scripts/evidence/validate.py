@@ -46,7 +46,7 @@ def validate_record(record: dict[str, Any], path: Path) -> list[str]:
         "status",
         "image",
         "deploy",
-        "smoke",
+        "tests",
         "attempts",
         "timestamps",
     ]
@@ -77,13 +77,22 @@ def validate_record(record: dict[str, Any], path: Path) -> list[str]:
         if promoted_at is not None:
             _expect(isinstance(promoted_at, str) and _is_iso8601_z(promoted_at), "deploy.promoted_at must be ISO8601 UTC (YYYY-MM-DDTHH:MM:SSZ)", errors)
 
-    smoke = record.get("smoke")
-    _expect(isinstance(smoke, dict), "smoke must be object", errors)
+    tests = record.get("tests")
+    _expect(isinstance(tests, dict), "tests must be object", errors)
+    smoke = None
+    if isinstance(tests, dict):
+        smoke = tests.get("smoke")
+        _expect(isinstance(smoke, dict), "tests.smoke must be object", errors)
+
     if isinstance(smoke, dict):
-        _expect(smoke.get("status") in SMOKE_ALLOWED, f"smoke.status must be one of {sorted(SMOKE_ALLOWED)}", errors)
+        _expect(smoke.get("status") in SMOKE_ALLOWED, f"tests.smoke.status must be one of {sorted(SMOKE_ALLOWED)}", errors)
         checked_at = smoke.get("checked_at")
         if checked_at is not None:
-            _expect(isinstance(checked_at, str) and _is_iso8601_z(checked_at), "smoke.checked_at must be ISO8601 UTC (YYYY-MM-DDTHH:MM:SSZ)", errors)
+            _expect(
+                isinstance(checked_at, str) and _is_iso8601_z(checked_at),
+                "tests.smoke.checked_at must be ISO8601 UTC (YYYY-MM-DDTHH:MM:SSZ)",
+                errors,
+            )
 
     _expect(isinstance(record["attempts"], int) and record["attempts"] >= 0, "attempts must be integer >= 0", errors)
 

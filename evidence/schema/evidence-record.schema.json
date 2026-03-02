@@ -11,7 +11,7 @@
     "status",
     "image",
     "deploy",
-    "smoke",
+    "tests",
     "attempts",
     "timestamps"
   ],
@@ -77,6 +77,39 @@
         "promoted_at": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "smoke"
+      ],
+      "properties": {
+        "smoke": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "unknown",
+                "pass",
+                "fail"
+              ]
+            },
+            "checked_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "details": {
+              "type": "string"
+            }
+          }
         }
       }
     },

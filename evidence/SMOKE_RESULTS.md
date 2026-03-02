@@ -1,10 +1,10 @@
 # Reading Smoke Results
 
-Smoke results are written into each evidence record under the `smoke` field:
+Smoke results are written into each evidence record under `tests.smoke`:
 
-- `smoke.status`: `pass` or `fail`
-- `smoke.checked_at`: UTC timestamp of the last smoke run
-- `smoke.details`: Argo sync/health and endpoint response summary
+- `tests.smoke.status`: `pass` or `fail`
+- `tests.smoke.checked_at`: UTC timestamp of the last smoke run
+- `tests.smoke.details`: Argo sync/health and endpoint response summary
 
 ## Where It Appears on Dashboard
 
@@ -21,4 +21,4 @@ In the `Latest Records` table:
 1. Filter/find the affected service row.
 2. Confirm `Promotion` is `promoted`.
 3. Inspect `Smoke` badge.
-4. If `fail`, open record path and read `smoke.details` for exact Argo/endpoint context.
+4. If `fail`, open record path and read `tests.smoke.details` for exact Argo/endpoint context.

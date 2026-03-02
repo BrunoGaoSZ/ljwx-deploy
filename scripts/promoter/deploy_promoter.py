@@ -189,6 +189,7 @@ def upsert_evidence_record(
     image = entry.get("image", {})
     repository = str(image.get("repository", ""))
     tag = str(image.get("tag", ""))
+    existing_smoke = existing.get("tests", {}).get("smoke") or existing.get("smoke") or {"status": "unknown"}
 
     payload: dict[str, Any] = {
         "record_id": record_id,
@@ -205,7 +206,9 @@ def upsert_evidence_record(
             "commit": commit,
             "promoted_at": now_utc() if outcome_status == "promoted" else existing.get("deploy", {}).get("promoted_at"),
         },
-        "smoke": existing.get("smoke", {"status": "unknown"}),
+        "tests": {
+            "smoke": existing_smoke,
+        },
         "attempts": int(entry.get("attempts", 0)),
         "error": error,
         "links": {

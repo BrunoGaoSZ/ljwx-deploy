@@ -12,9 +12,11 @@
     "promoter": "bootstrap",
     "commit": "0000000"
   },
-  "smoke": {
-    "status": "unknown",
-    "details": "seed record"
+  "tests": {
+    "smoke": {
+      "status": "unknown",
+      "details": "seed record"
+    }
   },
   "attempts": 0,
   "error": "",

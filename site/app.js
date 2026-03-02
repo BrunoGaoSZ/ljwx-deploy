@@ -14,6 +14,10 @@ function shortSha(value) {
   return String(value).slice(0, 12);
 }
 
+function smokeStatus(record) {
+  return record.tests?.smoke?.status || record.smoke?.status || "unknown";
+}
+
 function renderCards(feed) {
   const container = document.getElementById("summary-cards");
   const tpl = document.getElementById("card-template");
@@ -23,7 +27,7 @@ function renderCards(feed) {
     ["Total Records", feed.total_records ?? 0],
     ["Promoted", feed.summary?.by_status?.promoted ?? 0],
     ["Failed", feed.summary?.by_status?.failed ?? 0],
-    ["Smoke Pass", feed.records?.filter((r) => r.smoke?.status === "pass").length ?? 0],
+    ["Smoke Pass", feed.records?.filter((r) => smokeStatus(r) === "pass").length ?? 0],
   ];
 
   cards.forEach(([title, value]) => {
@@ -49,7 +53,7 @@ function renderTable(feed) {
           <td>${escapeHtml(record.service)}</td>
           <td>${escapeHtml(record.environment)}</td>
           <td>${pill(record.status)}</td>
-          <td>${pill(record.smoke?.status || "unknown")}</td>
+          <td>${pill(smokeStatus(record))}</td>
           <td><code>${escapeHtml(shortSha(record.deploy?.commit))}</code></td>
           <td><code>${escapeHtml(digest)}</code></td>
           <td>${escapeHtml(record.timestamps?.updated_at || "-")}</td>
