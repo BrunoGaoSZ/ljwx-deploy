@@ -1,4 +1,6 @@
 resources:
   - namespace-dev.yaml
+  - namespace-ljwx-website-dev.yaml
+  - namespace-ljwx-bookstore.yaml
   - regcred.yaml
   - default-sa.yaml

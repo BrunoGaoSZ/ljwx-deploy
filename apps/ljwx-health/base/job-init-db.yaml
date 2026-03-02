@@ -1,0 +1,59 @@
+---
+# =============================================================================
+# Database Initialization Job
+# 在 ljwx-boot 启动前创建数据库，让 Flyway 可以运行迁移
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ljwx-health-init-db
+  namespace: ljwx-health
+  labels:
+    app: ljwx-health
+    component: init-db
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "0"  # 首先运行
+spec:
+  ttlSecondsAfterFinished: 300  # 5分钟后自动清理
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: ljwx-health
+        component: init-db
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: init-database
+          image: mysql:8.0
+          command:
+            - sh
+            - -c
+            - |
+              echo "检查并创建 ljwx_health 数据库..."
+              mysql -h mysql-infra.infra.svc.cluster.local -u root -p${MYSQL_ROOT_PASSWORD} <<EOF
+              CREATE DATABASE IF NOT EXISTS ljwx_health
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci;
+
+              SHOW DATABASES LIKE 'ljwx_health';
+
+              SELECT 'Database ljwx_health is ready' AS status;
+              EOF
+
+              echo "✅ 数据库初始化完成"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: DB_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

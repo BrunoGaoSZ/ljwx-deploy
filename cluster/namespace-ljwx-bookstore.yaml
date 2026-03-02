@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-bookstore
+  labels:
+    name: ljwx-bookstore
+    environment: production
+    app: ljwx-bookstore
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ljwx-bookstore-quota
+  namespace: ljwx-bookstore
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: "2Gi"
+    limits.cpu: "2"
+    limits.memory: "4Gi"
+    persistentvolumeclaims: "10"
+    services: "10"
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ljwx-bookstore-limits
+  namespace: ljwx-bookstore
+spec:
+  limits:
+  - max:
+      cpu: "1"
+      memory: "2Gi"
+    min:
+      cpu: "50m"
+      memory: "128Mi"
+    default:
+      cpu: "500m"
+      memory: "1Gi"
+    defaultRequest:
+      cpu: "250m"
+      memory: "512Mi"
+    type: Container

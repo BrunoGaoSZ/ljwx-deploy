@@ -1,0 +1,91 @@
+---
+# =============================================================================
+# ljwx-admin Deployment Configuration
+# Vue3 前端管理后台（Nginx 静态服务）
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-admin
+  namespace: ljwx-health
+  labels:
+    app: ljwx-admin
+    component: frontend
+    version: v1.0.0
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ljwx-admin
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: ljwx-admin
+        component: frontend
+        version: v1.0.0
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "20260103-072537"
+    spec:
+      # Harbor 镜像拉取凭证
+      imagePullSecrets:
+        - name: harbor-registry
+
+      containers:
+        - name: ljwx-admin
+          image: harbor.omniverseai.net/ljwx-health/ljwx-admin:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
+          # 环境变量
+          env:
+            - name: TZ
+              value: "Asia/Shanghai"
+            # 后端 API 地址（通过 Ingress 访问）
+            - name: VITE_API_URL
+              value: "https://health-admin.omniverseai.net/api"
+
+          # 资源配置
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          # 健康检查
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+            successThreshold: 1
+
+      # 重启策略
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst

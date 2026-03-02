@@ -1,0 +1,91 @@
+---
+# =============================================================================
+# ljwx-bookstore ConfigMap Configuration
+# 应用配置和非敏感环境变量
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ljwx-bookstore-config
+  namespace: ljwx-bookstore
+  labels:
+    app: ljwx-bookstore
+    component: config
+data:
+  # 应用基础配置
+  SPRING_PROFILES_ACTIVE: "prod"
+  SERVER_PORT: "8844"
+
+  # JVM配置
+  JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+UseStringDeduplication -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
+
+  # 数据库连接池配置（非敏感）
+  HIKARI_MAXIMUM_POOL_SIZE: "20"
+  HIKARI_MINIMUM_IDLE: "5"
+  HIKARI_CONNECTION_TIMEOUT: "20000"
+  HIKARI_IDLE_TIMEOUT: "300000"
+
+  # AI服务配置
+  AI_ENABLED: "true"
+  AI_LOCAL_ENABLED: "true"
+  AI_LOCAL_PROVIDER: "ollama"
+  AI_LOCAL_OLLAMA_URL: "http://ollama.devops.svc.cluster.local:11434"
+  AI_LOCAL_DEFAULT_MODEL: "qwen2.5:7b"
+  AI_LOCAL_FALLBACK_MODEL: "llama3.2:8b"
+  AI_CLOUD_ENABLED: "false"
+
+  # OpenSearch配置
+  AI_OPENSEARCH_HOST: "opensearch.monitoring.svc.cluster.local"
+  AI_OPENSEARCH_PORT: "9200"
+  AI_OPENSEARCH_PARAGRAPH_INDEX: "ai_paragraphs"
+
+  # 对象存储配置
+  HGBOOK_STORAGE_ACTIVE: "aliyun"
+  HGBOOK_STORAGE_ALIYUN_REGION_ID: "cn-zhangjiakou"
+  HGBOOK_STORAGE_ALIYUN_BUCKET_NAME: "hg-tech"
+
+  # 监控配置
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
+  MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: "true"
+
+  # 日志配置
+  LOGGING_LEVEL_ROOT: "INFO"
+  LOGGING_LEVEL_CN_BOOK_BUS: "DEBUG"
+  LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+  # Flyway配置
+  SPRING_FLYWAY_ENABLED: "true"
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+  SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
+
+  # MyBatis Plus配置
+  MYBATIS_CONFIGURATION_MAP_UNDERSCORE_TO_CAMEL_CASE: "true"
+  MYBATIS_CONFIGURATION_CACHE_ENABLED: "true"
+
+  # 微信支付配置（非敏感）
+  HGBOOK_WX_APP_ID: "wxe92bc58a93b04a87"
+  HGBOOK_WX_MCH_ID: "1623644809"
+  HGBOOK_WX_NOTIFY_URL: "http://bookstore.192.168.1.83.nip.io/wx/order/pay-notify"
+
+  # 邮件配置（非敏感）
+  HGBOOK_NOTIFY_MAIL_ENABLE: "true"
+  HGBOOK_NOTIFY_MAIL_HOST: "smtp.qq.com"
+  HGBOOK_NOTIFY_MAIL_PORT: "465"
+  HGBOOK_NOTIFY_MAIL_USERNAME: "38455629@qq.com"
+  HGBOOK_NOTIFY_MAIL_SENDFROM: "38455629@qq.com"
+  HGBOOK_NOTIFY_MAIL_SENDTO: "gaojunivas@gmail.com"
+
+  # 短信配置（非敏感）
+  HGBOOK_NOTIFY_SMS_ENABLE: "true"
+  HGBOOK_NOTIFY_SMS_ACTIVE: "tencent"
+  HGBOOK_NOTIFY_SMS_SIGN: "和光文化"
+  HGBOOK_NOTIFY_SMS_TENCENT_APPID: "1400311284"
+
+  # OpenTelemetry配置
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.tracing.svc.cluster.local:4317"
+  OTEL_SERVICE_NAME: "ljwx-bookstore"
+  OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
+  OTEL_TRACES_SAMPLER_ARG: "0.1"
+  OTEL_METRICS_EXPORTER: "prometheus"
+  OTEL_LOGS_EXPORTER: "none"

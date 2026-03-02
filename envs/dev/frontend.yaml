@@ -1,0 +1,6 @@
+{
+  "service": "frontend",
+  "environment": "dev",
+  "image": "harbor.omniverseai.net/ljwx/frontend-dashboard:dev",
+  "updated_at": "2026-03-02T00:00:00Z"
+}

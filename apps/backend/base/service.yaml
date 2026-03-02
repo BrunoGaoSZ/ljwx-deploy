@@ -4,17 +4,13 @@ metadata:
   name: backend
   labels:
     app: backend
-    app.kubernetes.io/name: backend
-    app.kubernetes.io/part-of: youngth-guard
     component: api
 spec:
   type: ClusterIP
-  selector:
-    app: backend
-    app.kubernetes.io/name: backend
-    app.kubernetes.io/part-of: youngth-guard
   ports:
-    - name: http
-      port: 8000
+    - port: 8000
       targetPort: http
       protocol: TCP
+      name: http
+  selector:
+    app: backend

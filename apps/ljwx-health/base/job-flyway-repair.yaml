@@ -1,0 +1,70 @@
+---
+# =============================================================================
+# Flyway Repair Job
+# 修复失败的迁移记录，清理 flyway_schema_history 表
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ljwx-health-flyway-repair
+  namespace: ljwx-health
+  labels:
+    app: ljwx-health
+    component: flyway-repair
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"  # 在 init-db (wave 0) 之后运行
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: ljwx-health
+        component: flyway-repair
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: flyway-repair
+          image: mysql:8.0
+          command:
+            - sh
+            - -c
+            - |
+              echo "检查并修复 Flyway schema history..."
+
+              # 删除所有失败的迁移记录
+              mysql -h mysql-infra.infra.svc.cluster.local -u root -p${MYSQL_ROOT_PASSWORD} ljwx_health <<EOF
+
+              -- 检查 flyway_schema_history 表是否存在
+              SELECT CASE WHEN COUNT(*) > 0 THEN 'Flyway history table exists'
+                          ELSE 'No flyway history table found' END AS status
+              FROM information_schema.tables
+              WHERE table_schema = 'ljwx_health'
+              AND table_name = 'flyway_schema_history';
+
+              -- 显示所有迁移记录
+              SELECT CONCAT('Total migrations before cleanup: ', COUNT(*)) AS count FROM flyway_schema_history;
+
+              -- 完全删除 flyway_schema_history 表，让 Flyway 重新开始
+              DROP TABLE IF EXISTS flyway_schema_history;
+
+              SELECT 'Flyway schema history table dropped. Flyway will recreate it on next run.' AS result;
+
+              EOF
+
+              echo "✅ Flyway schema history 修复完成"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: DB_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

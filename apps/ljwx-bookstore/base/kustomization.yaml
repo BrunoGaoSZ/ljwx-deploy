@@ -1,6 +1,34 @@
+---
+# =============================================================================
+# Kustomize Base Configuration for ljwx-bookstore
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ljwx-bookstore
+
 resources:
+  - namespace.yaml
+  # Secret 由 infra 团队手动创建，不在 Git 中管理
+  # TODO: 后续迁移到 External Secrets Operator 实现完全 GitOps
+  - configmap.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-  - ghcr-secret.yaml
-  - redis-secret.yaml
+  - db-init-job.yaml
+
+commonLabels:
+  app: ljwx-bookstore
+  managed-by: kustomize
+
+# 镜像替换（将由 CD 流程动态更新）
+images:
+  - name: harbor.omniverseai.net/ljwx/ljwx-bookstore
+    newTag: latest
+
+# 配置生成器行为
+generatorOptions:
+  disableNameSuffixHash: true
+
+# 构建元数据
+buildMetadata: [originAnnotations, transformerAnnotations]

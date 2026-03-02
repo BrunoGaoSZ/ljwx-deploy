@@ -4,43 +4,30 @@ metadata:
   name: backend
   labels:
     app: backend
-    app.kubernetes.io/name: backend
-    app.kubernetes.io/part-of: youngth-guard
     component: api
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: backend
-      app.kubernetes.io/name: backend
-      app.kubernetes.io/part-of: youngth-guard
   template:
     metadata:
       labels:
         app: backend
-        app.kubernetes.io/name: backend
-        app.kubernetes.io/part-of: youngth-guard
         component: api
     spec:
-      imagePullSecrets:
-        - name: harbor-registry
       containers:
         - name: backend
-          image: harbor.omniverseai.net/ljwx/ljwx-shiti:sha-775861d
-          imagePullPolicy: IfNotPresent
+          image: harbor.omniverseai.net/ljwx/backend-template:dev
           ports:
-            - containerPort: 8000
-              name: http
+            - name: http
+              containerPort: 8000
               protocol: TCP
           env:
             - name: ENVIRONMENT
               value: "dev"
             - name: LOG_LEVEL
               value: "info"
-            - name: DATABASE_URL
-              value: "postgresql+asyncpg://appuser:123456@postgres-infra-postgresql.infra.svc.cluster.local:5432/appdb"
-            - name: REDIS_URL
-              value: "redis://:123456@redis-infra-master.infra.svc.cluster.local:6379/0"
           livenessProbe:
             httpGet:
               path: /health
@@ -55,8 +42,8 @@ spec:
             periodSeconds: 5
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              memory: "128Mi"
+              cpu: "100m"
             limits:
-              cpu: 500m
-              memory: 512Mi
+              memory: "512Mi"
+              cpu: "500m"

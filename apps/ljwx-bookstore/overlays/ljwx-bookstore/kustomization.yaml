@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ljwx-bookstore
+
+resources:
+  - ../../base
+
+images:
+  - name: harbor.omniverseai.net/ljwx/ljwx-bookstore
+    newTag: "main-9e937b1"
+
+replicas:
+  - name: ljwx-bookstore
+    count: 1

@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-runner
+  namespace: gitea-runner
+  labels:
+    app: gitea-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea-runner
+  template:
+    metadata:
+      labels:
+        app: gitea-runner
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: runner-data
+          emptyDir: {}
+        - name: runner-config
+          configMap:
+            name: runner-config
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+      containers:
+        - name: runner
+          image: gitea/act_runner:0.2.6
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              
+              # 注册 runner（如果未注册）
+              if [ ! -f /data/.runner ]; then
+                echo "Registering runner..."
+                act_runner register \
+                  --instance http://192.168.1.83:33000 \
+                  --token ${GITEA_RUNNER_TOKEN} \
+                  --name k8s-runner-${HOSTNAME} \
+                  --labels ubuntu-latest,ubuntu-22.04,docker,self-hosted \
+                  --no-interactive
+              fi
+              
+              # 启动 runner
+              echo "Starting runner..."
+              act_runner daemon --config /config/config.yaml
+          env:
+            - name: GITEA_INSTANCE_URL
+              value: "http://192.168.1.83:33000"
+            - name: GITEA_RUNNER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: runner-token
+                  key: token
+            - name: DOCKER_HOST
+              value: unix:///var/run/docker.sock
+          volumeMounts:
+            - name: runner-data
+              mountPath: /data
+            - name: runner-config
+              mountPath: /config
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi

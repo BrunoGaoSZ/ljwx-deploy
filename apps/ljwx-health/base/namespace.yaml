@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-health
+  labels:
+    name: ljwx-health
+    app.kubernetes.io/name: ljwx-health
+    app.kubernetes.io/component: health-monitoring

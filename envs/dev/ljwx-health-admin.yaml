@@ -1,0 +1,6 @@
+{
+  "service": "ljwx-health-admin",
+  "environment": "dev",
+  "image": "harbor.omniverseai.net/ljwx-health/ljwx-admin:latest",
+  "updated_at": "2026-03-02T00:00:00Z"
+}

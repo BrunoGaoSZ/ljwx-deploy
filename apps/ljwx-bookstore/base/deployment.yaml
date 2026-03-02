@@ -1,79 +1,210 @@
+---
+# =============================================================================
+# ljwx-bookstore Deployment Configuration
+# Spring Boot 应用部署，连接 infra namespace 的 MySQL 和 Redis
+# =============================================================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bookstore
+  name: ljwx-bookstore
+  namespace: ljwx-bookstore
   labels:
-    app: bookstore
-    managed-by: argocd
-    project: ljwx-bookstore
+    app: ljwx-bookstore
+    component: backend
+    version: v1.0.0
 spec:
-  replicas: 2
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
-      app: bookstore
+      app: ljwx-bookstore
+      component: backend
   template:
     metadata:
       labels:
-        app: bookstore
-        project: ljwx-bookstore
-        version: v0.1.4
+        app: ljwx-bookstore
+        component: backend
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8844"
+        prometheus.io/path: "/fiction/actuator/prometheus"
     spec:
-      imagePullSecrets:
-        - name: ghcr-secret
+      # 初始化容器 - 等待数据库就绪
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL to be ready..."
+              until nc -z mysql-infra.infra.svc.cluster.local 3306; do
+                echo "MySQL not ready, sleeping for 2 seconds..."
+                sleep 2
+              done
+              echo "MySQL is ready!"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+
+      # 主容器
       containers:
-        - name: bookstore
-          image: ghcr.io/brunogaosz/ljwx-bookstore/bookstore:bookstore-latest
+        - name: ljwx-bookstore
+          image: harbor.omniverseai.net/ljwx/ljwx-bookstore:latest
+          imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8844
+              protocol: TCP
+
+          # 环境变量 - 从 ConfigMap
+          envFrom:
+            - configMapRef:
+                name: ljwx-bookstore-config
+
+          # 环境变量 - 从 Secret（敏感信息）
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "prod"
-            - name: SERVER_PORT
-              value: "8080"
-            # Database configuration from infra Postgres
-            - name: SPRING_DATASOURCE_URL
+            # 数据库配置
+            - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: bookstore-db-credentials
-                  key: SPRING_DATASOURCE_URL
-            - name: SPRING_DATASOURCE_USERNAME
+                  name: ljwx-bookstore-secret
+                  key: DB_HOST
+            - name: DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: bookstore-db-credentials
-                  key: SPRING_DATASOURCE_USERNAME
-            - name: SPRING_DATASOURCE_PASSWORD
+                  name: ljwx-bookstore-secret
+                  key: DB_PORT
+            - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: bookstore-db-credentials
-                  key: SPRING_DATASOURCE_PASSWORD
-            # Redis configuration
-            - name: SPRING_DATA_REDIS_HOST
-              value: "redis-service.ljwx-health.svc.cluster.local"
-            - name: SPRING_DATA_REDIS_PORT
-              value: "6379"
-            - name: SPRING_DATA_REDIS_PASSWORD
+                  name: ljwx-bookstore-secret
+                  key: DB_NAME
+            - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: redis-credentials
+                  name: ljwx-bookstore-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: DB_PASSWORD
+
+            # Redis配置
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: REDIS_PORT
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
                   key: REDIS_PASSWORD
-            - name: SPRING_DATA_REDIS_DATABASE
-              value: "0"
+
+            # 微信支付配置
+            - name: WX_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: WX_APP_SECRET
+            - name: WX_MCH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: WX_MCH_KEY
+
+            # 邮件配置
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: MAIL_PASSWORD
+
+            # 短信配置
+            - name: SMS_TENCENT_APPKEY
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: SMS_TENCENT_APPKEY
+
+            # 对象存储配置
+            - name: STORAGE_ALIYUN_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: STORAGE_ALIYUN_ACCESS_KEY_ID
+            - name: STORAGE_ALIYUN_ACCESS_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-bookstore-secret
+                  key: STORAGE_ALIYUN_ACCESS_KEY_SECRET
+
+          # 资源配置
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          # 健康检查
           livenessProbe:
             httpGet:
               path: /fiction/actuator/health
-              port: 8080
+              port: 8844
+              scheme: HTTP
             initialDelaySeconds: 120
             periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+
           readinessProbe:
             httpGet:
               path: /fiction/actuator/health
-              port: 8080
+              port: 8844
+              scheme: HTTP
             initialDelaySeconds: 60
             periodSeconds: 10
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "500m"
-            limits:
-              memory: "1Gi"
-              cpu: "1000m"
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          startupProbe:
+            httpGet:
+              path: /fiction/actuator/health
+              port: 8844
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+            successThreshold: 1
+
+          # 生命周期
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+
+      # 重启策略
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+      dnsPolicy: ClusterFirst

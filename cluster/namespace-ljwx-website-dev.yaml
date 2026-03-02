@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-website-dev
+  labels:
+    name: ljwx-website-dev
+    environment: dev
+    app: ljwx-website
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ljwx-website-quota
+  namespace: ljwx-website-dev
+spec:
+  hard:
+    requests.cpu: "500m"
+    requests.memory: "512Mi"
+    limits.cpu: "1"
+    limits.memory: "1Gi"
+    persistentvolumeclaims: "5"
+    services: "5"
+    pods: "10"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ljwx-website-limits
+  namespace: ljwx-website-dev
+spec:
+  limits:
+  - max:
+      cpu: "500m"
+      memory: "512Mi"
+    min:
+      cpu: "10m"
+      memory: "32Mi"
+    default:
+      cpu: "100m"
+      memory: "128Mi"
+    defaultRequest:
+      cpu: "50m"
+      memory: "64Mi"
+    type: Container

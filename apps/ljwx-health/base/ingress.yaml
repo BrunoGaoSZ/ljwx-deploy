@@ -1,0 +1,67 @@
+---
+# =============================================================================
+# ljwx-health Ingress Configuration
+# 路由配置:
+#   - health-admin.omniverseai.net -> ljwx-admin (Vue3 前端)
+#   - health-dashboard.omniverseai.net -> ljwx-bigscreen (Flask 大屏)
+#   - health-admin.omniverseai.net/api -> ljwx-boot (后端 API)
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ljwx-health-ingress
+  namespace: ljwx-health
+  labels:
+    app: ljwx-health
+  annotations:
+    # CORS 配置
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    # 请求大小限制
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    # 超时配置
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+spec:
+  ingressClassName: nginx
+  rules:
+    # =========================================================================
+    # Rule 1: health-admin.omniverseai.net
+    # =========================================================================
+    - host: health-admin.omniverseai.net
+      http:
+        paths:
+          # 后端 API 路由
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-boot
+                port:
+                  number: 9998
+          # 前端静态资源
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-admin
+                port:
+                  number: 80
+
+    # =========================================================================
+    # Rule 2: health-dashboard.omniverseai.net
+    # =========================================================================
+    - host: health-dashboard.omniverseai.net
+      http:
+        paths:
+          # 大屏应用
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-bigscreen
+                port:
+                  number: 5001

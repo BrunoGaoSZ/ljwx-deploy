@@ -4,3 +4,7 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
+
+commonLabels:
+  app.kubernetes.io/name: backend
+  app.kubernetes.io/part-of: youngth-guard

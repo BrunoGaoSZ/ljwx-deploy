@@ -1,41 +1,57 @@
+---
+# =============================================================================
+# ljwx-bookstore Ingress Configuration
+# 域名: book.omniverseai.net (HTTP only)
+# =============================================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: bookstore-ingress
-  namespace: bookstore
+  name: ljwx-bookstore
+  namespace: ljwx-bookstore
+  labels:
+    app: ljwx-bookstore
+    component: backend
   annotations:
-    # Traefik annotations
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/redirect-to-https: "true"
-    # Redirect root path to /fiction/index
-    traefik.ingress.kubernetes.io/router.middlewares: bookstore-redirect-root@kubernetescrd
-    # cert-manager annotation for automatic TLS certificate
-    cert-manager.io/cluster-issuer: dnspod-letsencrypt
+    # Nginx Ingress 配置
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+
+    # 禁用SSL重定向 - HTTP only
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+    # 健康检查
+    nginx.ingress.kubernetes.io/health-check-path: "/fiction/actuator/health"
+
+    # CORS 配置（如果需要）
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://book.omniverseai.net"
 spec:
-  ingressClassName: traefik
-  tls:
-  - hosts:
-    - bookstore.lingjingwanxiang.cn
-    secretName: bookstore-lingjingwanxiang-tls
+  ingressClassName: nginx
+
+  # 路由规则
   rules:
-  - host: bookstore.lingjingwanxiang.cn
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: bookstore
-            port:
-              number: 8080
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: redirect-root
-  namespace: bookstore
-spec:
-  redirectRegex:
-    regex: "^https?://[^/]+/$"
-    replacement: "https://bookstore.lingjingwanxiang.cn/fiction/index"
-    permanent: false
+    # 生产域名
+    - host: book.omniverseai.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-bookstore
+                port:
+                  number: 80
+
+    # 本地测试域名
+    - host: bookstore.192.168.1.83.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-bookstore
+                port:
+                  number: 80

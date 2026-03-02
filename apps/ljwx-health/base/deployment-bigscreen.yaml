@@ -1,0 +1,162 @@
+---
+# =============================================================================
+# ljwx-bigscreen Deployment Configuration
+# Flask 大屏监控服务
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-bigscreen
+  namespace: ljwx-health
+  labels:
+    app: ljwx-bigscreen
+    component: dashboard
+    version: v1.0.0
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ljwx-bigscreen
+      component: dashboard
+  template:
+    metadata:
+      labels:
+        app: ljwx-bigscreen
+        component: dashboard
+        version: v1.0.0
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "20260103-072537"
+    spec:
+      # Harbor 镜像拉取凭证
+      imagePullSecrets:
+        - name: harbor-registry
+
+      # 初始化容器 - 等待数据库就绪
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL to be ready..."
+              until nc -z mysql-infra.infra.svc.cluster.local 3306; do
+                echo "MySQL not ready, sleeping for 2 seconds..."
+                sleep 2
+              done
+              echo "MySQL is ready!"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+
+      # 主容器
+      containers:
+        - name: ljwx-bigscreen
+          image: harbor.omniverseai.net/ljwx-health/ljwx-bigscreen:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5225
+              protocol: TCP
+
+          # 环境变量 - 从 ConfigMap
+          envFrom:
+            - configMapRef:
+                name: ljwx-health-config
+
+          # 环境变量 - 从 Secret（敏感信息）
+          env:
+            # 数据库配置
+            - name: MYSQL_HOST
+              value: "mysql-infra.infra.svc.cluster.local"
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_DATABASE
+              value: "ljwx_health"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: DB_PASSWORD
+
+            # Redis 配置
+            - name: REDIS_HOST
+              value: "redis-infra-master.infra.svc.cluster.local"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: REDIS_PASSWORD
+
+            # Flask 配置
+            - name: FLASK_ENV
+              value: "production"
+            - name: FLASK_APP
+              value: "run.py"
+
+          # 资源配置
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+          # 健康检查
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5225
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5225
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5225
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 20
+            successThreshold: 1
+
+          # 生命周期
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+
+      # 重启策略
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst

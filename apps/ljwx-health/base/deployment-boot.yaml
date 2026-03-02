@@ -1,0 +1,173 @@
+---
+# =============================================================================
+# ljwx-boot Deployment Configuration
+# Spring Boot 后端服务，连接 infra namespace 的 MySQL 和 Redis
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-boot
+  namespace: ljwx-health
+  labels:
+    app: ljwx-boot
+    component: backend
+    version: v1.0.0
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ljwx-boot
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: ljwx-boot
+        component: backend
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9998"
+        prometheus.io/path: "/actuator/prometheus"
+        kubectl.kubernetes.io/restartedAt: "20260103-080347"
+    spec:
+      # Harbor 镜像拉取凭证
+      imagePullSecrets:
+        - name: harbor-registry
+
+      # 初始化容器 - 等待数据库就绪
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.35
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL to be ready..."
+              until nc -z mysql-infra.infra.svc.cluster.local 3306; do
+                echo "MySQL not ready, sleeping for 2 seconds..."
+                sleep 2
+              done
+              echo "MySQL is ready!"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+
+      # 主容器
+      containers:
+        - name: ljwx-boot
+          image: harbor.omniverseai.net/ljwx-health/ljwx-boot:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 9998
+              protocol: TCP
+
+          # 环境变量 - 从 ConfigMap
+          envFrom:
+            - configMapRef:
+                name: ljwx-health-config
+
+          # 环境变量 - 从 Secret（敏感信息）
+          env:
+            # 数据库密码（旧格式）
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: DB_PASSWORD
+
+            # Spring 数据库密码（新格式）
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: DB_PASSWORD
+
+            # Redis 密码（旧格式）
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: REDIS_PASSWORD
+
+            # Spring Redis 密码（新格式）
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: REDIS_PASSWORD
+
+            # OSS 密钥
+            - name: OSS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: OSS_ACCESS_KEY
+            - name: OSS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ljwx-health-secret
+                  key: OSS_SECRET_KEY
+
+          # 资源配置
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+
+          # 健康检查
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9998
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9998
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9998
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+            successThreshold: 1
+
+          # 生命周期
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+
+      # 重启策略
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+      dnsPolicy: ClusterFirst

@@ -2,5 +2,5 @@ resources:
   - ../../base
 images:
   - name: nginx
-    newName: ghcr.io/nginxinc/nginx-unprivileged
-    newTag: "1.27-alpine"
+    newName: harbor.omniverseai.net/dockerhub/library/nginx
+    newTag: "alpine"
