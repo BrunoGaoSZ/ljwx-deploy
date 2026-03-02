@@ -1,0 +1,47 @@
+name: nightly-auto-repair
+
+on:
+  schedule:
+    # 01:30 Asia/Tokyo (JST) = 16:30 UTC previous day
+    - cron: "30 16 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run auto-repair loop
+        run: |
+          python3 scripts/repair/run_repair.py \
+            --recipes scripts/repair/recipes.yaml \
+            --check-cmd "bash scripts/ci/run_checks.sh" \
+            --max-attempts 3 \
+            --log-dir .factory/repair/nightly \
+            --issue-repo "${{ github.repository }}" \
+            --issue-title "Nightly auto-repair exhausted" \
+            --open-issue-on-failure
+
+      - name: Commit and push repair changes
+        run: |
+          if git diff --quiet; then
+            echo "No repair changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore(repair): nightly automated fixes"
+          git push
