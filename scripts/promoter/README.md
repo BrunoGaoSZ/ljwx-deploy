@@ -42,6 +42,20 @@ docker run --rm \
 - `ghcr.io/<owner>/ljwx-deploy-promoter:sha-<12>`
 - `ghcr.io/<owner>/ljwx-deploy-promoter:main` (when built from `main`)
 
+For Kubernetes pulls from GHCR, create and bind `ghcr-pull` in `shared-platform`:
+
+```bash
+kubectl create secret docker-registry ghcr-pull \
+  -n shared-platform \
+  --docker-server=ghcr.io \
+  --docker-username=<github-username> \
+  --docker-password=<github-token> \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl patch serviceaccount promoter -n shared-platform \
+  -p '{"imagePullSecrets":[{"name":"ghcr-pull"}]}'
+```
+
 ## Environment variables
 
 - `DEPLOY_REPO_URL` (default: `https://github.com/BrunoGaoSZ/ljwx-deploy.git`)

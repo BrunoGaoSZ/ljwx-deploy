@@ -12,6 +12,8 @@ spec:
     spec:
       template:
         spec:
+          imagePullSecrets:
+            - name: ghcr-pull
           restartPolicy: OnFailure
           containers:
             - name: promoter

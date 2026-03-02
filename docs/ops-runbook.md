@@ -54,13 +54,17 @@ Results are recorded in each evidence file under `tests.smoke`.
 1. Harbor digest not found:
    - Validate Harbor pull replication policy and credentials.
    - Verify manifest availability with the exact curl command in `scripts/verify.sh`.
-2. Queue entry stuck in `failed`:
+2. Promoter image pull fails (`ImagePullBackOff` on GHCR):
+   - Ensure `ghcr-pull` exists in `shared-platform`.
+   - Ensure `promoter` ServiceAccount includes `imagePullSecrets: [{name: ghcr-pull}]`.
+   - Recreate stuck jobs after secret/SA fix.
+3. Queue entry stuck in `failed`:
    - Fix source image/tag/digest.
    - Re-enqueue with a new queue `id`.
-3. Argo app not healthy:
+4. Argo app not healthy:
    - Check sync errors/events in `kubectl -n argocd describe application <app-name>`.
    - Fix manifest/resource issue and re-sync.
-4. Smoke failed:
+5. Smoke failed:
    - Inspect `tests.smoke.details` in evidence record.
    - Confirm endpoint DNS/service/ingress and app readiness probe behavior.
 
