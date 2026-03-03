@@ -34,7 +34,19 @@ def main() -> int:
             print(f"missing list key: {key}")
             return 1
 
-    required = ["id", "service", "env", "source", "createdAt", "status", "attempts", "lastError", "promotedAt", "supersededAt", "failedAt"]
+    required = [
+        "id",
+        "service",
+        "env",
+        "source",
+        "createdAt",
+        "status",
+        "attempts",
+        "lastError",
+        "promotedAt",
+        "supersededAt",
+        "failedAt",
+    ]
     for state in ["pending", "promoted", "failed", "superseded"]:
         for idx, item in enumerate(data[state]):
             if not isinstance(item, dict):

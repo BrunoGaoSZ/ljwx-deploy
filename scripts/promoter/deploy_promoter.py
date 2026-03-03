@@ -35,7 +35,9 @@ def read_json_like(path: Path) -> dict[str, Any]:
 
 def write_json_like(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def ensure_queue_shape(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
@@ -81,7 +83,9 @@ def fetch_manifest_digest(
     }
 
     if username and password:
-        token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+        token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode(
+            "ascii"
+        )
         headers["Authorization"] = f"Basic {token}"
 
     methods = ["HEAD", "GET"]
@@ -100,14 +104,20 @@ def fetch_manifest_digest(
         except urllib.error.HTTPError as exc:
             last_error = exc
             if exc.code == 404:
-                raise RuntimeError(f"manifest not found in Harbor: {repository}:{reference}") from exc
+                raise RuntimeError(
+                    f"manifest not found in Harbor: {repository}:{reference}"
+                ) from exc
         except Exception as exc:  # noqa: BLE001
             last_error = exc
 
-    raise RuntimeError(f"failed to query Harbor manifest {repository}:{reference}: {last_error}")
+    raise RuntimeError(
+        f"failed to query Harbor manifest {repository}:{reference}: {last_error}"
+    )
 
 
-def choose_latest_pending(entries: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def choose_latest_pending(
+    entries: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Keep only latest pending per service and mark older as superseded."""
     grouped: dict[str, list[dict[str, Any]]] = {}
     for entry in entries:
@@ -128,7 +138,9 @@ def choose_latest_pending(entries: list[dict[str, Any]]) -> tuple[list[dict[str,
         for stale in service_entries[:-1]:
             stale_copy = deepcopy(stale)
             stale_copy["status"] = "superseded"
-            stale_copy["last_error"] = "superseded by newer pending entry for same service"
+            stale_copy["last_error"] = (
+                "superseded by newer pending entry for same service"
+            )
             stale_copy["updated_at"] = now_utc()
             superseded.append(stale_copy)
 
@@ -141,13 +153,22 @@ def get_deploy_commit() -> str:
         return env_sha
 
     try:
-        output = subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL)
+        output = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL
+        )
         return output.decode("utf-8").strip()
     except Exception:  # noqa: BLE001
         return "unknown"
 
 
-def upsert_env_manifest(env_dir: Path, service: str, environment: str, image_ref: str, queue_id: str, dry_run: bool) -> str:
+def upsert_env_manifest(
+    env_dir: Path,
+    service: str,
+    environment: str,
+    image_ref: str,
+    queue_id: str,
+    dry_run: bool,
+) -> str:
     path = env_dir / f"{service}.yaml"
     payload = read_json_like(path)
 
@@ -189,7 +210,11 @@ def upsert_evidence_record(
     image = entry.get("image", {})
     repository = str(image.get("repository", ""))
     tag = str(image.get("tag", ""))
-    existing_smoke = existing.get("tests", {}).get("smoke") or existing.get("smoke") or {"status": "unknown"}
+    existing_smoke = (
+        existing.get("tests", {}).get("smoke")
+        or existing.get("smoke")
+        or {"status": "unknown"}
+    )
 
     payload: dict[str, Any] = {
         "record_id": record_id,
@@ -204,7 +229,9 @@ def upsert_evidence_record(
             "queue_id": queue_id,
             "promoter": "deploy-promoter",
             "commit": commit,
-            "promoted_at": now_utc() if outcome_status == "promoted" else existing.get("deploy", {}).get("promoted_at"),
+            "promoted_at": now_utc()
+            if outcome_status == "promoted"
+            else existing.get("deploy", {}).get("promoted_at"),
         },
         "tests": {
             "smoke": existing_smoke,
@@ -301,7 +328,9 @@ def promote(
                 logs.append(f"manifest available for {queue_id}: {digest}")
 
             image_ref = f"{repository}@{digest}"
-            env_manifest_path = upsert_env_manifest(args.env_dir, service, environment, image_ref, queue_id, args.dry_run)
+            env_manifest_path = upsert_env_manifest(
+                args.env_dir, service, environment, image_ref, queue_id, args.dry_run
+            )
 
             entry["attempts"] = attempts + 1
             entry["status"] = "promoted"
@@ -346,23 +375,34 @@ def promote(
                 logs.append(f"{queue_id} failed after {attempts} attempt(s): {error}")
             else:
                 queue["pending"].append(entry)
-                logs.append(f"{queue_id} retry scheduled ({attempts}/{max_attempts}): {error}")
+                logs.append(
+                    f"{queue_id} retry scheduled ({attempts}/{max_attempts}): {error}"
+                )
 
     return queue, logs
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Auto-promote pending queue items for dev")
+    parser = argparse.ArgumentParser(
+        description="Auto-promote pending queue items for dev"
+    )
     parser.add_argument("--queue", default="release/queue.yaml", type=Path)
     parser.add_argument("--env-dir", default="envs/dev", type=Path)
     parser.add_argument("--evidence-dir", default="evidence/records", type=Path)
     parser.add_argument("--max-attempts", default=3, type=int)
-    parser.add_argument("--harbor-url", default=os.getenv("HARBOR_URL", "https://harbor.omniverseai.net"))
+    parser.add_argument(
+        "--harbor-url",
+        default=os.getenv("HARBOR_URL", "https://harbor.omniverseai.net"),
+    )
     parser.add_argument("--harbor-username", default=os.getenv("HARBOR_USERNAME"))
     parser.add_argument("--harbor-password", default=os.getenv("HARBOR_PASSWORD"))
     parser.add_argument("--timeout", default=8.0, type=float)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--skip-registry-check", action="store_true", help="use synthetic digest in non-network dry runs")
+    parser.add_argument(
+        "--skip-registry-check",
+        action="store_true",
+        help="use synthetic digest in non-network dry runs",
+    )
     return parser.parse_args()
 
 

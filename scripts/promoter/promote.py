@@ -49,7 +49,9 @@ def yaml_load(path: Path, default: Any) -> Any:
 
 def yaml_dump(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    path.write_text(
+        yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8"
+    )
 
 
 def ensure_queue_shape(queue: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
@@ -130,7 +132,9 @@ def harbor_repo_path(harbor_image: str, harbor_url: str) -> str:
     return image
 
 
-def harbor_manifest_ready(harbor_image: str, digest: str, harbor_url: str, harbor_user: str, harbor_pass: str) -> bool:
+def harbor_manifest_ready(
+    harbor_image: str, digest: str, harbor_url: str, harbor_user: str, harbor_pass: str
+) -> bool:
     repo = harbor_repo_path(harbor_image, harbor_url)
     if not repo or not digest:
         return False
@@ -156,7 +160,11 @@ def ghcr_repo(ghcr_ref: str) -> str:
 
 
 def commit_from_tag(tag: str) -> str:
-    return tag[4:] if isinstance(tag, str) and tag.startswith("sha-") and len(tag) > 4 else "unknown"
+    return (
+        tag[4:]
+        if isinstance(tag, str) and tag.startswith("sha-") and len(tag) > 4
+        else "unknown"
+    )
 
 
 def safe_tag(tag: str) -> str:
@@ -183,7 +191,9 @@ def load_service_map(path: Path) -> dict[str, Any]:
     return data
 
 
-def resolve_target(service_map: dict[str, Any], service: str, env: str) -> dict[str, Any]:
+def resolve_target(
+    service_map: dict[str, Any], service: str, env: str
+) -> dict[str, Any]:
     services = service_map.get("services", {})
     svc = services.get(service, {}) if isinstance(services, dict) else {}
     if not isinstance(svc, dict):
@@ -198,7 +208,9 @@ def resolve_target(service_map: dict[str, Any], service: str, env: str) -> dict[
     return {}
 
 
-def normalize_pending(queue: dict[str, list[dict[str, Any]]], now: str) -> tuple[dict[str, list[dict[str, Any]]], bool]:
+def normalize_pending(
+    queue: dict[str, list[dict[str, Any]]], now: str
+) -> tuple[dict[str, list[dict[str, Any]]], bool]:
     changed = False
     pending = queue["pending"]
     promoted_ids = set(by_id(queue["promoted"]).keys())
@@ -215,7 +227,10 @@ def normalize_pending(queue: dict[str, list[dict[str, Any]]], now: str) -> tuple
 
     grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for entry in filtered:
-        key = (str(entry.get("service", "")).strip(), str(entry.get("env", "dev")).strip())
+        key = (
+            str(entry.get("service", "")).strip(),
+            str(entry.get("env", "dev")).strip(),
+        )
         grouped.setdefault(key, []).append(entry)
 
     new_pending: list[dict[str, Any]] = []
@@ -263,7 +278,11 @@ def update_overlay_kustomization(
             idx = i
             break
 
-    target = copy.deepcopy(images[idx]) if idx is not None and isinstance(images[idx], dict) else {}
+    target = (
+        copy.deepcopy(images[idx])
+        if idx is not None and isinstance(images[idx], dict)
+        else {}
+    )
     target["name"] = image_name
     target["newName"] = harbor_image
     target["digest"] = digest
@@ -289,7 +308,13 @@ def process_pending(
     harbor_user: str,
     harbor_pass: str,
     skip_registry_check: bool,
-) -> tuple[dict[str, list[dict[str, Any]]], dict[Path, dict[str, Any]], dict[Path, dict[str, Any]], list[dict[str, str]], bool]:
+) -> tuple[
+    dict[str, list[dict[str, Any]]],
+    dict[Path, dict[str, Any]],
+    dict[Path, dict[str, Any]],
+    list[dict[str, str]],
+    bool,
+]:
     now = now_rfc3339()
     queue, changed = normalize_pending(queue, now)
 
@@ -300,15 +325,31 @@ def process_pending(
     for entry in list(queue["pending"]):
         service = str(entry.get("service", "")).strip()
         env = str(entry.get("env", "dev")).strip() or "dev"
-        source = entry.get("source", {}) if isinstance(entry.get("source"), dict) else {}
+        source = (
+            entry.get("source", {}) if isinstance(entry.get("source"), dict) else {}
+        )
         tag = str(source.get("tag", "unknown"))
         digest = get_digest(entry)
 
         target = resolve_target(service_map, service, env)
-        overlay_rel = str(target.get("overlayPath", "")).strip() if isinstance(target, dict) else ""
-        image_name = str(target.get("kustomizeImageName", "")).strip() if isinstance(target, dict) else ""
-        harbor_image = str(target.get("harborImage", "")).strip() if isinstance(target, dict) else ""
-        argocd_app = str(target.get("argocdApp", "")).strip() if isinstance(target, dict) else ""
+        overlay_rel = (
+            str(target.get("overlayPath", "")).strip()
+            if isinstance(target, dict)
+            else ""
+        )
+        image_name = (
+            str(target.get("kustomizeImageName", "")).strip()
+            if isinstance(target, dict)
+            else ""
+        )
+        harbor_image = (
+            str(target.get("harborImage", "")).strip()
+            if isinstance(target, dict)
+            else ""
+        )
+        argocd_app = (
+            str(target.get("argocdApp", "")).strip() if isinstance(target, dict) else ""
+        )
 
         if not harbor_image:
             harbor_image = f"harbor.omniverseai.net/app/{service}"
@@ -316,16 +357,22 @@ def process_pending(
         if not service or not env or not digest or not overlay_rel or not image_name:
             attempts = int(entry.get("attempts", 0)) + 1
             entry["attempts"] = attempts
-            entry["lastError"] = "invalid entry or missing service mapping in release/services.yaml"
+            entry["lastError"] = (
+                "invalid entry or missing service mapping in release/services.yaml"
+            )
             if attempts >= retry_max:
                 entry["status"] = "failed"
                 entry["failedAt"] = now_rfc3339()
-                queue["pending"] = [e for e in queue["pending"] if entry_id(e) != entry_id(entry)]
+                queue["pending"] = [
+                    e for e in queue["pending"] if entry_id(e) != entry_id(entry)
+                ]
                 upsert_entry(queue["failed"], entry)
             changed = True
             continue
 
-        if not skip_registry_check and not harbor_manifest_ready(harbor_image, digest, harbor_url, harbor_user, harbor_pass):
+        if not skip_registry_check and not harbor_manifest_ready(
+            harbor_image, digest, harbor_url, harbor_user, harbor_pass
+        ):
             continue
 
         overlay_path = repo_dir / overlay_rel
@@ -336,7 +383,9 @@ def process_pending(
             if attempts >= retry_max:
                 entry["status"] = "failed"
                 entry["failedAt"] = now_rfc3339()
-                queue["pending"] = [e for e in queue["pending"] if entry_id(e) != entry_id(entry)]
+                queue["pending"] = [
+                    e for e in queue["pending"] if entry_id(e) != entry_id(entry)
+                ]
                 upsert_entry(queue["failed"], entry)
             changed = True
             continue
@@ -364,9 +413,13 @@ def process_pending(
             "service": service,
             "env": env,
             "source": {
-                "repo": ghcr_repo(ghcr_ref) if ghcr_ref else f"ghcr.io/unknown/{service}",
+                "repo": ghcr_repo(ghcr_ref)
+                if ghcr_ref
+                else f"ghcr.io/unknown/{service}",
                 "commit": commit_from_tag(tag),
-                "workflowRun": str(source.get("workflowRun", "")) if source.get("workflowRun") else "",
+                "workflowRun": str(source.get("workflowRun", ""))
+                if source.get("workflowRun")
+                else "",
             },
             "image": {
                 "ghcr": ghcr_ref,
@@ -375,7 +428,10 @@ def process_pending(
             "deploy": {
                 "deployRepoCommit": "__PENDING_COMMIT__",
                 "queueId": entry_id(entry),
-                "argocdApp": argocd_app or existing.get("deploy", {}).get("argocdApp", f"{service}-{env}") if isinstance(existing.get("deploy"), dict) else f"{service}-{env}",
+                "argocdApp": argocd_app
+                or existing.get("deploy", {}).get("argocdApp", f"{service}-{env}")
+                if isinstance(existing.get("deploy"), dict)
+                else f"{service}-{env}",
                 "overlayPath": overlay_rel,
                 "syncedAt": promoted_at,
             },
@@ -385,7 +441,9 @@ def process_pending(
                     "checkedAt": "",
                 }
             },
-            "approvals": existing.get("approvals", {}) if isinstance(existing.get("approvals"), dict) else {},
+            "approvals": existing.get("approvals", {})
+            if isinstance(existing.get("approvals"), dict)
+            else {},
         }
 
         evidence_changes[evidence_path] = record
@@ -394,23 +452,31 @@ def process_pending(
         entry["status"] = "promoted"
         entry["promotedAt"] = promoted_at
         entry["lastError"] = ""
-        queue["pending"] = [e for e in queue["pending"] if entry_id(e) != entry_id(entry)]
+        queue["pending"] = [
+            e for e in queue["pending"] if entry_id(e) != entry_id(entry)
+        ]
         upsert_entry(queue["promoted"], entry)
 
-        promoted_meta.append({
-            "service": service,
-            "tag": tag,
-            "evidence_path": str(evidence_path),
-            "overlay_path": overlay_rel,
-        })
+        promoted_meta.append(
+            {
+                "service": service,
+                "tag": tag,
+                "evidence_path": str(evidence_path),
+                "overlay_path": overlay_rel,
+            }
+        )
 
     return queue, overlay_changes, evidence_changes, promoted_meta, changed
 
 
-def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
+def run(
+    cmd: list[str], cwd: Path | None = None, check: bool = True
+) -> subprocess.CompletedProcess[str]:
     proc = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
     if check and proc.returncode != 0:
-        raise RuntimeError(f"command failed: {' '.join(cmd)}\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}")
+        raise RuntimeError(
+            f"command failed: {' '.join(cmd)}\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
+        )
     return proc
 
 
@@ -450,12 +516,24 @@ def commit_and_push(
     run(["python3", "scripts/evidence/validate.py"], cwd=repo_dir)
 
     run(["git", "config", "user.name", "deploy-promoter[bot]"], cwd=repo_dir)
-    run(["git", "config", "user.email", "deploy-promoter[bot]@users.noreply.github.com"], cwd=repo_dir)
+    run(
+        [
+            "git",
+            "config",
+            "user.email",
+            "deploy-promoter[bot]@users.noreply.github.com",
+        ],
+        cwd=repo_dir,
+    )
 
     stage_paths = ["release/queue.yaml", "evidence/records"]
-    stage_paths.extend(item["overlay_path"] for item in promoted_meta if item.get("overlay_path"))
+    stage_paths.extend(
+        item["overlay_path"] for item in promoted_meta if item.get("overlay_path")
+    )
     run(["git", "add", *sorted(set(stage_paths))], cwd=repo_dir)
-    diff = run(["git", "diff", "--cached", "--name-only"], cwd=repo_dir, check=False).stdout.strip()
+    diff = run(
+        ["git", "diff", "--cached", "--name-only"], cwd=repo_dir, check=False
+    ).stdout.strip()
     if not diff:
         print("No changes to commit")
         return
@@ -476,7 +554,9 @@ def commit_and_push(
         record = yaml_load(path, default={})
         if not isinstance(record, dict):
             continue
-        deploy = record.get("deploy", {}) if isinstance(record.get("deploy"), dict) else {}
+        deploy = (
+            record.get("deploy", {}) if isinstance(record.get("deploy"), dict) else {}
+        )
         if deploy.get("deployRepoCommit") != sha:
             deploy["deployRepoCommit"] = sha
             record["deploy"] = deploy
@@ -485,27 +565,58 @@ def commit_and_push(
 
     if touched:
         run(["python3", "scripts/evidence/validate.py"], cwd=repo_dir)
-        run(["git", "add", *[str(p.relative_to(repo_dir)) for p in touched]], cwd=repo_dir)
+        run(
+            ["git", "add", *[str(p.relative_to(repo_dir)) for p in touched]],
+            cwd=repo_dir,
+        )
         run(["git", "commit", "--amend", "--no-edit"], cwd=repo_dir)
 
     run(["git", "push", "origin", "HEAD:main"], cwd=repo_dir)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Promote ready release queue entries to Argo-consumed overlays")
+    parser = argparse.ArgumentParser(
+        description="Promote ready release queue entries to Argo-consumed overlays"
+    )
     parser.add_argument("--local-repo-dir", default=os.getenv("LOCAL_REPO_DIR", ""))
-    parser.add_argument("--deploy-repo-url", default=os.getenv("DEPLOY_REPO_URL", "https://github.com/BrunoGaoSZ/ljwx-deploy.git"))
-    parser.add_argument("--deploy-repo-token", default=os.getenv("DEPLOY_REPO_TOKEN", ""))
-    parser.add_argument("--service-map", default=os.getenv("SERVICE_MAP_PATH", "release/services.yaml"))
-    parser.add_argument("--harbor-url", default=os.getenv("HARBOR_URL", "https://harbor.omniverseai.net"))
+    parser.add_argument(
+        "--deploy-repo-url",
+        default=os.getenv(
+            "DEPLOY_REPO_URL", "https://github.com/BrunoGaoSZ/ljwx-deploy.git"
+        ),
+    )
+    parser.add_argument(
+        "--deploy-repo-token", default=os.getenv("DEPLOY_REPO_TOKEN", "")
+    )
+    parser.add_argument(
+        "--service-map", default=os.getenv("SERVICE_MAP_PATH", "release/services.yaml")
+    )
+    parser.add_argument(
+        "--harbor-url",
+        default=os.getenv("HARBOR_URL", "https://harbor.omniverseai.net"),
+    )
     parser.add_argument("--harbor-user", default=os.getenv("HARBOR_USER", ""))
     parser.add_argument("--harbor-pass", default=os.getenv("HARBOR_PASS", ""))
-    parser.add_argument("--retry-max", type=int, default=int(os.getenv("RETRY_MAX", "10")))
-    parser.add_argument("--dry-run", action="store_true", help="simulate without writing/committing")
-    parser.add_argument("--skip-registry-check", action="store_true", help="skip Harbor manifest check (local dry-run only)")
+    parser.add_argument(
+        "--retry-max", type=int, default=int(os.getenv("RETRY_MAX", "10"))
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="simulate without writing/committing"
+    )
+    parser.add_argument(
+        "--skip-registry-check",
+        action="store_true",
+        help="skip Harbor manifest check (local dry-run only)",
+    )
     args = parser.parse_args()
 
-    dry_run = bool(args.dry_run) or os.getenv("DRY_RUN", "0") in {"1", "true", "True", "yes", "YES"}
+    dry_run = bool(args.dry_run) or os.getenv("DRY_RUN", "0") in {
+        "1",
+        "true",
+        "True",
+        "yes",
+        "YES",
+    }
 
     repo_dir, tmp_root = repo_workdir(args)
     try:
@@ -518,15 +629,17 @@ def main() -> int:
 
         service_map = load_service_map(repo_dir / args.service_map)
 
-        queue, overlay_changes, evidence_changes, promoted_meta, changed = process_pending(
-            queue=queue,
-            repo_dir=repo_dir,
-            service_map=service_map,
-            retry_max=args.retry_max,
-            harbor_url=args.harbor_url,
-            harbor_user=args.harbor_user,
-            harbor_pass=args.harbor_pass,
-            skip_registry_check=args.skip_registry_check,
+        queue, overlay_changes, evidence_changes, promoted_meta, changed = (
+            process_pending(
+                queue=queue,
+                repo_dir=repo_dir,
+                service_map=service_map,
+                retry_max=args.retry_max,
+                harbor_url=args.harbor_url,
+                harbor_user=args.harbor_user,
+                harbor_pass=args.harbor_pass,
+                skip_registry_check=args.skip_registry_check,
+            )
         )
 
         if not changed:

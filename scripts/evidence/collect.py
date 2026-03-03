@@ -41,7 +41,11 @@ def record_timestamp(record: dict[str, Any]) -> datetime:
     deploy = record.get("deploy", {})
     synced_at = deploy.get("syncedAt") if isinstance(deploy, dict) else None
     promoted_at = record.get("promotedAt")
-    return parse_ts(synced_at) if parse_ts(synced_at) != datetime.min.replace(tzinfo=timezone.utc) else parse_ts(promoted_at)
+    return (
+        parse_ts(synced_at)
+        if parse_ts(synced_at) != datetime.min.replace(tzinfo=timezone.utc)
+        else parse_ts(promoted_at)
+    )
 
 
 def short_digest(image_ref: str) -> str:
@@ -96,14 +100,18 @@ def write_summary(records: list[dict[str, Any]], out_path: Path) -> None:
             if isinstance(smoke_obj, dict):
                 smoke = str(smoke_obj.get("status", "unknown"))
 
-        lines.append(f"| {service} | {env} | `{digest}` | {synced_at} | {smoke} | {links_cell(record)} |")
+        lines.append(
+            f"| {service} | {env} | `{digest}` | {synced_at} | {smoke} | {links_cell(record)} |"
+        )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Collect evidence YAML records into JSON index")
+    parser = argparse.ArgumentParser(
+        description="Collect evidence YAML records into JSON index"
+    )
     parser.add_argument("--records-dir", default="evidence/records", type=Path)
     parser.add_argument("--out", default="evidence/index.json", type=Path)
     parser.add_argument("--summary", default="evidence/summary/latest.md", type=Path)
@@ -123,7 +131,9 @@ def main() -> int:
     records.sort(key=record_timestamp, reverse=True)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(records, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    args.out.write_text(
+        json.dumps(records, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     write_summary(records, args.summary)
 
     print(f"wrote {args.out} ({len(records)} records)")

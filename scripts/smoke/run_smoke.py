@@ -38,7 +38,9 @@ def read_yaml(path: Path) -> dict[str, Any]:
 
 
 def write_yaml(path: Path, payload: dict[str, Any]) -> None:
-    path.write_text(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    path.write_text(
+        yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8"
+    )
 
 
 def parse_ts(value: Any) -> datetime:
@@ -68,7 +70,9 @@ def record_files(evidence_dir: Path) -> list[Path]:
     return sorted([p for p in evidence_dir.glob("*.yaml") if p.is_file()])
 
 
-def find_record_path(evidence_dir: Path, service: str, environment: str, queue_id: str | None) -> Path | None:
+def find_record_path(
+    evidence_dir: Path, service: str, environment: str, queue_id: str | None
+) -> Path | None:
     candidates: list[tuple[datetime, Path]] = []
     for path in record_files(evidence_dir):
         try:
@@ -80,7 +84,11 @@ def find_record_path(evidence_dir: Path, service: str, environment: str, queue_i
             continue
 
         deploy = record.get("deploy", {})
-        if queue_id and isinstance(deploy, dict) and str(deploy.get("queueId", "")) != str(queue_id):
+        if (
+            queue_id
+            and isinstance(deploy, dict)
+            and str(deploy.get("queueId", "")) != str(queue_id)
+        ):
             continue
 
         smoke_status = (
@@ -100,7 +108,9 @@ def find_record_path(evidence_dir: Path, service: str, environment: str, queue_i
     return candidates[0][1]
 
 
-def http_get(url: str, headers: dict[str, str] | None = None, timeout: float = 5.0) -> tuple[int, str]:
+def http_get(
+    url: str, headers: dict[str, str] | None = None, timeout: float = 5.0
+) -> tuple[int, str]:
     req = urllib.request.Request(url, headers=headers or {}, method="GET")
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         body = resp.read(4096).decode("utf-8", errors="ignore")
@@ -142,7 +152,9 @@ def wait_for_argocd_health(
     return False, f"argocd wait timeout: {last}"
 
 
-def wait_for_endpoint(endpoint: str, timeout_seconds: int, interval_seconds: int) -> tuple[bool, str]:
+def wait_for_endpoint(
+    endpoint: str, timeout_seconds: int, interval_seconds: int
+) -> tuple[bool, str]:
     end = time.time() + timeout_seconds
     last = ""
 
@@ -191,7 +203,10 @@ def run_target(target: dict[str, Any], args: argparse.Namespace) -> tuple[str, s
 
     record_path = find_record_path(args.evidence_dir, service, environment, queue_id)
     if not record_path:
-        return "skip", f"{service}: no promoted evidence record for {service}/{environment}"
+        return (
+            "skip",
+            f"{service}: no promoted evidence record for {service}/{environment}",
+        )
 
     ok_argocd, argocd_details = wait_for_argocd_health(
         server=args.argocd_server,
@@ -218,8 +233,12 @@ def run_target(target: dict[str, Any], args: argparse.Namespace) -> tuple[str, s
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run smoke checks and write evidence results")
-    parser.add_argument("--targets", type=Path, default=Path("scripts/smoke/targets.json"))
+    parser = argparse.ArgumentParser(
+        description="Run smoke checks and write evidence results"
+    )
+    parser.add_argument(
+        "--targets", type=Path, default=Path("scripts/smoke/targets.json")
+    )
     parser.add_argument("--evidence-dir", type=Path, default=Path("evidence/records"))
     parser.add_argument("--argocd-server", default=os.getenv("ARGOCD_SERVER", ""))
     parser.add_argument("--argocd-token", default=os.getenv("ARGOCD_TOKEN", ""))
@@ -247,7 +266,16 @@ def main() -> int:
         else:
             skipped += 1
 
-    print(json.dumps({"passed": passed, "failed": failed, "skipped": skipped, "dry_run": args.dry_run}))
+    print(
+        json.dumps(
+            {
+                "passed": passed,
+                "failed": failed,
+                "skipped": skipped,
+                "dry_run": args.dry_run,
+            }
+        )
+    )
     return 0 if failed == 0 else 1
 
 

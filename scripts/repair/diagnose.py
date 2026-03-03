@@ -38,7 +38,11 @@ def gh_checks_summary(pr_url: str) -> dict[str, Any]:
     if proc_json.returncode == 0:
         try:
             payload = json.loads(proc_json.stdout)
-            failures = [item for item in payload if str(item.get("state", "")).lower() not in {"success", "passed"}]
+            failures = [
+                item
+                for item in payload
+                if str(item.get("state", "")).lower() not in {"success", "passed"}
+            ]
             return {
                 "available": True,
                 "mode": "json",
@@ -71,15 +75,27 @@ def select_recipes(recipes: list[dict[str, Any]], merged_text: str) -> list[str]
     if selected:
         return selected
 
-    return [str(recipe.get("id", "")) for recipe in recipes if bool(recipe.get("default_on_unknown", True))]
+    return [
+        str(recipe.get("id", ""))
+        for recipe in recipes
+        if bool(recipe.get("default_on_unknown", True))
+    ]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Diagnose failed checks and recommend repair recipes")
-    parser.add_argument("--check-log", type=Path, required=True, help="path to local check log")
+    parser = argparse.ArgumentParser(
+        description="Diagnose failed checks and recommend repair recipes"
+    )
+    parser.add_argument(
+        "--check-log", type=Path, required=True, help="path to local check log"
+    )
     parser.add_argument("--recipes", type=Path, default=Path("repairs/recipes.yaml"))
-    parser.add_argument("--pr-url", default="", help="GitHub PR URL for gh checks summary")
-    parser.add_argument("--out", type=Path, default=Path(".factory/repair/diagnose.json"))
+    parser.add_argument(
+        "--pr-url", default="", help="GitHub PR URL for gh checks summary"
+    )
+    parser.add_argument(
+        "--out", type=Path, default=Path(".factory/repair/diagnose.json")
+    )
     return parser.parse_args()
 
 
@@ -110,8 +126,15 @@ def main() -> int:
     }
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(json.dumps({"recommended_recipe_ids": recommended, "diagnose_out": str(args.out)}, ensure_ascii=False))
+    args.out.write_text(
+        json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(
+        json.dumps(
+            {"recommended_recipe_ids": recommended, "diagnose_out": str(args.out)},
+            ensure_ascii=False,
+        )
+    )
     return 0
 
 

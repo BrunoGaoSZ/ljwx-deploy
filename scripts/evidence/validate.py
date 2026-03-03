@@ -37,7 +37,9 @@ def record_files(records_dir: Path) -> list[Path]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate evidence YAML records")
     parser.add_argument("--records-dir", default="evidence/records", type=Path)
-    parser.add_argument("--schema", default="evidence/schema/evidence.schema.json", type=Path)
+    parser.add_argument(
+        "--schema", default="evidence/schema/evidence.schema.json", type=Path
+    )
     args = parser.parse_args()
 
     schema = json.loads(args.schema.read_text(encoding="utf-8"))
@@ -65,7 +67,9 @@ def main() -> int:
                     node: Any = data
                     for key in key_path:
                         if not isinstance(node, dict) or key not in node:
-                            raise ValueError(f"missing required field: {'.'.join(key_path)}")
+                            raise ValueError(
+                                f"missing required field: {'.'.join(key_path)}"
+                            )
                         node = node[key]
                     if node in ("", None):
                         raise ValueError(f"empty required field: {'.'.join(key_path)}")

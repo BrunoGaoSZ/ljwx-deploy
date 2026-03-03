@@ -25,7 +25,9 @@ def read_json(path: Path) -> Any:
 
 
 def write_json(path: Path, payload: Any) -> None:
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def run_check_command(check_cmd: str, log_path: Path) -> tuple[int, str]:
@@ -72,7 +74,9 @@ def action_format_json(repo_root: Path) -> int:
 def action_strip_trailing_whitespace(repo_root: Path) -> int:
     changed = 0
     pattern = re.compile(r"[ \t]+$", re.MULTILINE)
-    for path in iter_files(repo_root, (".py", ".sh", ".md", ".yaml", ".yml", ".js", ".ts")):
+    for path in iter_files(
+        repo_root, (".py", ".sh", ".md", ".yaml", ".yml", ".js", ".ts")
+    ):
         text = path.read_text(encoding="utf-8")
         updated = pattern.sub("", text)
         if updated != text:
@@ -82,7 +86,12 @@ def action_strip_trailing_whitespace(repo_root: Path) -> int:
 
 
 def action_regenerate_evidence_index(repo_root: Path) -> int:
-    cmd = [sys.executable, "scripts/evidence/collect.py", "--out", "evidence/index.json"]
+    cmd = [
+        sys.executable,
+        "scripts/evidence/collect.py",
+        "--out",
+        "evidence/index.json",
+    ]
     proc = subprocess.run(cmd, cwd=repo_root, text=True, capture_output=True)
     if proc.returncode != 0:
         raise RuntimeError(f"collect.py failed: {proc.stderr.strip()}")
@@ -116,7 +125,9 @@ ACTION_MAP = {
 }
 
 
-def select_recipes(recipes: list[dict[str, Any]], check_output: str) -> list[dict[str, Any]]:
+def select_recipes(
+    recipes: list[dict[str, Any]], check_output: str
+) -> list[dict[str, Any]]:
     text = check_output.lower()
     selected: list[dict[str, Any]] = []
 
@@ -128,10 +139,14 @@ def select_recipes(recipes: list[dict[str, Any]], check_output: str) -> list[dic
     if selected:
         return selected
 
-    return [recipe for recipe in recipes if bool(recipe.get("default_on_unknown", True))]
+    return [
+        recipe for recipe in recipes if bool(recipe.get("default_on_unknown", True))
+    ]
 
 
-def run_recipes(recipes: list[dict[str, Any]], repo_root: Path) -> tuple[int, list[str]]:
+def run_recipes(
+    recipes: list[dict[str, Any]], repo_root: Path
+) -> tuple[int, list[str]]:
     total_changed = 0
     logs: list[str] = []
     for recipe in recipes:
@@ -148,7 +163,9 @@ def run_recipes(recipes: list[dict[str, Any]], repo_root: Path) -> tuple[int, li
     return total_changed, logs
 
 
-def open_issue(repo: str, title: str, body: str, labels: list[str], dry_run: bool) -> str:
+def open_issue(
+    repo: str, title: str, body: str, labels: list[str], dry_run: bool
+) -> str:
     if dry_run:
         return "dry-run: issue creation skipped"
 
@@ -156,7 +173,9 @@ def open_issue(repo: str, title: str, body: str, labels: list[str], dry_run: boo
     if not token:
         return "issue skipped: missing GITHUB_TOKEN/GH_TOKEN"
 
-    payload = json.dumps({"title": title, "body": body, "labels": labels}).encode("utf-8")
+    payload = json.dumps({"title": title, "body": body, "labels": labels}).encode(
+        "utf-8"
+    )
     url = f"https://api.github.com/repos/{repo}/issues"
     req = urllib.request.Request(
         url,
@@ -180,7 +199,9 @@ def open_issue(repo: str, title: str, body: str, labels: list[str], dry_run: boo
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Auto-repair common failures and retry checks")
+    parser = argparse.ArgumentParser(
+        description="Auto-repair common failures and retry checks"
+    )
     parser.add_argument("--recipes", type=Path, default=Path("repairs/recipes.yaml"))
     parser.add_argument("--check-cmd", default="bash scripts/ci/run_checks.sh")
     parser.add_argument("--max-attempts", type=int, default=3)
@@ -223,7 +244,9 @@ def main() -> int:
         selected = select_recipes(recipes, output)
         changed, repair_logs = run_recipes(selected, repo_root)
         all_logs.extend(repair_logs)
-        print(f"attempt {attempt} failed; applied {len(selected)} recipe(s), changed={changed}")
+        print(
+            f"attempt {attempt} failed; applied {len(selected)} recipe(s), changed={changed}"
+        )
         for line in repair_logs:
             print(f"  {line}")
 
@@ -251,7 +274,9 @@ def main() -> int:
     print(f"repair failed after {args.max_attempts} attempts; summary: {failure_note}")
 
     if args.open_issue_on_failure and args.issue_repo:
-        labels = [label.strip() for label in args.issue_labels.split(",") if label.strip()]
+        labels = [
+            label.strip() for label in args.issue_labels.split(",") if label.strip()
+        ]
         result = open_issue(
             repo=args.issue_repo,
             title=args.issue_title,
