@@ -4,6 +4,17 @@ This runbook covers day-2 operations for the async promotion path:
 
 `GitHub queue -> Harbor pull replication -> deploy-promoter -> ArgoCD auto-sync -> smoke -> evidence feed`
 
+## Bootstrap (GitOps-managed CronJobs)
+
+`deploy-promoter` and `smoke-runner` are now managed by `cluster-bootstrap` from:
+
+- `cluster/deploy-promoter-cronjob.yaml`
+- `cluster/smoke-runner-cronjob.yaml`
+
+Required secret (not committed with real values):
+
+- `cluster/deploy-promoter-secret.example.yaml`
+
 Cluster rule:
 
 - same GitOps source code for local `k3s` and OrbStack `k3s`

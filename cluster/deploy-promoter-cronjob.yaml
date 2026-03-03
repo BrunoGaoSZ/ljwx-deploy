@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: deploy-promoter
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: deploy-promoter
+    app.kubernetes.io/part-of: bid-mvp-factory
+spec:
+  schedule: "*/10 * * * *"
+  timeZone: Asia/Tokyo
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: promoter
+              image: ghcr.io/astral-sh/uv:python3.11-alpine
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: GIT_BRANCH
+                  value: main
+                - name: SERVICE_MAP_PATH
+                  value: release/services.local-k3s.yaml
+                - name: HARBOR_URL
+                  value: https://harbor.omniverseai.net
+                - name: HARBOR_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_username
+                      optional: true
+                - name: HARBOR_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_password
+                      optional: true
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: github_token
+                      optional: true
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+                  apk add --no-cache bash git openssh-client
+                  rm -rf /work/repo
+                  git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
+                  cd /work/repo
+                  export LOCAL_REPO_DIR=/work/repo
+                  bash scripts/promoter/promote.sh
+                  uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+                  if git diff --quiet; then
+                    echo "No promoter changes"
+                    exit 0
+                  fi
+                  git config user.name "deploy-promoter[bot]"
+                  git config user.email "deploy-promoter[bot]@users.noreply.github.com"
+                  git add release/queue.yaml envs/dev evidence/records evidence/index.json evidence/summary/latest.md
+                  git commit -m "chore(promoter): auto promote pending services [skip ci]"
+                  git push origin "HEAD:${GIT_BRANCH}"
