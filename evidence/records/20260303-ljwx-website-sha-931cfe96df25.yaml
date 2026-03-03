@@ -14,10 +14,10 @@ deploy:
   argocdApp: ljwx-website-dev
   overlayPath: apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml
   syncedAt: '2026-03-03T05:40:34Z'
-  smokedAt: '2026-03-03T10:40:14Z'
+  smokedAt: '2026-03-03T10:44:09Z'
 tests:
   smoke:
     status: fail
-    checkedAt: '2026-03-03T10:40:14Z'
+    checkedAt: '2026-03-03T10:44:09Z'
     details: 'argocd check skipped; endpoint wait timeout: http=404'
 approvals: {}
