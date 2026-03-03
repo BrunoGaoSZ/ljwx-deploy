@@ -1,4 +1,19 @@
-pending: []
+pending:
+- id: 20260303T075500Z-ljwx-platform-sha-93d32b2
+  service: ljwx-platform
+  env: prod
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:63c715798acc3e3996bc791498d9ef4452291e937566339ebfa5e9e39b2a69c0
+    tag: sha-93d32b2
+    digest: sha256:63c715798acc3e3996bc791498d9ef4452291e937566339ebfa5e9e39b2a69c0
+    gitSha: 93d32b213cbd6c2ba03c66b7a6850970cb93d351
+  createdAt: '2026-03-03T07:55:00Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
