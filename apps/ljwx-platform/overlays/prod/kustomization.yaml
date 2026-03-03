@@ -5,7 +5,7 @@ resources:
 - ../../base
 - runtime-config.yaml
 images:
-- name: harbor.omniverseai.net/app/ljwx-platform
+- name: ghcr.io/brunogao/ljwx-platform/ljwx-platform
   digest: sha256:b87a530b80384b1f9b956e35237afa47e6bdd72fa73277d123a3545203e8f615
   newName: ghcr.io/brunogao/ljwx-platform/ljwx-platform
 - name: ghcr.io/brunogao/ljwx-platform/ljwx-platform-admin-ui

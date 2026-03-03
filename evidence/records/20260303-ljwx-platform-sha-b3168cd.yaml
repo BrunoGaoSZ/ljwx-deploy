@@ -10,15 +10,13 @@ image:
   harbor: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:b87a530b80384b1f9b956e35237afa47e6bdd72fa73277d123a3545203e8f615
   deployed: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:b87a530b80384b1f9b956e35237afa47e6bdd72fa73277d123a3545203e8f615
 deploy:
-  deployRepoCommit: 83124b107c8a44567aae0094e04fb626eb596f87
-  queueId: 20260303T151620Z-ljwx-platform-sha-b3168cd
-  argocdApp: ljwx-platform-prod
+  deployRepoCommit: 836e0ba6c7c336974914bc62e4e2aa2a282144eb
+  queueId: 20260303T152643Z-ljwx-platform-sha-b3168cd-r2
+  argocdApp: ljwx-platform
   overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
-  syncedAt: '2026-03-03T15:18:36Z'
-  smokedAt: '2026-03-03T15:22:03Z'
+  syncedAt: '2026-03-03T15:28:25Z'
 tests:
   smoke:
-    status: pass
-    checkedAt: '2026-03-03T15:22:03Z'
-    details: argocd check skipped; endpoint=200 body='{"code":200,"message":"success","data":{"status":"UP"},"traceId":"5b2a46f1-8954-4b73-aa58-26d778dd3aa6"}'
+    status: pending
+    checkedAt: ''
 approvals: {}
