@@ -14,11 +14,11 @@ deploy:
   argocdApp: ljwx-platform-prod
   overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
   syncedAt: '2026-03-03T06:40:50Z'
-  smokedAt: '2026-03-03T08:54:00Z'
+  smokedAt: '2026-03-03T08:57:25Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-03T08:54:00Z'
+    checkedAt: '2026-03-03T08:57:25Z'
     details: 'argocd check skipped; endpoint=200 body=''<!DOCTYPE html> <html> <head>
       <title>Welcome to nginx!</title> <style> html { color-scheme: light dark; }
       body { width: '''
