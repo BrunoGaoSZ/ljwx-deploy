@@ -5,9 +5,11 @@ resources:
   - ../../base
 patches:
   - path: service-nodeport.yaml
+  - path: deployment-probe.yaml
 images:
   - name: harbor.omniverseai.net/ljwx/ljwx-website
-    newTag: "main-abde1fb"
+    newName: nginxinc/nginx-unprivileged
+    newTag: "1.27-alpine"
 replicas:
   - name: ljwx-website
     count: 1
