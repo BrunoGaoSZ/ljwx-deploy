@@ -64,5 +64,6 @@ spec:
                   git config user.email "smoke-runner[bot]@users.noreply.github.com"
                   git add evidence/records evidence/index.json evidence/summary/latest.md
                   git commit -m "chore(smoke): update smoke evidence [skip ci]"
+                  git pull --rebase origin "${GIT_BRANCH}"
                   git push origin "HEAD:${GIT_BRANCH}"
                   exit "${SMOKE_EXIT}"
