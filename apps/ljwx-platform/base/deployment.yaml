@@ -22,6 +22,9 @@ spec:
                 name: ljwx-platform-runtime
             - secretRef:
                 name: ljwx-platform-db
+          volumeMounts:
+            - name: app-logs
+              mountPath: /workspace/logs
           ports:
             - name: http
               containerPort: 8080
@@ -38,3 +41,6 @@ spec:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 10
+      volumes:
+        - name: app-logs
+          emptyDir: {}
