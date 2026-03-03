@@ -14,9 +14,10 @@ spec:
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
         spec:
-          restartPolicy: OnFailure
+          restartPolicy: Never
           containers:
             - name: smoke-runner
               image: ghcr.io/astral-sh/uv:python3.11-alpine
