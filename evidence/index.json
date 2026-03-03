@@ -1,5 +1,36 @@
 [
   {
+    "evidenceId": "20260303-ljwx-platform-sha-e2e001",
+    "service": "ljwx-platform",
+    "env": "prod",
+    "source": {
+      "repo": "ghcr.io/brunogaosz/ljwx-platform",
+      "commit": "e2e001",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogaosz/ljwx-platform@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "harbor": "harbor.omniverseai.net/app/ljwx-platform@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "deploy": {
+      "deployRepoCommit": "1d679035ed8a78e7e0820228ae59d1e420da5695",
+      "queueId": "2026-03-03T060500Z-ljwx-platform-sha-e2e001",
+      "argocdApp": "ljwx-platform-prod",
+      "overlayPath": "apps/ljwx-platform/overlays/prod/kustomization.yaml",
+      "syncedAt": "2026-03-03T06:40:50Z",
+      "smokedAt": "2026-03-03T06:43:12Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "fail",
+        "checkedAt": "2026-03-03T06:43:12Z",
+        "details": "argocd check skipped; endpoint wait timeout: <urlopen error [Errno -2] Name or service not known>"
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260303-ljwx-platform-sha-e2e001.yaml"
+  },
+  {
     "evidenceId": "20260303-ljwx-website-sha-931cfe96df25",
     "service": "ljwx-website",
     "env": "dev",
