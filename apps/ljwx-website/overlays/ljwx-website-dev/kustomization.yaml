@@ -8,7 +8,7 @@ patches:
   - path: deployment-probe.yaml
 images:
   - name: harbor.omniverseai.net/ljwx/ljwx-website
-    newName: nginxinc/nginx-unprivileged
+    newName: nginx
     newTag: "1.27-alpine"
 replicas:
   - name: ljwx-website
