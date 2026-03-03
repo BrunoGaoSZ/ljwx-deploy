@@ -6,4 +6,4 @@ resources:
 images:
 - name: harbor.omniverseai.net/app/ljwx-platform
   newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
-  newTag: sha-f4d74e8
+  newTag: sha-93d32b2
