@@ -20,3 +20,16 @@ ARGOCD_SERVER=https://argocd.example.com \
 ARGOCD_TOKEN=*** \
 python3 scripts/smoke/run_smoke.py
 ```
+
+## Cluster profiles
+
+Use target files instead of forking smoke logic:
+
+- local server k3s: `scripts/smoke/targets.local-k3s.json`
+- China mainland OrbStack k3s: `scripts/smoke/targets.orbstack-k3s-cn.json`
+
+Example:
+
+```bash
+python3 scripts/smoke/run_smoke.py --targets scripts/smoke/targets.orbstack-k3s-cn.json
+```

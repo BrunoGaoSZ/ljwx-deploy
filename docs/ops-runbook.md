@@ -4,6 +4,11 @@ This runbook covers day-2 operations for the async promotion path:
 
 `GitHub queue -> Harbor pull replication -> deploy-promoter -> ArgoCD auto-sync -> smoke -> evidence feed`
 
+Cluster rule:
+
+- same GitOps source code for local `k3s` and OrbStack `k3s`
+- cluster variance only via profile files (`SERVICE_MAP_PATH`, `SMOKE_TARGETS`)
+
 ## 1) Observe deploy-promoter
 
 ```bash
@@ -72,8 +77,11 @@ Results are recorded in each evidence file under `tests.smoke`.
 
 1. Service repo build pushes image to GHCR.
 2. Service repo enqueues release to `release/queue.yaml` (no wait for Harbor replication).
-3. Harbor pull replication mirrors artifact into `app/<svc>`.
-4. Promoter sees digest and writes promotion commit.
-5. Argo auto-sync applies new revision.
-6. Smoke writes pass/fail to evidence record.
-7. Pages feed updates with latest `evidence/index.json`.
+3. Promoter cluster profile selects mapping:
+   - local `k3s`: `release/services.local-k3s.yaml`
+   - OrbStack `k3s`: `release/services.orbstack-k3s-cn.yaml`
+4. Harbor pull replication mirrors artifact into `app/<svc>`.
+5. Promoter sees digest and writes promotion commit.
+6. Argo auto-sync applies new revision.
+7. Smoke (profile-based targets) writes pass/fail to evidence record.
+8. Pages feed updates with latest `evidence/index.json`.

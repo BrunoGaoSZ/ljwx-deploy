@@ -19,11 +19,13 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: smoke-runner
-              image: python:3.11-alpine
+              image: ghcr.io/astral-sh/uv:python3.11-alpine
               imagePullPolicy: IfNotPresent
               env:
                 - name: GIT_BRANCH
                   value: main
+                - name: SMOKE_TARGETS
+                  value: scripts/smoke/targets.local-k3s.json
                 - name: ARGOCD_SERVER
                   valueFrom:
                     secretKeyRef:
@@ -44,16 +46,15 @@ spec:
                 - -c
                 - |
                   set -euo pipefail
-                  apk add --no-cache git openssh-client py3-pip
-                  pip install --break-system-packages --no-cache-dir pyyaml jsonschema
+                  apk add --no-cache git openssh-client
                   rm -rf /work/repo
                   git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
                   cd /work/repo
                   set +e
-                  python3 scripts/smoke/run_smoke.py
+                  uvx --with pyyaml --with jsonschema python scripts/smoke/run_smoke.py --targets "${SMOKE_TARGETS}"
                   SMOKE_EXIT=$?
                   set -e
-                  python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+                  uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
                   if git diff --quiet; then
                     echo "No smoke updates"
                     exit "${SMOKE_EXIT}"
