@@ -62,6 +62,6 @@ services:
     envs:
       prod:
         overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
-        kustomizeImageName: harbor.omniverseai.net/app/ljwx-platform
+        kustomizeImageName: ghcr.io/brunogao/ljwx-platform/ljwx-platform
         harborImage: harbor.omniverseai.net/app/ljwx-platform
         argocdApp: ljwx-platform
