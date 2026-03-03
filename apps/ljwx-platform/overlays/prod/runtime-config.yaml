@@ -8,6 +8,6 @@ data:
   SPRING_FLYWAY_IGNORE_MIGRATION_PATTERNS: "*:future,*:ignored"
   DB_HOST: "postgres-lb.infra.svc.cluster.local"
   DB_PORT: "5432"
-  DB_NAME: "postgres"
+  DB_NAME: "ljwx_platform"
   REDIS_HOST: "redis-lb.infra.svc.cluster.local"
   REDIS_PORT: "6379"
