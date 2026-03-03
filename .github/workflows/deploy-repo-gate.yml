@@ -54,13 +54,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        run: pip install --disable-pip-version-check pyyaml jsonschema
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
 
       - name: Validate release queue structure
-        run: python3 scripts/promoter/validate_queue.py
+        run: uvx --with pyyaml python scripts/promoter/validate_queue.py
 
       - name: Evidence validate + collect (dry run)
         run: |
-          python3 scripts/evidence/validate.py
-          python3 scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md
+          uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
+          uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md

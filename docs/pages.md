@@ -36,3 +36,9 @@ Example for `BrunoGaoSZ/ljwx-deploy`:
 - all other files in `gh-pages` root are deleted before each publish
 
 This prevents deployment manifests or source files from being accidentally retained in the Pages branch.
+
+## Source Directory Convention
+
+- Canonical source for Pages publish is `pages/`.
+- `site/` is legacy and not used by `nightly-evidence`.
+- New dashboard changes must be applied in `pages/index.html` and `pages/app.js`.

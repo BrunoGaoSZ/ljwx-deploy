@@ -32,13 +32,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        run: pip install --disable-pip-version-check pyyaml jsonschema
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
 
       - name: Validate and collect evidence
         run: |
-          python3 scripts/evidence/validate.py
-          python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+          uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
+          uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
 
       - name: Build publish payload (atomic staging)
         run: |

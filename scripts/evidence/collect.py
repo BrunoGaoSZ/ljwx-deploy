@@ -12,7 +12,9 @@ from typing import Any
 try:
     import yaml
 except Exception as exc:  # noqa: BLE001
-    raise SystemExit(f"PyYAML is required. Install with: pip3 install pyyaml\n{exc}")
+    raise SystemExit(
+        f"PyYAML is required. Install with: uvx --with pyyaml python <script>\n{exc}"
+    )
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
