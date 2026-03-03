@@ -1,5 +1,35 @@
 [
   {
+    "evidenceId": "20260303-ljwx-platform-sha-b3168cd",
+    "service": "ljwx-platform",
+    "env": "prod",
+    "source": {
+      "repo": "ghcr.io/brunogao/ljwx-platform/ljwx-platform",
+      "commit": "b3168cd",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:b87a530b80384b1f9b956e35237afa47e6bdd72fa73277d123a3545203e8f615",
+      "harbor": "ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:b87a530b80384b1f9b956e35237afa47e6bdd72fa73277d123a3545203e8f615",
+      "deployed": "ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:b87a530b80384b1f9b956e35237afa47e6bdd72fa73277d123a3545203e8f615"
+    },
+    "deploy": {
+      "deployRepoCommit": "83124b107c8a44567aae0094e04fb626eb596f87",
+      "queueId": "20260303T151620Z-ljwx-platform-sha-b3168cd",
+      "argocdApp": "ljwx-platform-prod",
+      "overlayPath": "apps/ljwx-platform/overlays/prod/kustomization.yaml",
+      "syncedAt": "2026-03-03T15:18:36Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pending",
+        "checkedAt": ""
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260303-ljwx-platform-sha-b3168cd.yaml"
+  },
+  {
     "evidenceId": "20260303-ljwx-platform-sha-93d32b2",
     "service": "ljwx-platform",
     "env": "prod",
