@@ -4,6 +4,8 @@ metadata:
   name: ljwx-platform-runtime
 data:
   SPRING_PROFILES_ACTIVE: "prod"
+  SPRING_FLYWAY_OUT_OF_ORDER: "false"
+  SPRING_FLYWAY_IGNORE_MIGRATION_PATTERNS: "*:future,*:ignored"
   DB_HOST: "postgres-lb.infra.svc.cluster.local"
   DB_PORT: "5432"
   DB_NAME: "postgres"
