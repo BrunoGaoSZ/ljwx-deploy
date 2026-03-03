@@ -24,13 +24,13 @@ Cluster rule:
 
 ```bash
 # manifests
-kubectl -n shared-platform get cronjob deploy-promoter
-kubectl -n shared-platform get cronjob deploy-promoter -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
+kubectl -n dev get cronjob deploy-promoter
+kubectl -n dev get cronjob deploy-promoter -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
 
 # latest job and pod
-kubectl -n shared-platform get jobs --sort-by=.metadata.creationTimestamp | tail -n 5
-kubectl -n shared-platform get pods -l job-name=<job-name>
-kubectl -n shared-platform logs job/<job-name>
+kubectl -n dev get jobs --sort-by=.metadata.creationTimestamp | tail -n 5
+kubectl -n dev get pods -l job-name=<job-name>
+kubectl -n dev logs job/<job-name>
 ```
 
 Expected:
@@ -71,8 +71,8 @@ Results are recorded in each evidence file under `tests.smoke`.
    - Validate Harbor pull replication policy and credentials.
    - Verify manifest availability with the exact curl command in `scripts/verify.sh`.
 2. Promoter image pull fails (`ImagePullBackOff` on GHCR):
-   - Ensure `ghcr-pull` exists in `shared-platform`.
-   - Ensure `promoter` ServiceAccount includes `imagePullSecrets: [{name: ghcr-pull}]`.
+   - Ensure `ghcr-pull` exists in `dev`.
+   - Ensure `dev/default` ServiceAccount includes `imagePullSecrets: [{name: ghcr-pull}]`.
    - Recreate stuck jobs after secret/SA fix.
 3. Queue entry stuck in `failed`:
    - Fix source image/tag/digest.
