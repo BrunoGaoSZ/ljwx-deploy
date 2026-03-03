@@ -1,1 +1,33 @@
-[]
+[
+  {
+    "evidenceId": "20260303-ljwx-website-sha-931cfe96df25",
+    "service": "ljwx-website",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogaosz/ljwx-website",
+      "commit": "931cfe96df25",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogaosz/ljwx-website@sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641",
+      "harbor": "harbor.omniverseai.net/app/ljwx-website@sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641"
+    },
+    "deploy": {
+      "deployRepoCommit": "3e1ea9e61cef4876d0807b0e9ec5711ce298449a",
+      "queueId": "2026-03-02T151550Z-ljwx-website-sha-931cfe96df25",
+      "argocdApp": "ljwx-website-dev",
+      "overlayPath": "apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml",
+      "syncedAt": "2026-03-03T05:40:34Z",
+      "smokedAt": "2026-03-03T05:46:37Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "fail",
+        "checkedAt": "2026-03-03T05:46:37Z",
+        "details": "argocd check skipped; endpoint wait timeout: <urlopen error [Errno -2] Name or service not known>"
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260303-ljwx-website-sha-931cfe96df25.yaml"
+  }
+]
