@@ -30,6 +30,12 @@
       "environment": "dev",
       "argocd_app": "ljwx-bookstore",
       "endpoint": "http://ljwx-bookstore.ljwx-bookstore.svc.cluster.local/fiction/actuator/health"
+    },
+    {
+      "service": "ljwx-platform",
+      "environment": "prod",
+      "argocd_app": "ljwx-platform",
+      "endpoint": "http://ljwx-platform.ljwx-platform.svc.cluster.local/"
     }
   ]
 }

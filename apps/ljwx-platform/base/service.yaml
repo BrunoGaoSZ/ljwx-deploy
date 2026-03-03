@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ljwx-platform
+  labels:
+    app: ljwx-platform
+spec:
+  type: ClusterIP
+  selector:
+    app: ljwx-platform
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

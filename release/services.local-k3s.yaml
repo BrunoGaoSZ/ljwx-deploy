@@ -57,3 +57,10 @@ services:
         kustomizeImageName: harbor.omniverseai.net/ljwx-health/ljwx-bigscreen
         harborImage: harbor.omniverseai.net/app/ljwx-health-bigscreen
         argocdApp: ljwx-health-bigscreen
+  ljwx-platform:
+    envs:
+      prod:
+        overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/app/ljwx-platform
+        harborImage: harbor.omniverseai.net/app/ljwx-platform
+        argocdApp: ljwx-platform

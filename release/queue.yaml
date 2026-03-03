@@ -1,4 +1,18 @@
-pending: []
+pending:
+- id: 2026-03-03T060500Z-ljwx-platform-sha-e2e001
+  service: ljwx-platform
+  env: prod
+  source:
+    ghcr: ghcr.io/brunogaosz/ljwx-platform@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    tag: sha-e2e001
+    digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  createdAt: '2026-03-03T06:05:00Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
