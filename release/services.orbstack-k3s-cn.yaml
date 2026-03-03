@@ -1,0 +1,59 @@
+# Cluster profile: China mainland OrbStack k3s
+# Keep service mappings in sync with release/services.local-k3s.yaml.
+services:
+  backend:
+    envs:
+      dev:
+        overlayPath: apps/backend/overlays/dev/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx/backend-template
+        harborImage: harbor.omniverseai.net/app/backend
+        argocdApp: backend-dev
+  frontend:
+    envs:
+      dev:
+        overlayPath: apps/frontend/overlays/dev/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx/frontend-dashboard
+        harborImage: harbor.omniverseai.net/app/frontend
+        argocdApp: frontend-dev
+  quality-dashboard:
+    envs:
+      dev:
+        overlayPath: apps/quality-dashboard/overlays/dev/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx/quality-dashboard
+        harborImage: harbor.omniverseai.net/app/quality-dashboard
+        argocdApp: quality-dashboard-dev
+  ljwx-website:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx/ljwx-website
+        harborImage: harbor.omniverseai.net/app/ljwx-website
+        argocdApp: ljwx-website-dev
+  ljwx-bookstore:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx/ljwx-bookstore
+        harborImage: harbor.omniverseai.net/app/ljwx-bookstore
+        argocdApp: ljwx-bookstore
+  ljwx-health-boot:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-health/overlays/ljwx-boot/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx-health/ljwx-boot
+        harborImage: harbor.omniverseai.net/app/ljwx-health-boot
+        argocdApp: ljwx-health-boot
+  ljwx-health-admin:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-health/overlays/ljwx-admin/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx-health/ljwx-admin
+        harborImage: harbor.omniverseai.net/app/ljwx-health-admin
+        argocdApp: ljwx-health-admin
+  ljwx-health-bigscreen:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-health/overlays/ljwx-bigscreen/kustomization.yaml
+        kustomizeImageName: harbor.omniverseai.net/ljwx-health/ljwx-bigscreen
+        harborImage: harbor.omniverseai.net/app/ljwx-health-bigscreen
+        argocdApp: ljwx-health-bigscreen

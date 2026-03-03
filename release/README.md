@@ -32,6 +32,14 @@ Promoter resolves deployment targets from `release/services.yaml`:
 
 This mapping is the decoupling boundary. Business repos only enqueue queue entries; they do not need deploy path details.
 
+## Dual-k3s Same-code Rule
+
+- Use the same queue/evidence/promoter code for both clusters.
+- Switch only mapping profile by environment variable:
+  - local server k3s: `SERVICE_MAP_PATH=release/services.local-k3s.yaml`
+  - China mainland OrbStack k3s: `SERVICE_MAP_PATH=release/services.orbstack-k3s-cn.yaml`
+- Do not fork promoter logic or queue schema by cluster.
+
 ## Queue Entry Schema
 
 ```yaml

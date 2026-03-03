@@ -9,6 +9,7 @@ Promoter reads `release/queue.yaml` and auto-promotes ready releases by mutating
 - Promotion only happens after Harbor manifest HEAD/GET returns HTTP 200.
 - Idempotent rerun: already-promoted items are not promoted again.
 - Promotion target resolution is centralized in `release/services.yaml`.
+- One codebase can target multiple clusters by switching `SERVICE_MAP_PATH`.
 
 ## Main Command
 
@@ -64,6 +65,7 @@ kubectl patch serviceaccount promoter -n shared-platform \
 - `HARBOR_USER`, `HARBOR_PASS`
 - `RETRY_MAX` (default: `10`)
 - `DRY_RUN` (`1` or `0`)
+- `SERVICE_MAP_PATH` (default: `release/services.yaml`)
 
 ## Queue file
 
@@ -77,3 +79,10 @@ kubectl patch serviceaccount promoter -n shared-platform \
 Each entry includes `id/service/env/source/*/status/attempts/timestamps` fields described in `release/README.md`.
 
 `release/services.yaml` provides `service+env -> overlay/image/app` mapping so business repos only need to enqueue minimal release metadata.
+
+Cluster profiles:
+
+- local server k3s: `release/services.local-k3s.yaml`
+- China mainland OrbStack k3s: `release/services.orbstack-k3s-cn.yaml`
+
+`scripts/promoter/deploy_promoter.py` is retained only as a compatibility wrapper. Use `promote.py` as the canonical implementation.

@@ -19,11 +19,13 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: promoter
-              image: python:3.11-alpine
+              image: ghcr.io/astral-sh/uv:python3.11-alpine
               imagePullPolicy: IfNotPresent
               env:
                 - name: GIT_BRANCH
                   value: main
+                - name: SERVICE_MAP_PATH
+                  value: release/services.local-k3s.yaml
                 - name: HARBOR_URL
                   value: https://harbor.omniverseai.net
                 - name: HARBOR_USER
@@ -46,14 +48,13 @@ spec:
                 - -c
                 - |
                   set -euo pipefail
-                  apk add --no-cache bash git openssh-client py3-pip
-                  pip install --break-system-packages --no-cache-dir pyyaml jsonschema
+                  apk add --no-cache bash git openssh-client
                   rm -rf /work/repo
                   git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
                   cd /work/repo
                   export LOCAL_REPO_DIR=/work/repo
                   bash scripts/promoter/promote.sh
-                  python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+                  uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
                   if git diff --quiet; then
                     echo "No promoter changes"
                     exit 0

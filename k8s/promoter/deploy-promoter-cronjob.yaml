@@ -5,6 +5,7 @@ metadata:
   namespace: shared-platform
 spec:
   schedule: "*/1 * * * *"
+  timeZone: Asia/Tokyo
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 3
@@ -24,6 +25,8 @@ spec:
                   value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
                 - name: RETRY_MAX
                   value: "10"
+                - name: SERVICE_MAP_PATH
+                  value: release/services.local-k3s.yaml
                 - name: DRY_RUN
                   value: "0"
                 - name: HARBOR_URL
