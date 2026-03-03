@@ -1,0 +1,80 @@
+---
+# =============================================================================
+# ljwx-bookstore ServiceMonitor Configuration
+# Prometheus Operator 自动服务发现和指标抓取
+# =============================================================================
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ljwx-bookstore
+  namespace: ljwx-bookstore
+  labels:
+    app: ljwx-bookstore
+    component: backend
+    prometheus: kube-prometheus
+spec:
+  # 选择要监控的 Service
+  selector:
+    matchLabels:
+      app: ljwx-bookstore
+      component: backend
+
+  # 指定 Service 所在的 namespace
+  namespaceSelector:
+    matchNames:
+      - ljwx-bookstore
+
+  # 端点配置
+  endpoints:
+    - port: http
+      path: /fiction/actuator/prometheus
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: http
+
+      # 指标重新标记
+      relabelings:
+        # 添加 namespace 标签
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+          action: replace
+
+        # 添加 pod 名称
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+          action: replace
+
+        # 添加服务名称
+        - sourceLabels: [__meta_kubernetes_service_name]
+          targetLabel: service
+          action: replace
+
+        # 添加应用标签
+        - sourceLabels: [__meta_kubernetes_service_label_app]
+          targetLabel: app
+          action: replace
+
+      # 指标过滤和转换
+      metricRelabelings:
+        # 保留重要的 JVM 指标
+        - sourceLabels: [__name__]
+          regex: 'jvm_.*|process_.*|system_.*'
+          action: keep
+
+        # 保留 HTTP 请求指标
+        - sourceLabels: [__name__]
+          regex: 'http_.*|tomcat_.*'
+          action: keep
+
+        # 保留应用业务指标
+        - sourceLabels: [__name__]
+          regex: 'hikaricp_.*|jdbc_.*'
+          action: keep
+
+        # 保留 Spring Boot 指标
+        - sourceLabels: [__name__]
+          regex: 'spring_.*'
+          action: keep
+
+  # 任务标签
+  jobLabel: app

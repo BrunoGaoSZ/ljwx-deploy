@@ -1,0 +1,12 @@
+OK   evidence/records/bootstrap-record.json
+validation passed: 1 file(s)
+wrote evidence/index.json with 1 record(s)
+processing queue item frontend-dev-20260302-001 (frontend/dev)
+registry check skipped for frontend-dev-20260302-001
+summary: {"pending": 0, "promoted": 1, "failed": 0, "dry_run": true}
+frontend: no promoted evidence record for frontend/dev
+backend: no promoted evidence record for backend/dev
+quality-dashboard: no promoted evidence record for quality-dashboard/dev
+ljwx-website: no promoted evidence record for ljwx-website/dev
+ljwx-bookstore: no promoted evidence record for ljwx-bookstore/dev
+{"passed": 0, "failed": 0, "skipped": 5, "dry_run": true}

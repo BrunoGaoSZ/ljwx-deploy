@@ -16,8 +16,8 @@ data:
   SPRING_PROFILES_ACTIVE: "prod"
   SERVER_PORT: "8844"
 
-  # JVM配置
-  JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+UseStringDeduplication -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
+  # JVM配置（与 docker-compose 同步，使用 ZGC）
+  JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseZGC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
 
   # 数据库连接池配置（非敏感）
   HIKARI_MAXIMUM_POOL_SIZE: "20"
@@ -25,14 +25,35 @@ data:
   HIKARI_CONNECTION_TIMEOUT: "20000"
   HIKARI_IDLE_TIMEOUT: "300000"
 
-  # AI服务配置
+  # AI服务配置（与 application.yml 同步）
   AI_ENABLED: "true"
+  AI_MODEL_STRATEGY: "LOCAL_PRIORITY"
   AI_LOCAL_ENABLED: "true"
   AI_LOCAL_PROVIDER: "ollama"
   AI_LOCAL_OLLAMA_URL: "http://ollama.devops.svc.cluster.local:11434"
-  AI_LOCAL_DEFAULT_MODEL: "qwen2.5:7b"
-  AI_LOCAL_FALLBACK_MODEL: "llama3.2:8b"
+  AI_LOCAL_DEFAULT_MODEL: "lingjingwanxiang:32b"
+  AI_LOCAL_FALLBACK_MODEL: "lingjingwanxiang:32b"
+  AI_LOCAL_MAX_TOKENS: "4096"
+  AI_LOCAL_TEMPERATURE: "0.7"
   AI_CLOUD_ENABLED: "false"
+
+  # AI LLM 配置（统一使用 32B 模型）
+  AI_LLM_TYPE: "ollama"
+  AI_LLM_BASE_URL: "http://ollama.devops.svc.cluster.local:11434"
+  AI_LLM_MODEL: "lingjingwanxiang:32b"
+  AI_LLM_MAX_TOKENS: "2048"
+  AI_LLM_TEMPERATURE: "0.3"
+  AI_LLM_TOP_P: "0.9"
+
+  # AI 高级模型配置（32B深度分析）
+  AI_LLM_ADVANCED_ENABLED: "true"
+  AI_LLM_ADVANCED_MODEL: "lingjingwanxiang:32b"
+  AI_LLM_ADVANCED_MAX_TOKENS: "8192"
+  AI_LLM_ADVANCED_TEMPERATURE: "0.5"
+  AI_LLM_ADVANCED_TOP_P: "0.95"
+
+  # AI 模型路由配置
+  AI_MODEL_ROUTING_STRATEGY: "TASK_BASED"
 
   # OpenSearch配置
   AI_OPENSEARCH_HOST: "opensearch.monitoring.svc.cluster.local"
@@ -82,10 +103,12 @@ data:
   HGBOOK_NOTIFY_SMS_SIGN: "和光文化"
   HGBOOK_NOTIFY_SMS_TENCENT_APPID: "1400311284"
 
-  # OpenTelemetry配置
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.tracing.svc.cluster.local:4317"
+  # OpenTelemetry配置（使用 HTTP endpoint）
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-opentelemetry-collector.tracing.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
   OTEL_SERVICE_NAME: "ljwx-bookstore"
   OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
   OTEL_TRACES_SAMPLER_ARG: "0.1"
   OTEL_METRICS_EXPORTER: "prometheus"
   OTEL_LOGS_EXPORTER: "none"
+  OTEL_RESOURCE_ATTRIBUTES: "service.name=ljwx-bookstore,service.namespace=ljwx-bookstore,deployment.environment=production"

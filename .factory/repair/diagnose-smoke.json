@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-03-02T04:56:27Z",
+  "check_log": ".factory/repair/main/20260302T045426Z/attempt-1/check.log",
+  "recipes_file": "repairs/recipes.yaml",
+  "pr_url": "",
+  "recommended_recipe_ids": [
+    "format-json",
+    "regen-evidence-index",
+    "normalize-queue-shape"
+  ],
+  "gh_checks": {
+    "available": false,
+    "reason": "no_pr_url"
+  }
+}

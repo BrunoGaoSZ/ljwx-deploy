@@ -15,6 +15,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+  - servicemonitor.yaml
   - db-init-job.yaml
 
 commonLabels:
