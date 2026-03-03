@@ -26,8 +26,14 @@ spec:
                   value: main
                 - name: SERVICE_MAP_PATH
                   value: release/services.local-k3s.yaml
+                - name: SKIP_REGISTRY_CHECK
+                  value: "1"
                 - name: HARBOR_URL
-                  value: https://harbor.omniverseai.net
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_url
+                      optional: true
                 - name: HARBOR_USER
                   valueFrom:
                     secretKeyRef:

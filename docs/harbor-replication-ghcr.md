@@ -6,8 +6,8 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
 
 1. Service CI pushes `ghcr.io/<org>/<svc>:sha-*` or `v*`.
 2. Harbor policy pulls into local project `app`.
-3. Promoter checks Harbor v2 manifest API.
-4. Only when manifest exists, promoter updates deploy repo.
+3. (Optional) Promoter checks Harbor v2 manifest API when `HARBOR_URL` is configured.
+4. Promoter updates deploy repo using standard `source.ghcr` image path.
 
 ## Harbor UI steps
 
@@ -34,12 +34,12 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
 # by digest (preferred by promoter)
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "https://harbor.omniverseai.net/v2/app/<svc>/manifests/sha256:<digest>"
+  "https://<your-harbor-domain>/v2/app/<svc>/manifests/sha256:<digest>"
 
 # by tag (manual verification)
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "https://harbor.omniverseai.net/v2/app/<svc>/manifests/sha-<shortsha>"
+  "https://<your-harbor-domain>/v2/app/<svc>/manifests/sha-<shortsha>"
 ```
 
 Expected:

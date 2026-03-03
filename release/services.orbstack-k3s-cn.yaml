@@ -1,5 +1,6 @@
 # Cluster profile: China mainland OrbStack k3s
 # Keep service mappings in sync with release/services.local-k3s.yaml.
+# NOTE: promoter prefers queue source.ghcr as deploy image; harborImage is fallback only.
 services:
   backend:
     envs:

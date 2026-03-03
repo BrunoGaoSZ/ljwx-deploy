@@ -29,8 +29,14 @@ spec:
                   value: release/services.local-k3s.yaml
                 - name: DRY_RUN
                   value: "0"
+                - name: SKIP_REGISTRY_CHECK
+                  value: "1"
                 - name: HARBOR_URL
-                  value: https://harbor.omniverseai.net
+                  valueFrom:
+                    secretKeyRef:
+                      name: promoter-secrets
+                      key: HARBOR_URL
+                      optional: true
                 - name: DEPLOY_REPO_TOKEN
                   valueFrom:
                     secretKeyRef:

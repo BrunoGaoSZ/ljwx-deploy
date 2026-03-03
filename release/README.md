@@ -5,9 +5,9 @@ This queue drives dev auto-promotion in `ljwx-deploy`.
 ## Flow
 
 1. Service repository appends a `pending` entry into `release/queue.yaml`.
-2. Harbor pull replication copies GHCR artifacts into Harbor.
-3. Promoter checks Harbor digest readiness.
-4. If ready, promoter updates Argo-consumed overlay (`apps/*/overlays/*/kustomization.yaml`), writes evidence, and moves queue item to `promoted`.
+2. Optional cache layer (Harbor pull replication / proxy cache) prepares upstream images.
+3. Promoter promotes using standard image repository from `source.ghcr` by default.
+4. Promoter updates Argo-consumed overlay (`apps/*/overlays/*/kustomization.yaml`), writes evidence, and moves queue item to `promoted`.
 
 ## Superseded Semantics
 
@@ -18,7 +18,7 @@ This queue drives dev auto-promotion in `ljwx-deploy`.
 ## Retry Policy
 
 - Default retry budget `N=10`.
-- Non-ready Harbor digest is skipped (no forced failure on that cycle).
+- If registry readiness check is enabled and digest is not ready, entry is skipped for this cycle (no forced failure).
 - Hard processing errors increment `attempts`; once attempts reach `N`, item transitions to `failed` with `failedAt` and `lastError`.
 
 ## Service Mapping
@@ -27,7 +27,8 @@ Promoter resolves deployment targets from `release/services.yaml`:
 
 - `overlayPath`: Argo application source path file to update.
 - `kustomizeImageName`: image selector in `kustomization.yaml`.
-- `harborImage`: final image repository used by runtime.
+- `harborImage`: optional legacy/fallback image repository (used when queue `source.ghcr` is absent).
+- `deployImage`: optional explicit runtime repository override.
 - `argocdApp`: app name written into evidence records.
 
 This mapping is the decoupling boundary. Business repos only enqueue queue entries; they do not need deploy path details.

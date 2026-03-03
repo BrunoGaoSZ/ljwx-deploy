@@ -6,7 +6,8 @@ Promoter reads `release/queue.yaml` and auto-promotes ready releases by mutating
 
 - Per-service serialization: at most one pending entry per `service+env`.
 - Older pending entries are moved to `superseded` (not failed).
-- Promotion only happens after Harbor manifest HEAD/GET returns HTTP 200.
+- Promotion uses queue `source.ghcr` (standard image path) by default.
+- Optional registry readiness check can be enabled with `HARBOR_URL`.
 - Idempotent rerun: already-promoted items are not promoted again.
 - Promotion target resolution is centralized in `release/services.yaml`.
 - One codebase can target multiple clusters by switching `SERVICE_MAP_PATH`.
@@ -17,8 +18,16 @@ Promoter reads `release/queue.yaml` and auto-promotes ready releases by mutating
 # Dry run (no commit/push)
 bash scripts/promoter/promote.sh --dry-run
 
-# Normal run (token + Harbor credentials required)
-DEPLOY_REPO_TOKEN=*** HARBOR_USER=*** HARBOR_PASS=*** \
+# Normal run (token required; registry check optional)
+DEPLOY_REPO_TOKEN=*** \
+  bash scripts/promoter/promote.sh
+
+# Transparent-cache mode (skip registry blocking)
+DEPLOY_REPO_TOKEN=*** SKIP_REGISTRY_CHECK=1 \
+  bash scripts/promoter/promote.sh
+
+# Strict Harbor readiness mode
+DEPLOY_REPO_TOKEN=*** HARBOR_URL=https://harbor.example.com HARBOR_USER=*** HARBOR_PASS=*** \
   bash scripts/promoter/promote.sh
 ```
 
@@ -61,8 +70,9 @@ kubectl patch serviceaccount promoter -n shared-platform \
 
 - `DEPLOY_REPO_URL` (default: `https://github.com/BrunoGaoSZ/ljwx-deploy.git`)
 - `DEPLOY_REPO_TOKEN` (required unless using `--local-repo-dir`)
-- `HARBOR_URL` (default: `https://harbor.omniverseai.net`)
+- `HARBOR_URL` (optional; empty by default)
 - `HARBOR_USER`, `HARBOR_PASS`
+- `SKIP_REGISTRY_CHECK` (`1/true` to pass `--skip-registry-check`)
 - `RETRY_MAX` (default: `10`)
 - `DRY_RUN` (`1` or `0`)
 - `SERVICE_MAP_PATH` (default: `release/services.yaml`)

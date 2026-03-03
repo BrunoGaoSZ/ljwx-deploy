@@ -1,4 +1,5 @@
 services:
+  # NOTE: promoter prefers queue source.ghcr as deploy image; harborImage is fallback only.
   backend:
     envs:
       dev:

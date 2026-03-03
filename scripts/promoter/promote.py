@@ -107,34 +107,50 @@ def host_from_url(url: str) -> str:
     return txt.strip("/")
 
 
-def harbor_repo_path(harbor_image: str, harbor_url: str) -> str:
-    image = harbor_image.strip()
-    if not image:
-        return ""
-
+def image_without_digest(image_ref: str) -> str:
+    image = image_ref.strip()
     if "@" in image:
-        image = image.split("@", 1)[0]
+        return image.split("@", 1)[0]
+    return image
 
-    harbor_host = host_from_url(harbor_url)
 
-    if image.startswith(harbor_host + "/"):
-        return image.split("/", 1)[1]
+def image_registry_and_repo(image_ref: str) -> tuple[str, str]:
+    image = image_without_digest(image_ref)
+    if not image:
+        return "", ""
 
     if image.startswith("https://") or image.startswith("http://"):
         stripped = image.split("//", 1)[1]
         parts = stripped.split("/", 1)
-        return parts[1] if len(parts) > 1 else ""
+        if len(parts) == 1:
+            return parts[0], ""
+        return parts[0], parts[1]
 
     first = image.split("/", 1)[0]
-    if "." in first or ":" in first:
-        return image.split("/", 1)[1] if "/" in image else ""
+    if "." in first or ":" in first or first == "localhost":
+        return first, image.split("/", 1)[1] if "/" in image else ""
 
-    return image
+    return "", image
+
+
+def harbor_repo_path(harbor_image: str, harbor_url: str) -> str:
+    harbor_host = host_from_url(harbor_url)
+    image_host, image_repo = image_registry_and_repo(harbor_image)
+    if not image_repo:
+        return ""
+
+    if harbor_host and image_host and image_host != harbor_host:
+        return ""
+
+    return image_repo
 
 
 def harbor_manifest_ready(
     harbor_image: str, digest: str, harbor_url: str, harbor_user: str, harbor_pass: str
 ) -> bool:
+    if not harbor_url.strip():
+        return False
+
     repo = harbor_repo_path(harbor_image, harbor_url)
     if not repo or not digest:
         return False
@@ -328,6 +344,8 @@ def process_pending(
         source = (
             entry.get("source", {}) if isinstance(entry.get("source"), dict) else {}
         )
+        ghcr_ref = str(source.get("ghcr", "")).strip()
+        ghcr_image_repo = ghcr_repo(ghcr_ref) if ghcr_ref else ""
         tag = str(source.get("tag", "unknown"))
         digest = get_digest(entry)
 
@@ -347,12 +365,21 @@ def process_pending(
             if isinstance(target, dict)
             else ""
         )
+        deploy_image = (
+            str(target.get("deployImage", "")).strip()
+            if isinstance(target, dict)
+            else ""
+        )
         argocd_app = (
             str(target.get("argocdApp", "")).strip() if isinstance(target, dict) else ""
         )
 
-        if not harbor_image:
-            harbor_image = f"harbor.omniverseai.net/app/{service}"
+        if not deploy_image and ghcr_image_repo:
+            deploy_image = ghcr_image_repo
+        if not deploy_image and harbor_image:
+            deploy_image = harbor_image
+        if not deploy_image:
+            deploy_image = f"ghcr.io/unknown/{service}"
 
         if not service or not env or not digest or not overlay_rel or not image_name:
             attempts = int(entry.get("attempts", 0)) + 1
@@ -370,8 +397,9 @@ def process_pending(
             changed = True
             continue
 
-        if not skip_registry_check and not harbor_manifest_ready(
-            harbor_image, digest, harbor_url, harbor_user, harbor_pass
+        should_check_registry = (not skip_registry_check) and bool(harbor_url.strip())
+        if should_check_registry and not harbor_manifest_ready(
+            deploy_image, digest, harbor_url, harbor_user, harbor_pass
         ):
             continue
 
@@ -394,7 +422,7 @@ def process_pending(
         o_path, o_changed, o_data = update_overlay_kustomization(
             overlay_path=overlay_path,
             image_name=image_name,
-            harbor_image=harbor_image,
+            harbor_image=deploy_image,
             digest=digest,
         )
         if o_changed:
@@ -407,14 +435,13 @@ def process_pending(
         if not isinstance(existing, dict):
             existing = {}
 
-        ghcr_ref = str(source.get("ghcr", ""))
         record = {
             "evidenceId": evidence_id,
             "service": service,
             "env": env,
             "source": {
-                "repo": ghcr_repo(ghcr_ref)
-                if ghcr_ref
+                "repo": ghcr_image_repo
+                if ghcr_image_repo
                 else f"ghcr.io/unknown/{service}",
                 "commit": commit_from_tag(tag),
                 "workflowRun": str(source.get("workflowRun", ""))
@@ -423,7 +450,9 @@ def process_pending(
             },
             "image": {
                 "ghcr": ghcr_ref,
-                "harbor": f"{harbor_image}@{digest}",
+                # Keep legacy key for schema compatibility; value is the actual deployed image.
+                "harbor": f"{deploy_image}@{digest}",
+                "deployed": f"{deploy_image}@{digest}",
             },
             "deploy": {
                 "deployRepoCommit": "__PENDING_COMMIT__",
@@ -593,7 +622,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--harbor-url",
-        default=os.getenv("HARBOR_URL", "https://harbor.omniverseai.net"),
+        default=os.getenv("HARBOR_URL", ""),
     )
     parser.add_argument("--harbor-user", default=os.getenv("HARBOR_USER", ""))
     parser.add_argument("--harbor-pass", default=os.getenv("HARBOR_PASS", ""))
@@ -606,7 +635,7 @@ def main() -> int:
     parser.add_argument(
         "--skip-registry-check",
         action="store_true",
-        help="skip Harbor manifest check (local dry-run only)",
+        help="skip registry manifest check (transparent-cache mode)",
     )
     args = parser.parse_args()
 

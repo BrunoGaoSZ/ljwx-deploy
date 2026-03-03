@@ -6,7 +6,8 @@ This runbook configures Harbor pull replication from GHCR while keeping GitHub a
 
 - Build pipeline pushes images to GHCR.
 - Harbor pulls from GHCR by policy.
-- Promoter never assumes replication timing; it checks Harbor v2 manifest availability before pinning digest.
+- Promoter uses standard `source.ghcr` image path for deployment.
+- Optional: promoter can check Harbor v2 manifest availability when `HARBOR_URL` is configured.
 
 ## Setup Steps
 
@@ -26,7 +27,7 @@ This runbook configures Harbor pull replication from GHCR while keeping GitHub a
 # Replace <repo> and <tag>
 curl -sSI \
   -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-  "https://harbor.omniverseai.net/v2/<repo>/manifests/<tag>"
+  "https://<your-harbor-domain>/v2/<repo>/manifests/<tag>"
 ```
 
 Expected: `HTTP 200` and `Docker-Content-Digest` header.
