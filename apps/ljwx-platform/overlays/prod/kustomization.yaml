@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: ljwx-platform
 resources:
 - ../../base
+- runtime-config.yaml
 images:
 - name: harbor.omniverseai.net/app/ljwx-platform
   newName: ghcr.io/brunogao/ljwx-platform/ljwx-platform

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ljwx-platform-runtime
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  DB_HOST: "postgres-lb.infra.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "postgres"
+  REDIS_HOST: "redis-lb.infra.svc.cluster.local"
+  REDIS_PORT: "6379"

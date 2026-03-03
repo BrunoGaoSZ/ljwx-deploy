@@ -35,7 +35,7 @@
       "service": "ljwx-platform",
       "environment": "prod",
       "argocd_app": "ljwx-platform",
-      "endpoint": "http://ljwx-platform.ljwx-platform.svc.cluster.local/"
+      "endpoint": "http://ljwx-platform.ljwx-platform.svc.cluster.local/actuator/health/readiness"
     }
   ]
 }
