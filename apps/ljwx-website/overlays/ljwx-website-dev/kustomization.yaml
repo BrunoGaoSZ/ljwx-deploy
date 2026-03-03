@@ -3,6 +3,8 @@ kind: Kustomization
 namespace: ljwx-website-dev
 resources:
   - ../../base
+patches:
+  - path: service-nodeport.yaml
 images:
   - name: harbor.omniverseai.net/ljwx/ljwx-website
     newTag: "main-abde1fb"
