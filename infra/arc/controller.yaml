@@ -20,6 +20,32 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: arc-system
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: horizontalrunnerautoscalers.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runnerdeployments.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runnerreplicasets.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runners.actions.summerwind.dev
+      jsonPointers:
+        - /spec
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: runnersets.actions.summerwind.dev
+      jsonPointers:
+        - /spec
   syncPolicy:
     automated:
       prune: true
