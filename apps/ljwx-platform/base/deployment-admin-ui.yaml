@@ -14,6 +14,9 @@ spec:
       labels:
         app: ljwx-platform-admin-ui
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+        - name: harbor-pull
       containers:
         - name: ljwx-platform-admin-ui
           image: ghcr.io/brunogao/ljwx-platform/ljwx-platform-admin-ui:latest

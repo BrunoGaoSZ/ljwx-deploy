@@ -14,6 +14,9 @@ spec:
       labels:
         app: ljwx-platform-screen
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+        - name: harbor-pull
       containers:
         - name: ljwx-platform-screen
           image: ghcr.io/brunogao/ljwx-platform/ljwx-platform-screen:latest
