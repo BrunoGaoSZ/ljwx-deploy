@@ -15,8 +15,10 @@ deploy:
   argocdApp: ljwx-platform
   overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
   syncedAt: '2026-03-03T15:28:25Z'
+  smokedAt: '2026-03-03T15:33:15Z'
 tests:
   smoke:
-    status: pending
-    checkedAt: ''
+    status: pass
+    checkedAt: '2026-03-03T15:33:15Z'
+    details: argocd check skipped; endpoint=200 body='{"code":200,"message":"success","data":{"status":"UP"},"traceId":"00f01cf1-e927-4a65-af86-05174b8c4c6e"}'
 approvals: {}
