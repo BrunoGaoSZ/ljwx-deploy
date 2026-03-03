@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-platform-screen
+  labels:
+    app: ljwx-platform-screen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ljwx-platform-screen
+  template:
+    metadata:
+      labels:
+        app: ljwx-platform-screen
+    spec:
+      containers:
+        - name: ljwx-platform-screen
+          image: ghcr.io/brunogao/ljwx-platform/ljwx-platform-screen:latest
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10

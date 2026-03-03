@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ljwx-platform
-          image: harbor.omniverseai.net/app/ljwx-platform:latest
+          image: ghcr.io/brunogao/ljwx-platform/ljwx-platform:latest
           envFrom:
             - configMapRef:
                 name: ljwx-platform-runtime

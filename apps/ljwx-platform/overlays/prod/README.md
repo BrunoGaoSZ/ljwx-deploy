@@ -1,6 +1,10 @@
 # ljwx-platform prod runtime config
 
-This overlay deploys the backend image and runtime environment for k3s production-like clusters.
+This overlay deploys three services for k3s production-like clusters:
+
+- `ljwx-platform` (backend)
+- `ljwx-platform-admin-ui` (admin frontend)
+- `ljwx-platform-screen` (screen frontend)
 
 ## Required runtime secret
 
