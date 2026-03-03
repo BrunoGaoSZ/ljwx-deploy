@@ -1,4 +1,5 @@
-pending:
+pending: []
+promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
   env: dev
@@ -7,13 +8,12 @@ pending:
     tag: sha-931cfe96df25
     digest: sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641
   createdAt: '2026-03-02T15:15:50Z'
-  status: pending
+  status: promoted
   attempts: 0
   lastError: ''
-  promotedAt: ''
+  promotedAt: '2026-03-03T05:40:34Z'
   supersededAt: ''
   failedAt: ''
-promoted: []
 failed: []
 superseded:
 - id: 2026-03-02T140954Z-ljwx-website-sha-33df580336d0
