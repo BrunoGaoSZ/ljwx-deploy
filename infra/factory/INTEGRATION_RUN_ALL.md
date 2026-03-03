@@ -4,6 +4,11 @@ This flow supports the required sequence:
 
 `commit -> PR -> wait checks -> auto-fix -> recheck -> merge (dev)`
 
+Cluster profile parameters (same codebase):
+
+- `SERVICE_MAP_PATH`: choose service mapping profile per cluster
+- `SMOKE_TARGETS`: choose smoke target profile per cluster
+
 ## Scripted Flow
 
 Use:

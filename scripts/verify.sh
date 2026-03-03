@@ -5,11 +5,11 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 echo "[verify] validate release queue shape"
-python3 scripts/promoter/validate_queue.py
+uvx --with pyyaml python scripts/promoter/validate_queue.py
 
 echo "[verify] validate and collect evidence feed"
-python3 scripts/evidence/validate.py
-python3 scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md
+uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
+uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md
 
 echo "[verify] run promoter dry-run on local repo"
 python3 scripts/promoter/promote.py --dry-run --local-repo-dir .

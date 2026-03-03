@@ -19,25 +19,31 @@ Note: `npm run docs:build` currently fails on existing repo dead links unrelated
 cd ../ljwx-deploy
 test -f PLAN.md
 bash scripts/verify.sh
-python3 scripts/evidence/validate.py
-python3 scripts/evidence/collect.py --out evidence/index.json
+uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
+uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json
 python3 -m json.tool evidence/index.json >/dev/null
 ```
 
 ## 3. Promoter Dry Run
 
 ```bash
-python3 scripts/promoter/validate_queue.py
+uvx --with pyyaml python scripts/promoter/validate_queue.py
 bash scripts/promoter/promote.sh --dry-run
 ```
 
 Expected: script reports normalization/promotion simulation without commit/push.
 
+Profile note:
+
+- local k3s: `SERVICE_MAP_PATH=release/services.local-k3s.yaml`
+- OrbStack k3s: `SERVICE_MAP_PATH=release/services.orbstack-k3s-cn.yaml`
+
 ## 4. Smoke Runner Dry Run
 
 ```bash
-python3 scripts/smoke/run_smoke.py --help
-python3 scripts/smoke/run_smoke.py --dry-run
+uvx --with pyyaml --with jsonschema python scripts/smoke/run_smoke.py --help
+uvx --with pyyaml --with jsonschema python scripts/smoke/run_smoke.py --dry-run --targets scripts/smoke/targets.local-k3s.json
+uvx --with pyyaml --with jsonschema python scripts/smoke/run_smoke.py --dry-run --targets scripts/smoke/targets.orbstack-k3s-cn.json
 ```
 
 Expected: skips targets when no promoted records exist yet.
