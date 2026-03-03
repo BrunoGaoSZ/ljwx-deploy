@@ -19,12 +19,12 @@
       "argocdApp": "ljwx-platform-prod",
       "overlayPath": "apps/ljwx-platform/overlays/prod/kustomization.yaml",
       "syncedAt": "2026-03-03T10:31:01Z",
-      "smokedAt": "2026-03-03T10:36:31Z"
+      "smokedAt": "2026-03-03T10:40:14Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-03T10:36:31Z",
+        "checkedAt": "2026-03-03T10:40:14Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html> <html> <head> <title>Welcome to nginx!</title> <style> html { color-scheme: light dark; } body { width: '"
       }
     },
@@ -81,12 +81,12 @@
       "argocdApp": "ljwx-website-dev",
       "overlayPath": "apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml",
       "syncedAt": "2026-03-03T05:40:34Z",
-      "smokedAt": "2026-03-03T10:36:31Z"
+      "smokedAt": "2026-03-03T10:40:14Z"
     },
     "tests": {
       "smoke": {
         "status": "fail",
-        "checkedAt": "2026-03-03T10:36:31Z",
+        "checkedAt": "2026-03-03T10:40:14Z",
         "details": "argocd check skipped; endpoint wait timeout: http=404"
       }
     },
