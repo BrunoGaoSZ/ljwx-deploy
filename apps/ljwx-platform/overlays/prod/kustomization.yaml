@@ -5,5 +5,5 @@ resources:
 - ../../base
 images:
 - name: harbor.omniverseai.net/app/ljwx-platform
-  newName: harbor.omniverseai.net/app/ljwx-platform
-  digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
+  newTag: add53baedaf10af2a306e409289a483c94220852
