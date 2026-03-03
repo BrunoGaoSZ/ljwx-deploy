@@ -9,6 +9,7 @@ GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 - Promoter/Argo/Smoke 运维：`docs/ops-runbook.md`
 - 双 k3s 同代码部署规范：`docs/dual-k3s-deployment.md`
 - CronJob secret 示例：`cluster/deploy-promoter-secret.example.yaml`
+- 模板化批量接入：`docs/onboarding-automation.md`
 - 服务仓 enqueue 工作流片段：`docs/service-repo-workflow-snippet.md`
 - Argo dev 自动同步说明：`docs/argocd-dev-autosync.md`
 
