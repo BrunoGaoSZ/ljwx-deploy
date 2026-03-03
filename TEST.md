@@ -83,3 +83,35 @@ bash scripts/factory/run_all_dev.sh
 ```
 
 Requires authenticated `gh` CLI and permissions to create/merge PRs and issues.
+
+## 8. Repeatable Queue -> Promoted -> Smoke -> Evidence Acceptance
+
+Run this after a queue PR has been merged (for example, `queue(ljwx-platform): ...`):
+
+```bash
+set -euo pipefail
+
+# 1) Trigger promoter and smoke once (same logic as CronJob, no direct manifest patching).
+PROMOTE_JOB="deploy-promoter-verify-$(date +%H%M%S)"
+SMOKE_JOB="smoke-runner-verify-$(date +%H%M%S)"
+kubectl -n dev create job --from=cronjob/deploy-promoter "${PROMOTE_JOB}"
+kubectl -n dev create job --from=cronjob/smoke-runner "${SMOKE_JOB}"
+
+# 2) Wait and print logs.
+kubectl -n dev wait --for=condition=complete "job/${PROMOTE_JOB}" --timeout=600s
+kubectl -n dev wait --for=condition=complete "job/${SMOKE_JOB}" --timeout=600s
+kubectl -n dev logs "job/${PROMOTE_JOB}" --tail=200
+kubectl -n dev logs "job/${SMOKE_JOB}" --tail=200
+
+# 3) Verify queue/evidence result from git source of truth.
+gh api 'repos/BrunoGaoSZ/ljwx-deploy/contents/release/queue.yaml?ref=main' -q '.content' \
+  | tr -d '\n' | base64 -d | sed -n '1,140p'
+gh api 'repos/BrunoGaoSZ/ljwx-deploy/contents/evidence/index.json?ref=main' -q '.content' \
+  | tr -d '\n' | base64 -d | jq '.summary,.items[0]'
+```
+
+Success criteria:
+
+- Queue entry moved from `pending` to `promoted` (or `failed` with explicit `lastError`).
+- Latest evidence item has `deploy.status` and `tests.smoke.status`.
+- `evidence/index.json` summary counters are updated.

@@ -48,7 +48,8 @@ spec:
                 - -c
                 - |
                   set -euo pipefail
-                  apk add --no-cache bash git openssh-client
+                  apk add --no-cache bash git openssh-client curl py3-pip
+                  pip3 install --no-cache-dir pyyaml jsonschema
                   rm -rf /work/repo
                   git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
                   cd /work/repo
