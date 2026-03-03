@@ -14,8 +14,11 @@ deploy:
   argocdApp: ljwx-platform-prod
   overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
   syncedAt: '2026-03-03T06:40:50Z'
+  smokedAt: '2026-03-03T06:43:12Z'
 tests:
   smoke:
-    status: pending
-    checkedAt: ''
+    status: fail
+    checkedAt: '2026-03-03T06:43:12Z'
+    details: 'argocd check skipped; endpoint wait timeout: <urlopen error [Errno -2]
+      Name or service not known>'
 approvals: {}
