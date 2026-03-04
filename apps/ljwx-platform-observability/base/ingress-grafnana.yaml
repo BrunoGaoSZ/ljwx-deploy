@@ -21,7 +21,18 @@ spec:
                 name: prometheus-grafana
                 port:
                   number: 80
+    - host: granfana.lingjingwanxiang.cn
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-grafana
+                port:
+                  number: 80
   tls:
     - hosts:
         - grafnana.lingjingwanxiang.cn
+        - granfana.lingjingwanxiang.cn
       secretName: grafnana-lingjingwanxiang-cn-tls
