@@ -7,3 +7,4 @@ resources:
   - smoke-runner-cronjob.yaml
   - regcred.yaml
   - default-sa.yaml
+  - stock-etl-qlib-predict-application.yaml
