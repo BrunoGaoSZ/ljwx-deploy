@@ -1,5 +1,4 @@
 services:
-  # NOTE: promoter prefers queue source.ghcr as deploy image; harborImage is fallback only.
   backend:
     envs:
       dev:
@@ -63,3 +62,10 @@ services:
         kustomizeImageName: harbor.omniverseai.net/app/ljwx-platform
         harborImage: harbor.omniverseai.net/app/ljwx-platform
         argocdApp: ljwx-platform
+  ljwx-stock-qlib-predict:
+    envs:
+      dev:
+        overlayPath: apps/stock-etl/overlays/ljwx-stock/kustomization.yaml
+        kustomizeImageName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-qlib-predict
+        argocdApp: stock-etl-qlib-predict-dev

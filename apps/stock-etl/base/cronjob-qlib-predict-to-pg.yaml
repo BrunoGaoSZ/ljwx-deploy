@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qlib-predict-to-pg
+  labels:
+    app.kubernetes.io/component: batch
+spec:
+  schedule: "30 16 * * 1-5"
+  timeZone: Asia/Shanghai
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 7200
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: qlib-predict
+              image: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict:bootstrap
+              imagePullPolicy: IfNotPresent
+              command:
+                - python
+                - -m
+                - qlib_predict.app.predict_to_pg
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: stock-etl-secret
+                      key: DATABASE_URL
+                - name: QLIB_PROVIDER_URI
+                  value: /data/qlib/qlib_data/cn
+                - name: QLIB_MODEL_ROOT
+                  value: /data/qlib/artifacts/models
+                - name: CANDIDATE_POOL_SIZE
+                  value: "300"
+                - name: CODE_VERSION
+                  value: p3a
+              volumeMounts:
+                - name: qlib-data
+                  mountPath: /data/qlib
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
+                limits:
+                  cpu: "1"
+                  memory: 2Gi
+          volumes:
+            - name: qlib-data
+              persistentVolumeClaim:
+                claimName: qlib-pvc

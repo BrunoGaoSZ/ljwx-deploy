@@ -1,6 +1,3 @@
-# Cluster profile: China mainland OrbStack k3s
-# Keep service mappings in sync with release/services.local-k3s.yaml.
-# NOTE: promoter prefers queue source.ghcr as deploy image; harborImage is fallback only.
 services:
   backend:
     envs:
@@ -65,3 +62,10 @@ services:
         kustomizeImageName: ghcr.io/brunogao/ljwx-platform/ljwx-platform
         harborImage: harbor.omniverseai.net/app/ljwx-platform
         argocdApp: ljwx-platform
+  ljwx-stock-qlib-predict:
+    envs:
+      dev:
+        overlayPath: apps/stock-etl/overlays/ljwx-stock/kustomization.yaml
+        kustomizeImageName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-qlib-predict
+        argocdApp: stock-etl-qlib-predict-dev
