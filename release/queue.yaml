@@ -1,19 +1,4 @@
-pending:
-- id: 20260304T085230Z-ljwx-stock-kline-etl-sha-4421dac
-  service: ljwx-stock-kline-etl
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl@sha256:c450753bfd8dc454c59e562593b1911d3d817c11dd836d23a47180a44722a156
-    tag: sha-4421dac
-    digest: sha256:c450753bfd8dc454c59e562593b1911d3d817c11dd836d23a47180a44722a156
-    gitSha: 4421dac
-  createdAt: '2026-03-04T08:52:30Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
+pending: []
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
@@ -356,6 +341,21 @@ promoted:
   attempts: 0
   lastError: ''
   promotedAt: '2026-03-04T07:49:45Z'
+  supersededAt: ''
+  failedAt: ''
+- id: 20260304T085230Z-ljwx-stock-kline-etl-sha-4421dac
+  service: ljwx-stock-kline-etl
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl@sha256:c450753bfd8dc454c59e562593b1911d3d817c11dd836d23a47180a44722a156
+    tag: sha-4421dac
+    digest: sha256:c450753bfd8dc454c59e562593b1911d3d817c11dd836d23a47180a44722a156
+    gitSha: 4421dac
+  createdAt: '2026-03-04T08:52:30Z'
+  status: promoted
+  attempts: 0
+  lastError: ''
+  promotedAt: '2026-03-04T08:53:17Z'
   supersededAt: ''
   failedAt: ''
 failed: []
