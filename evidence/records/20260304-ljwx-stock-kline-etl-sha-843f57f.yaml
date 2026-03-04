@@ -1,0 +1,22 @@
+evidenceId: 20260304-ljwx-stock-kline-etl-sha-843f57f
+service: ljwx-stock-kline-etl
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
+  commit: 843f57f
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl@sha256:e406266dfcd0fff5f58842ec0adc9b1231f65b8e97d439372793baede81c7f92
+  harbor: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl@sha256:e406266dfcd0fff5f58842ec0adc9b1231f65b8e97d439372793baede81c7f92
+  deployed: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl@sha256:e406266dfcd0fff5f58842ec0adc9b1231f65b8e97d439372793baede81c7f92
+deploy:
+  deployRepoCommit: ac9aa9e700c7ac20989ab9a442a3685a9549877f
+  queueId: 20260304T085841Z-ljwx-stock-kline-etl-sha-843f57f
+  argocdApp: ljwx-stock-kline-etl-dev
+  overlayPath: apps/stock-etl/overlays/ljwx-stock/kustomization.yaml
+  syncedAt: '2026-03-04T08:59:17Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}

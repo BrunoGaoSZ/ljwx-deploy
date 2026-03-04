@@ -9,4 +9,4 @@ images:
   digest: sha256:de786efecae699778f537605dd956002f1dc706b7fe14bc76a03069bfc7e3d15
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
-  digest: sha256:c450753bfd8dc454c59e562593b1911d3d817c11dd836d23a47180a44722a156
+  digest: sha256:e406266dfcd0fff5f58842ec0adc9b1231f65b8e97d439372793baede81c7f92
