@@ -6,19 +6,17 @@ source:
   commit: 77fc7d7
   workflowRun: ''
 image:
-  ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:be230483d71904d72aed4d0983806f1e6a0004c7cb70e928bcd49592a9edfac7
-  harbor: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:be230483d71904d72aed4d0983806f1e6a0004c7cb70e928bcd49592a9edfac7
-  deployed: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:be230483d71904d72aed4d0983806f1e6a0004c7cb70e928bcd49592a9edfac7
+  ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:1d168995293ae6eb4b0a6e467ca53d0a2ca9a8c4b46c232b1ae9268a846059a4
+  harbor: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:1d168995293ae6eb4b0a6e467ca53d0a2ca9a8c4b46c232b1ae9268a846059a4
+  deployed: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:1d168995293ae6eb4b0a6e467ca53d0a2ca9a8c4b46c232b1ae9268a846059a4
 deploy:
-  deployRepoCommit: 30cb607d852b54a5b103ecb4204ab4888d0959ce
-  queueId: 20260304T055121Z-ljwx-platform-sha-77fc7d7
-  argocdApp: ljwx-platform-prod
+  deployRepoCommit: 70221eed834eba707cbfece48642960c48926d58
+  queueId: 20260304T070451Z-ljwx-platform-sha-77fc7d7
+  argocdApp: ljwx-platform
   overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
-  syncedAt: '2026-03-04T06:00:15Z'
-  smokedAt: '2026-03-04T07:03:45Z'
+  syncedAt: '2026-03-04T07:10:12Z'
 tests:
   smoke:
-    status: pass
-    checkedAt: '2026-03-04T07:03:45Z'
-    details: argocd check skipped; endpoint=200 body='{"code":200,"message":"success","data":{"status":"UP"},"traceId":"d530f906-bb96-4967-8486-fdd21b49d427"}'
+    status: pending
+    checkedAt: ''
 approvals: {}
