@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ingress-grafnana.yaml
+
+configMapGenerator:
+  - name: ljwx-platform-observability-dashboard
+    files:
+      - ljwx-platform-observability.json=dashboards/ljwx-platform-observability.json
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: ljwx-platform
+    app.kubernetes.io/component: observability

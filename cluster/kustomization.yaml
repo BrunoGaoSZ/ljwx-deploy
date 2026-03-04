@@ -3,6 +3,7 @@ resources:
   - namespace-ljwx-website-dev.yaml
   - namespace-ljwx-bookstore.yaml
   - website-dev-application.yaml
+  - ljwx-platform-observability-application.yaml
   - deploy-promoter-cronjob.yaml
   - smoke-runner-cronjob.yaml
   - regcred.yaml

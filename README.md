@@ -7,6 +7,7 @@ GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 - 运行验证：`bash scripts/verify.sh`
 - Harbor 复制：`docs/harbor-replication-ghcr.md`
 - Promoter/Argo/Smoke 运维：`docs/ops-runbook.md`
+- Grafana 可观测看板 + TLS（GitOps）：`apps/ljwx-platform-observability/`
 - 双 k3s 同代码部署规范：`docs/dual-k3s-deployment.md`
 - CronJob secret 示例：`cluster/deploy-promoter-secret.example.yaml`
 - 模板化批量接入：`docs/onboarding-automation.md`

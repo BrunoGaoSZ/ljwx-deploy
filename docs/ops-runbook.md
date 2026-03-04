@@ -20,6 +20,28 @@ Cluster rule:
 - same GitOps source code for local `k3s` and OrbStack `k3s`
 - cluster variance only via profile files (`SERVICE_MAP_PATH`, `SMOKE_TARGETS`)
 
+## Grafana dashboard + TLS (GitOps)
+
+`ljwx-platform` observability dashboard and Grafana ingress certificate are managed by Argo Application:
+
+- `cluster/ljwx-platform-observability-application.yaml`
+- source path: `apps/ljwx-platform-observability/overlays/prod`
+
+Managed resources:
+
+- `ConfigMap/monitoring/ljwx-platform-observability-dashboard` (label `grafana_dashboard=1`)
+- `Ingress/monitoring/grafnana-ingress` (host: `grafnana.lingjingwanxiang.cn`)
+- cert-manager ingress-shim certificate secret: `grafnana-lingjingwanxiang-cn-tls`
+
+Validation:
+
+```bash
+kubectl -n argocd get app ljwx-platform-observability
+kubectl -n monitoring get ingress grafnana-ingress
+kubectl -n monitoring get certificate grafnana-lingjingwanxiang-cn -o wide
+kubectl -n monitoring get cm ljwx-platform-observability-dashboard
+```
+
 ## 1) Observe deploy-promoter
 
 ```bash
