@@ -2,8 +2,8 @@
 
 | service | env | harbor digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
+| ljwx-platform | prod | `1d168995293ae6eb` | 2026-03-04T07:10:12Z | pending | - |
 | ljwx-platform | prod | `4191f2e577b26b95` | 2026-03-04T07:00:44Z | pending | - |
-| ljwx-platform | prod | `be230483d71904d7` | 2026-03-04T06:00:15Z | pass | - |
 | ljwx-platform | prod | `a345d00820df1807` | 2026-03-04T05:30:13Z | pass | - |
 | ljwx-platform | prod | `dc16eb93e6040872` | 2026-03-04T05:10:12Z | pass | - |
 | ljwx-platform | prod | `bb2f76af5a78e85f` | 2026-03-04T05:00:14Z | pending | - |
