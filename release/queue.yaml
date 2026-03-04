@@ -1,34 +1,4 @@
-pending:
-- id: 20260304T074802Z-ljwx-stock-qlib-predict-sha-ddc1fdf
-  service: ljwx-stock-qlib-predict
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:de786efecae699778f537605dd956002f1dc706b7fe14bc76a03069bfc7e3d15
-    tag: sha-ddc1fdf
-    digest: sha256:de786efecae699778f537605dd956002f1dc706b7fe14bc76a03069bfc7e3d15
-    gitSha: ddc1fdf
-  createdAt: '2026-03-04T07:48:02Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
-- id: 20260304T074808Z-ljwx-platform-sha-4021cca
-  service: ljwx-platform
-  env: prod
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:a2345cfd2f6e4657c20b8d1199684645327b7229c15019593b1d751567eb28ea
-    tag: sha-4021cca
-    digest: sha256:a2345cfd2f6e4657c20b8d1199684645327b7229c15019593b1d751567eb28ea
-    gitSha: 4021ccadc5600865341646110c664b6a952b0ee7
-  createdAt: '2026-03-04T07:48:08Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
+pending: []
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
@@ -341,6 +311,36 @@ promoted:
   attempts: 0
   lastError: ''
   promotedAt: '2026-03-04T07:40:18Z'
+  supersededAt: ''
+  failedAt: ''
+- id: 20260304T074802Z-ljwx-stock-qlib-predict-sha-ddc1fdf
+  service: ljwx-stock-qlib-predict
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:de786efecae699778f537605dd956002f1dc706b7fe14bc76a03069bfc7e3d15
+    tag: sha-ddc1fdf
+    digest: sha256:de786efecae699778f537605dd956002f1dc706b7fe14bc76a03069bfc7e3d15
+    gitSha: ddc1fdf
+  createdAt: '2026-03-04T07:48:02Z'
+  status: promoted
+  attempts: 0
+  lastError: ''
+  promotedAt: '2026-03-04T07:49:45Z'
+  supersededAt: ''
+  failedAt: ''
+- id: 20260304T074808Z-ljwx-platform-sha-4021cca
+  service: ljwx-platform
+  env: prod
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:a2345cfd2f6e4657c20b8d1199684645327b7229c15019593b1d751567eb28ea
+    tag: sha-4021cca
+    digest: sha256:a2345cfd2f6e4657c20b8d1199684645327b7229c15019593b1d751567eb28ea
+    gitSha: 4021ccadc5600865341646110c664b6a952b0ee7
+  createdAt: '2026-03-04T07:48:08Z'
+  status: promoted
+  attempts: 0
+  lastError: ''
+  promotedAt: '2026-03-04T07:49:45Z'
   supersededAt: ''
   failedAt: ''
 failed: []

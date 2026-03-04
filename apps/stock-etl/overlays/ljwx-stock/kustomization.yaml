@@ -1,11 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: ljwx-stock
-
 resources:
-  - ../../base
-
+- ../../base
 images:
-  - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
-    newTag: bootstrap
+- name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
+  newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
+  digest: sha256:de786efecae699778f537605dd956002f1dc706b7fe14bc76a03069bfc7e3d15

@@ -6,7 +6,7 @@ resources:
 - runtime-config.yaml
 images:
 - name: ghcr.io/brunogao/ljwx-platform/ljwx-platform
-  digest: sha256:79d27329b7147c628c96cd60a231de746605685bd528cfcfacfc2ebc65e213b8
+  digest: sha256:a2345cfd2f6e4657c20b8d1199684645327b7229c15019593b1d751567eb28ea
   newName: ghcr.io/brunogao/ljwx-platform/ljwx-platform
 - name: ghcr.io/brunogao/ljwx-platform/ljwx-platform-admin-ui
   digest: sha256:a74f2a0111bf891d5d2259fa8d1671d88f70af0e2907b42dfc2a7717753521bb
