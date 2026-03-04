@@ -2,6 +2,7 @@
 
 | service | env | harbor digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
+| ljwx-stock-kline-etl | dev | `c450753bfd8dc454` | 2026-03-04T08:53:17Z | pending | - |
 | ljwx-platform | prod | `a2345cfd2f6e4657` | 2026-03-04T07:49:45Z | pass | - |
 | ljwx-stock-qlib-predict | dev | `de786efecae69977` | 2026-03-04T07:49:45Z | pending | - |
 | ljwx-platform | prod | `79d27329b7147c62` | 2026-03-04T07:40:18Z | pending | - |
