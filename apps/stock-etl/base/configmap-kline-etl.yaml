@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kline-etl-config
+data:
+  LOG_LEVEL: INFO
+  ADJUST: qfq
+  TRADING_DAYS: "1200"
+  DAILY_LOOKBACK_CALENDAR_DAYS: "7"
+  RECONCILE_LOOKBACK_CALENDAR_DAYS: "100"
+  BATCH_SIZE: "2000"
+  REQUEST_SLEEP_MS: "30"
+  REQUEST_RETRIES: "2"
+  SYMBOL_LIMIT: "0"
