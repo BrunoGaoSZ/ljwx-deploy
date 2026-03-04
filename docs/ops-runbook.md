@@ -38,7 +38,7 @@ Validation:
 ```bash
 kubectl -n argocd get app ljwx-platform-observability
 kubectl -n monitoring get ingress grafnana-ingress
-kubectl -n monitoring get certificate grafnana-lingjingwanxiang-cn -o wide
+kubectl -n monitoring get certificate grafnana-lingjingwanxiang-cn-tls -o wide
 kubectl -n monitoring get cm ljwx-platform-observability-dashboard
 ```
 
