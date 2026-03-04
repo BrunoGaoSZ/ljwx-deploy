@@ -1,19 +1,4 @@
-pending:
-- id: 20260304T005557Z-ljwx-platform-sha-2cfc52c
-  service: ljwx-platform
-  env: prod
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
-    tag: sha-2cfc52c
-    digest: sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
-    gitSha: 2cfc52cc03f7a515679b71e800ad572d9a0c5256
-  createdAt: '2026-03-04T00:55:57Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
+pending: []
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
@@ -116,6 +101,21 @@ promoted:
   attempts: 0
   lastError: ''
   promotedAt: '2026-03-04T00:10:13Z'
+  supersededAt: ''
+  failedAt: ''
+- id: 20260304T005557Z-ljwx-platform-sha-2cfc52c
+  service: ljwx-platform
+  env: prod
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
+    tag: sha-2cfc52c
+    digest: sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
+    gitSha: 2cfc52cc03f7a515679b71e800ad572d9a0c5256
+  createdAt: '2026-03-04T00:55:57Z'
+  status: promoted
+  attempts: 0
+  lastError: ''
+  promotedAt: '2026-03-04T01:00:16Z'
   supersededAt: ''
   failedAt: ''
 failed: []

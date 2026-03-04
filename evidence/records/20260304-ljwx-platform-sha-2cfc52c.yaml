@@ -1,0 +1,22 @@
+evidenceId: 20260304-ljwx-platform-sha-2cfc52c
+service: ljwx-platform
+env: prod
+source:
+  repo: ghcr.io/brunogao/ljwx-platform/ljwx-platform
+  commit: 2cfc52c
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
+  harbor: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
+  deployed: ghcr.io/brunogao/ljwx-platform/ljwx-platform@sha256:7c507a311fcc1c8f923830e7ab08aaf7bbde2b5fb4f727a4cab85cc69dc13d27
+deploy:
+  deployRepoCommit: 097334aa37908aa74b7c37f3a12eb0df89ff7c09
+  queueId: 20260304T005557Z-ljwx-platform-sha-2cfc52c
+  argocdApp: ljwx-platform-prod
+  overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
+  syncedAt: '2026-03-04T01:00:16Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}
