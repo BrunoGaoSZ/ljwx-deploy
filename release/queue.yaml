@@ -77,6 +77,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260305T142803Z-ljwx-website-sha-f05d6f6
+  service: ljwx-website
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-website@sha256:e3fc55ee8ce8eb9a3e0c18aa451d5f04536fc8104e395faaeb30ad69e005ca2e
+    tag: sha-f05d6f6
+    digest: sha256:e3fc55ee8ce8eb9a3e0c18aa451d5f04536fc8104e395faaeb30ad69e005ca2e
+    gitSha: f05d6f6
+  createdAt: '2026-03-05T14:28:03Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
