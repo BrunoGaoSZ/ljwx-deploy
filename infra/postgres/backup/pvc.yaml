@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgbackrest-repo
+  namespace: infra
+  labels:
+    app: postgres
+    component: backup
+    managed-by: gitops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi  # Should be at least 2x database size
+  # storageClassName: standard  # Adjust based on your cluster

@@ -7,6 +7,9 @@ cd "$ROOT_DIR"
 echo "[verify] validate release queue shape"
 uvx --with pyyaml python scripts/promoter/validate_queue.py
 
+echo "[verify] pgvector guard"
+bash scripts/ops/check-pgvector.sh
+
 echo "[verify] validate and collect evidence feed"
 uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
 uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md

@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: infra
+  labels:
+    app: postgres
+    component: database
+    managed-by: gitops
+data:
+  # PostgreSQL configuration
+  # Connections
+  MAX_CONNECTIONS: "200"
+
+  # Memory settings (for 2GB RAM allocation)
+  SHARED_BUFFERS: "512MB"
+  EFFECTIVE_CACHE_SIZE: "1536MB"
+  MAINTENANCE_WORK_MEM: "128MB"
+  WORK_MEM: "2621kB"
+
+  # WAL settings (for backup and PITR)
+  WAL_LEVEL: "replica"
+  MAX_WAL_SIZE: "1GB"
+  MIN_WAL_SIZE: "80MB"
+  ARCHIVE_MODE: "on"
+  ARCHIVE_COMMAND: "test ! -f /var/lib/postgresql/wal_archive/%f && cp %p /var/lib/postgresql/wal_archive/%f"
+
+  # Performance
+  RANDOM_PAGE_COST: "1.1"
+  EFFECTIVE_IO_CONCURRENCY: "200"
+
+  # Logging
+  LOGGING_COLLECTOR: "on"
+  LOG_DIRECTORY: "/var/log/postgresql"
+  LOG_FILENAME: "postgresql-%Y-%m-%d.log"
+  LOG_ROTATION_AGE: "1d"
+  LOG_ROTATION_SIZE: "100MB"
+  LOG_MIN_DURATION_STATEMENT: "1000"  # Log queries slower than 1s
+
+  # pg_hba.conf - Client Authentication Configuration
+  pg_hba.conf: |
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+    # "local" is for Unix domain socket connections only
+    local   all             all                                     trust
+
+    # IPv4 local connections:
+    host    all             all             127.0.0.1/32            trust
+
+    # IPv6 local connections:
+    host    all             all             ::1/128                 trust
+
+    # Allow connections from pod network (for provisioning and apps)
+    host    all             all             10.42.0.0/16            scram-sha-256
+
+    # Allow replication connections from localhost
+    local   replication     all                                     trust
+    host    replication     all             127.0.0.1/32            trust
+    host    replication     all             ::1/128                 trust

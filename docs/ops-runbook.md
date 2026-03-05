@@ -98,13 +98,17 @@ Queue health metrics are generated at `evidence/metrics/queue-health.json`.
    - Ensure `ghcr-pull` exists in `dev`.
    - Ensure `dev/default` ServiceAccount includes `imagePullSecrets: [{name: ghcr-pull}]`.
    - Recreate stuck jobs after secret/SA fix.
-3. Queue entry stuck in `failed`:
+3. pgvector regression risk (`ljwx-chat` migration fails on `vector` extension):
+   - PR Gate blocks merge when `infra/postgres` is not `pgvector/pgvector:pg16`.
+   - Local static check: `bash scripts/ops/check-pgvector.sh`
+   - Runtime check (k3s): `bash scripts/ops/check-pgvector.sh --runtime`
+4. Queue entry stuck in `failed`:
    - Fix source image/tag/digest.
    - Re-enqueue with a new queue `id`.
-4. Argo app not healthy:
+5. Argo app not healthy:
    - Check sync errors/events in `kubectl -n argocd describe application <app-name>`.
    - Fix manifest/resource issue and re-sync.
-5. Smoke failed:
+6. Smoke failed:
    - Inspect `tests.smoke.details` in evidence record.
    - Confirm endpoint DNS/service/ingress and app readiness probe behavior.
 
