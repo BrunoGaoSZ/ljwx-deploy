@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ljwx-dify-upgrade-db
+  labels:
+    app.kubernetes.io/name: ljwx-dify
+    app.kubernetes.io/component: db-migration
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ljwx-dify
+        app.kubernetes.io/component: db-migration
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-pull
+        - name: regcred
+      containers:
+        - name: upgrade-db
+          image: ghcr.io/brunogao/ljwx-dify-api:latest
+          command:
+            - /bin/sh
+            - -lc
+            - |
+              set -e
+              echo "Starting Dify database migration..."
+              /app/api/.venv/bin/flask upgrade-db
+              echo "Dify database migration completed."
+          envFrom:
+            - configMapRef:
+                name: ljwx-dify-config
+            - secretRef:
+                name: ljwx-dify-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"

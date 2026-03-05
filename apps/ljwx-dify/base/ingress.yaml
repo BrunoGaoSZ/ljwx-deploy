@@ -3,11 +3,17 @@ kind: Ingress
 metadata:
   name: ljwx-dify
   annotations:
+    cert-manager.io/cluster-issuer: dnspod-letsencrypt
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "100m"
     nginx.ingress.kubernetes.io/websocket-services: "api"
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - dify.lingjingwanxiang.cn
+      secretName: dify-lingjingwanxiang-cn-tls
   rules:
     - host: dify.lingjingwanxiang.cn
       http:
