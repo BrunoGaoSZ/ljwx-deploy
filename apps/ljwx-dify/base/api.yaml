@@ -25,6 +25,7 @@ spec:
         app: ljwx-dify-api
     spec:
       imagePullSecrets:
+        - name: ghcr-pull
         - name: regcred
       containers:
         - name: api

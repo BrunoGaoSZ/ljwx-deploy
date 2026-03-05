@@ -13,6 +13,7 @@ spec:
         app: ljwx-chat
     spec:
       imagePullSecrets:
+        - name: ghcr-pull
         - name: regcred
       containers:
         - name: ljwx-chat
