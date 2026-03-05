@@ -29,6 +29,24 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260305T141516Z-ljwx-website-sha-e2eprod141516
+  service: ljwx-website
+  env: dev
+  source:
+    ghcr: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
+    tag: sha-e2eprod141516
+    digest: sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
+    gitSha: e2e-prod-flow
+  createdAt: '2026-03-05T14:15:16Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
+  meta:
+    manualE2E: true
+    note: website prod flow test
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
