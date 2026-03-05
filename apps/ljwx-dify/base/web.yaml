@@ -28,7 +28,7 @@ spec:
         - name: regcred
       containers:
         - name: web
-          image: ghcr.io/brunogaosz/ljwx-dify-web:latest
+          image: ghcr.io/brunogao/ljwx-dify-web:latest
           ports:
             - containerPort: 3000
               name: http

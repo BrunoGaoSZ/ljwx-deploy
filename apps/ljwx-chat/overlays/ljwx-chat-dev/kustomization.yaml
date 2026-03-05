@@ -7,6 +7,6 @@ resources:
   - ../../base
 
 images:
-  - name: ghcr.io/brunogaosz/ljwx-chat
-    newName: ghcr.io/brunogaosz/ljwx-chat
+  - name: ghcr.io/brunogao/ljwx-chat
+    newName: ghcr.io/brunogao/ljwx-chat
     newTag: latest
