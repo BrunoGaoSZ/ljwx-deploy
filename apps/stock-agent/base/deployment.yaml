@@ -65,6 +65,56 @@ spec:
                 configMapKeyRef:
                   name: stock-agent-config
                   key: MAX_TOKENS_PER_RUN
+            - name: DB_POOL_MIN_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: DB_POOL_MIN_SIZE
+            - name: DB_POOL_MAX_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: DB_POOL_MAX_SIZE
+            - name: DB_POOL_TIMEOUT_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: DB_POOL_TIMEOUT_SECONDS
+            - name: DB_COMMAND_TIMEOUT_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: DB_COMMAND_TIMEOUT_SECONDS
+            - name: KLINE_QUERY_TIMEOUT_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: KLINE_QUERY_TIMEOUT_SECONDS
+            - name: KLINE_DEFAULT_LIMIT
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: KLINE_DEFAULT_LIMIT
+            - name: KLINE_MAX_LIMIT
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: KLINE_MAX_LIMIT
+            - name: KLINE_BULK_PER_SYMBOL_LIMIT
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: KLINE_BULK_PER_SYMBOL_LIMIT
+            - name: KLINE_BULK_MAX_SYMBOLS
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: KLINE_BULK_MAX_SYMBOLS
+            - name: KLINE_BULK_MAX_ROWS
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: KLINE_BULK_MAX_ROWS
             - name: CANDIDATE_POOL_SIZE
               valueFrom:
                 configMapKeyRef:
@@ -75,6 +125,31 @@ spec:
                 configMapKeyRef:
                   name: stock-agent-config
                   key: DISPLAY_TOP_N
+            - name: MIN_AMOUNT_AVG
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: MIN_AMOUNT_AVG
+            - name: LOOKBACK_DAYS_CALENDAR
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: LOOKBACK_DAYS_CALENDAR
+            - name: STRATEGY_WEIGHT_MOMENTUM_RULE_V1
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: STRATEGY_WEIGHT_MOMENTUM_RULE_V1
+            - name: STRATEGY_WEIGHT_TECHNICAL_PATTERN_V1
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: STRATEGY_WEIGHT_TECHNICAL_PATTERN_V1
+            - name: STRATEGY_WEIGHT_QLIB_RECO_READER_V1
+              valueFrom:
+                configMapKeyRef:
+                  name: stock-agent-config
+                  key: STRATEGY_WEIGHT_QLIB_RECO_READER_V1
             - name: WRITE_RECO
               valueFrom:
                 configMapKeyRef:
