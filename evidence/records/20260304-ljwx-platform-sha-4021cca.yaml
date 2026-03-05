@@ -15,10 +15,10 @@ deploy:
   argocdApp: ljwx-platform-prod
   overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
   syncedAt: '2026-03-04T07:49:45Z'
-  smokedAt: '2026-03-05T01:33:14Z'
+  smokedAt: '2026-03-05T01:48:13Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-05T01:33:14Z'
-    details: argocd check skipped; endpoint=200 body='{"code":200,"message":"success","data":{"status":"UP"},"traceId":"95eb34ea-b9df-47e7-8b1d-0705477446d9"}'
+    checkedAt: '2026-03-05T01:48:13Z'
+    details: argocd check skipped; endpoint=200 body='{"code":200,"message":"success","data":{"status":"UP"},"traceId":"5757a35a-8e89-46c7-a61b-fa40b75e0620"}'
 approvals: {}

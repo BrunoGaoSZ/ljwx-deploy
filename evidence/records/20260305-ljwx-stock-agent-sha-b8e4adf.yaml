@@ -15,10 +15,10 @@ deploy:
   argocdApp: ljwx-stock-agent-dev
   overlayPath: apps/stock-agent/overlays/ljwx-stock/kustomization.yaml
   syncedAt: '2026-03-05T00:40:12Z'
-  smokedAt: '2026-03-05T01:33:14Z'
+  smokedAt: '2026-03-05T01:48:13Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-05T01:33:14Z'
+    checkedAt: '2026-03-05T01:48:13Z'
     details: argocd check skipped; endpoint=200 body='{"status":"ok"}'
 approvals: {}
