@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - configmap.yaml
   - job-upgrade-db.yaml
+  - job-configure-default-llm.yaml
   - pvc.yaml
   - api.yaml
   - worker.yaml
