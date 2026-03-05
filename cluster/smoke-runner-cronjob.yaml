@@ -20,7 +20,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: smoke-runner
-              image: ghcr.io/brunogaosz/ljwx-deploy-promoter:main
+              image: ghcr.io/brunogao/ljwx-deploy-promoter:main
               imagePullPolicy: Always
               env:
                 - name: GIT_BRANCH

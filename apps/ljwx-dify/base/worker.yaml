@@ -13,6 +13,7 @@ spec:
         app: ljwx-dify-worker
     spec:
       imagePullSecrets:
+        - name: ghcr-pull
         - name: regcred
       containers:
         - name: worker

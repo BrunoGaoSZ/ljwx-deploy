@@ -17,6 +17,7 @@ spec:
         component: web
     spec:
       imagePullSecrets:
+        - name: ghcr-pull
         - name: regcred
       containers:
         - name: ljwx-website
