@@ -14,6 +14,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260305T130859Z-ljwx-stock-qlib-predict-sha-887d1b0
+  service: ljwx-stock-qlib-predict
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:d448e7fad7757e8a9a5fdfa56b8ca684822bfdbbf853344eca116c6d9b4b209f
+    tag: sha-887d1b0
+    digest: sha256:d448e7fad7757e8a9a5fdfa56b8ca684822bfdbbf853344eca116c6d9b4b209f
+    gitSha: 887d1b0
+  createdAt: '2026-03-05T13:08:59Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
