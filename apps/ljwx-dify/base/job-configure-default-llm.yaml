@@ -112,7 +112,7 @@ spec:
                       headers["Content-Type"] = "application/json"
                       body_bytes = json.dumps(payload).encode("utf-8")
 
-                  if csrf_token and method.upper() not in {"GET", "HEAD", "OPTIONS"}:
+                  if csrf_token:
                       headers["X-CSRF-Token"] = csrf_token
 
                   req = urllib.request.Request(url=url, data=body_bytes, headers=headers, method=method.upper())
