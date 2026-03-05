@@ -1,4 +1,19 @@
-pending: []
+pending:
+- id: 20260305T071812Z-ljwx-website-sha-905bafb
+  service: ljwx-website
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-website@sha256:a24372e24753139928d3a3252d7a3348ebd714fec83c987ac3cce21cb1e43adb
+    tag: sha-905bafb
+    digest: sha256:a24372e24753139928d3a3252d7a3348ebd714fec83c987ac3cce21cb1e43adb
+    gitSha: 905bafb
+  createdAt: '2026-03-05T07:18:12Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
