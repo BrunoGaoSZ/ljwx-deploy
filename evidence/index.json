@@ -2,7 +2,7 @@
   {
     "evidenceId": "20260305-ljwx-website-sha-e2efinal143105",
     "service": "ljwx-website",
-    "env": "dev",
+    "env": "prod",
     "source": {
       "repo": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website",
       "commit": "e2efinal143105",
@@ -10,22 +10,20 @@
     },
     "image": {
       "ghcr": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9",
-      "harbor": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9",
-      "deployed": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9"
+      "harbor": "harbor.omniverseai.net/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9",
+      "deployed": "harbor.omniverseai.net/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9"
     },
     "deploy": {
-      "deployRepoCommit": "ca0ace2b0de04b308d693f0da38f9eca72d9dae1",
-      "queueId": "20260305T143105Z-ljwx-website-sha-e2efinal",
-      "argocdApp": "ljwx-website-dev",
-      "overlayPath": "apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml",
-      "syncedAt": "2026-03-05T14:34:16Z",
-      "smokedAt": "2026-03-05T14:35:54Z"
+      "deployRepoCommit": "727ea66a3204d98ee6906f5a44a41a4aa993e3c7",
+      "queueId": "20260305T143554Z-ljwx-website-sha-e2efinal143105-prod",
+      "argocdApp": "ljwx-website-prod",
+      "overlayPath": "apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml",
+      "syncedAt": "2026-03-05T14:36:45Z"
     },
     "tests": {
       "smoke": {
-        "status": "pass",
-        "checkedAt": "2026-03-05T14:35:54Z",
-        "details": "argocd check skipped; endpoint=200 body='healthy '"
+        "status": "pending",
+        "checkedAt": ""
       }
     },
     "approvals": {},

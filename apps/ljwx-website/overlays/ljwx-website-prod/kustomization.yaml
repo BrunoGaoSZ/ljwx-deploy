@@ -5,8 +5,8 @@ resources:
 - ../../base
 images:
 - name: ghcr.io/brunogao/ljwx-website
-  newName: ghcr.io/brunogao/ljwx-website
-  newTag: latest
+  newName: harbor.omniverseai.net/ljwx/ljwx-website
+  digest: sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
 replicas:
 - name: ljwx-website
   count: 2
