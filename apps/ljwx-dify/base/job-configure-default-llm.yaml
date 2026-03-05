@@ -1,0 +1,454 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ljwx-dify-configure-default-llm
+  labels:
+    app.kubernetes.io/name: ljwx-dify
+    app.kubernetes.io/component: default-llm-config
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ljwx-dify
+        app.kubernetes.io/component: default-llm-config
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-pull
+        - name: regcred
+      containers:
+        - name: configure-default-llm
+          image: ghcr.io/brunogao/ljwx-dify-api:latest
+          command:
+            - /bin/sh
+            - -lc
+            - |
+              set -eu
+              /app/api/.venv/bin/python - <<'PY'
+              import base64
+              import json
+              import os
+              import sys
+              import time
+              import urllib.error
+              import urllib.parse
+              import urllib.request
+              from http.cookiejar import CookieJar
+              from typing import Any
+
+
+              API_BASE = os.getenv("DIFY_API_BASE_URL", "http://api:5001").rstrip("/")
+              CONSOLE_API_BASE = os.getenv("DIFY_CONSOLE_API_BASE", f"{API_BASE}/console/api").rstrip("/")
+              WAIT_SECONDS = int(os.getenv("DIFY_INIT_WAIT_SECONDS", "300"))
+              REQUEST_TIMEOUT_SECONDS = int(os.getenv("DIFY_INIT_REQUEST_TIMEOUT_SECONDS", "15"))
+
+              ADMIN_EMAIL = os.getenv("DIFY_ADMIN_EMAIL", "").strip()
+              ADMIN_NAME = os.getenv("DIFY_ADMIN_NAME", "Admin").strip() or "Admin"
+              ADMIN_PASSWORD = os.getenv("DIFY_ADMIN_PASSWORD", "").strip()
+              INIT_PASSWORD = os.getenv("DIFY_INIT_PASSWORD", "").strip()
+
+              PROVIDER_HINT = os.getenv("DIFY_DEFAULT_LLM_PROVIDER", "anthropic").strip() or "anthropic"
+              DEFAULT_MODEL = os.getenv("DIFY_DEFAULT_LLM_MODEL", "claude-sonnet-4-6").strip()
+              ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
+              ANTHROPIC_BASE_URL = os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com").strip()
+
+
+              def fail(message: str) -> None:
+                  print(f"[ERROR] {message}", file=sys.stderr)
+                  sys.exit(1)
+
+
+              if not ADMIN_EMAIL:
+                  fail("缺少 DIFY_ADMIN_EMAIL，无法登录 Dify 控制台。")
+              if not ADMIN_PASSWORD:
+                  fail("缺少 DIFY_ADMIN_PASSWORD，无法登录 Dify 控制台。")
+              if not DEFAULT_MODEL:
+                  fail("缺少 DIFY_DEFAULT_LLM_MODEL，无法设置默认模型。")
+              if not ANTHROPIC_API_KEY:
+                  fail("缺少 ANTHROPIC_API_KEY，无法配置 Anthropic Provider。")
+
+              cookie_jar = CookieJar()
+              opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
+              csrf_token: str | None = None
+
+
+              def _decode_response(raw: bytes) -> tuple[Any | None, str]:
+                  text = raw.decode("utf-8", errors="replace")
+                  if not text:
+                      return None, ""
+                  try:
+                      return json.loads(text), text
+                  except json.JSONDecodeError:
+                      return None, text
+
+
+              def _error_text(body: Any | None, text: str) -> str:
+                  if isinstance(body, dict):
+                      code = body.get("code") or body.get("error_code")
+                      message = body.get("message") or body.get("description") or body.get("error")
+                      compact = json.dumps(body, ensure_ascii=False)
+                      return f"code={code}, message={message}, body={compact}"
+                  return text or "<empty>"
+
+
+              def request_json(
+                  method: str,
+                  path: str,
+                  payload: dict[str, Any] | None = None,
+                  expected_status: set[int] | None = None,
+              ) -> tuple[int, Any | None, str]:
+                  url = path if path.startswith("http") else f"{CONSOLE_API_BASE}{path}"
+                  headers = {
+                      "Accept": "application/json",
+                  }
+                  body_bytes = None
+                  if payload is not None:
+                      headers["Content-Type"] = "application/json"
+                      body_bytes = json.dumps(payload).encode("utf-8")
+
+                  if csrf_token and method.upper() not in {"GET", "HEAD", "OPTIONS"}:
+                      headers["X-CSRF-Token"] = csrf_token
+
+                  req = urllib.request.Request(url=url, data=body_bytes, headers=headers, method=method.upper())
+                  try:
+                      with opener.open(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
+                          status_code = resp.getcode()
+                          body, text = _decode_response(resp.read())
+                  except urllib.error.HTTPError as exc:
+                      status_code = exc.code
+                      body, text = _decode_response(exc.read())
+                      if expected_status and status_code in expected_status:
+                          return status_code, body, text
+                      fail(
+                          f"请求失败 {method.upper()} {url}，status={status_code}，{_error_text(body, text)}"
+                      )
+                  except Exception as exc:  # noqa: BLE001
+                      fail(f"请求异常 {method.upper()} {url}，error={exc}")
+
+                  if expected_status and status_code not in expected_status:
+                      fail(
+                          f"请求状态异常 {method.upper()} {url}，status={status_code}，{_error_text(body, text)}"
+                      )
+                  return status_code, body, text
+
+
+              def wait_for_api_ready() -> None:
+                  health_url = f"{API_BASE}/health"
+                  deadline = time.time() + WAIT_SECONDS
+                  last_error = ""
+                  while time.time() < deadline:
+                      try:
+                          with urllib.request.urlopen(health_url, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
+                              if resp.getcode() == 200:
+                                  print("[INFO] Dify API 健康检查通过。")
+                                  return
+                              last_error = f"status={resp.getcode()}"
+                      except Exception as exc:  # noqa: BLE001
+                          last_error = str(exc)
+                      print("[INFO] 等待 Dify API 就绪...")
+                      time.sleep(5)
+                  fail(f"Dify API 未在 {WAIT_SECONDS}s 内就绪，最后错误: {last_error}")
+
+
+              def login_console() -> None:
+                  global csrf_token
+                  nonlocal_csrf_token: str | None = None
+                  encoded_password = base64.b64encode(ADMIN_PASSWORD.encode("utf-8")).decode("utf-8")
+                  request_json(
+                      "POST",
+                      "/login",
+                      payload={
+                          "email": ADMIN_EMAIL,
+                          "password": encoded_password,
+                          "remember_me": False,
+                      },
+                      expected_status={200},
+                  )
+                  for cookie in cookie_jar:
+                      if cookie.name.endswith("csrf_token"):
+                          nonlocal_csrf_token = cookie.value
+                          break
+                  if not nonlocal_csrf_token:
+                      fail("登录成功但未获取 CSRF Token，无法继续调用写接口。")
+                  csrf_token = nonlocal_csrf_token
+                  print("[INFO] Dify 控制台登录成功。")
+
+
+              def ensure_setup() -> None:
+                  status, body, text = request_json("GET", "/setup", expected_status={200})
+                  if status != 200 or not isinstance(body, dict):
+                      fail(f"读取 setup 状态失败，body={text}")
+
+                  step = str(body.get("step", ""))
+                  if step == "finished":
+                      print("[INFO] Dify 已完成初始化。")
+                      return
+
+                  print("[INFO] Dify 尚未初始化，开始执行 setup。")
+                  if INIT_PASSWORD:
+                      init_status, init_body, init_text = request_json(
+                          "POST",
+                          "/init",
+                          payload={"password": INIT_PASSWORD},
+                          expected_status={201, 401, 403},
+                      )
+                      if init_status == 201:
+                          print("[INFO] init 校验已完成。")
+                      else:
+                          code = init_body.get("code") if isinstance(init_body, dict) else None
+                          if code == "already_setup":
+                              print("[INFO] init 已完成，继续执行。")
+                          else:
+                              fail(
+                                  f"init 校验失败，status={init_status}，{_error_text(init_body, init_text)}"
+                              )
+
+                  setup_status, setup_body, setup_text = request_json(
+                      "POST",
+                      "/setup",
+                      payload={
+                          "email": ADMIN_EMAIL,
+                          "name": ADMIN_NAME,
+                          "password": ADMIN_PASSWORD,
+                          "language": "zh-Hans",
+                      },
+                      expected_status={201, 401, 403},
+                  )
+                  if setup_status == 201:
+                      print("[INFO] Dify 初始化完成。")
+                      return
+
+                  setup_code = setup_body.get("code") if isinstance(setup_body, dict) else None
+                  if setup_code == "already_setup":
+                      print("[INFO] setup 已完成，继续执行后续配置。")
+                      return
+
+                  fail(
+                      f"Dify setup 失败，status={setup_status}，{_error_text(setup_body, setup_text)}"
+                  )
+
+
+              def list_llm_providers() -> list[dict[str, Any]]:
+                  _, body, text = request_json(
+                      "GET",
+                      "/workspaces/current/model-providers?model_type=llm",
+                      expected_status={200},
+                  )
+                  if not isinstance(body, dict) or not isinstance(body.get("data"), list):
+                      fail(f"读取 LLM provider 列表失败，body={text}")
+                  return body["data"]
+
+
+              def pick_provider(
+                  providers: list[dict[str, Any]],
+                  provider_hint: str,
+              ) -> dict[str, Any]:
+                  lower_hint = provider_hint.lower()
+
+                  for provider in providers:
+                      name = str(provider.get("provider", ""))
+                      if name.lower() == lower_hint:
+                          return provider
+
+                  for provider in providers:
+                      name = str(provider.get("provider", ""))
+                      if lower_hint in name.lower():
+                          return provider
+
+                  for provider in providers:
+                      name = str(provider.get("provider", ""))
+                      if name.split("/")[-1].lower() == lower_hint:
+                          return provider
+
+                  provider_names = [str(item.get("provider", "")) for item in providers]
+                  fail(f"未找到 provider={provider_hint}，当前可用: {provider_names}")
+
+
+              def build_provider_credentials(provider_item: dict[str, Any]) -> dict[str, str]:
+                  schema = provider_item.get("provider_credential_schema") or {}
+                  forms = schema.get("credential_form_schemas") if isinstance(schema, dict) else None
+
+                  known_value_map = {
+                      "anthropic_api_key": ANTHROPIC_API_KEY,
+                      "api_key": ANTHROPIC_API_KEY,
+                      "anthropic_api_url": ANTHROPIC_BASE_URL,
+                      "api_base": ANTHROPIC_BASE_URL,
+                      "base_url": ANTHROPIC_BASE_URL,
+                      "endpoint": ANTHROPIC_BASE_URL,
+                  }
+
+                  credentials: dict[str, str] = {}
+                  unresolved_required: list[str] = []
+
+                  if isinstance(forms, list):
+                      for form in forms:
+                          if not isinstance(form, dict):
+                              continue
+                          variable = str(form.get("variable", "")).strip()
+                          if not variable:
+                              continue
+                          lower_var = variable.lower()
+                          required = bool(form.get("required"))
+
+                          value = known_value_map.get(lower_var, "")
+                          if not value:
+                              if "key" in lower_var or "token" in lower_var:
+                                  value = ANTHROPIC_API_KEY
+                              elif "url" in lower_var or "base" in lower_var or "endpoint" in lower_var:
+                                  value = ANTHROPIC_BASE_URL
+
+                          if value:
+                              credentials[variable] = value
+                          elif required:
+                              unresolved_required.append(variable)
+
+                  if not credentials:
+                      credentials["anthropic_api_key"] = ANTHROPIC_API_KEY
+                      if ANTHROPIC_BASE_URL:
+                          credentials["anthropic_api_url"] = ANTHROPIC_BASE_URL
+
+                  if unresolved_required:
+                      fail(
+                          f"无法自动映射 provider 必填字段: {unresolved_required}，请补充 Job 变量映射。"
+                      )
+
+                  return credentials
+
+
+              def quote_provider_path(provider_name: str) -> str:
+                  return urllib.parse.quote(provider_name, safe="/")
+
+
+              def ensure_provider_credentials(provider_name: str, credentials: dict[str, str]) -> None:
+                  providers = list_llm_providers()
+                  provider_item = pick_provider(providers, provider_name)
+                  provider_name = str(provider_item.get("provider", provider_name))
+                  quoted_provider = quote_provider_path(provider_name)
+
+                  custom_cfg = provider_item.get("custom_configuration") or {}
+                  current_credential_id = custom_cfg.get("current_credential_id")
+                  available_credentials = custom_cfg.get("available_credentials") or []
+
+                  if not current_credential_id and available_credentials:
+                      first_credential = available_credentials[0]
+                      candidate_id = first_credential.get("credential_id")
+                      if candidate_id:
+                          request_json(
+                              "POST",
+                              f"/workspaces/current/model-providers/{quoted_provider}/credentials/switch",
+                              payload={"credential_id": candidate_id},
+                              expected_status={200},
+                          )
+                          current_credential_id = candidate_id
+                          print(f"[INFO] 已切换 provider 凭据到 {candidate_id}。")
+
+                  if current_credential_id:
+                      request_json(
+                          "PUT",
+                          f"/workspaces/current/model-providers/{quoted_provider}/credentials",
+                          payload={
+                              "credential_id": current_credential_id,
+                              "credentials": credentials,
+                          },
+                          expected_status={200},
+                      )
+                      print("[INFO] 已更新现有 Anthropic provider 凭据。")
+                  else:
+                      request_json(
+                          "POST",
+                          f"/workspaces/current/model-providers/{quoted_provider}/credentials",
+                          payload={"credentials": credentials},
+                          expected_status={201},
+                      )
+                      print("[INFO] 已创建 Anthropic provider 凭据。")
+
+                      providers_after = list_llm_providers()
+                      provider_item_after = pick_provider(providers_after, provider_name)
+                      custom_cfg_after = provider_item_after.get("custom_configuration") or {}
+                      current_after = custom_cfg_after.get("current_credential_id")
+                      available_after = custom_cfg_after.get("available_credentials") or []
+                      if not current_after and available_after:
+                          candidate_id = available_after[0].get("credential_id")
+                          if candidate_id:
+                              request_json(
+                                  "POST",
+                                  f"/workspaces/current/model-providers/{quoted_provider}/credentials/switch",
+                                  payload={"credential_id": candidate_id},
+                                  expected_status={200},
+                              )
+                              print(f"[INFO] 已激活新创建的 provider 凭据 {candidate_id}。")
+
+                  request_json(
+                      "POST",
+                      f"/workspaces/current/model-providers/{quoted_provider}/preferred-provider-type",
+                      payload={"preferred_provider_type": "custom"},
+                      expected_status={200},
+                  )
+                  print("[INFO] 已设置 provider 使用 custom 配置。")
+
+
+              def set_default_model(provider_name: str, model_name: str) -> None:
+                  request_json(
+                      "POST",
+                      "/workspaces/current/default-model",
+                      payload={
+                          "model_settings": [
+                              {
+                                  "model_type": "llm",
+                                  "provider": provider_name,
+                                  "model": model_name,
+                              }
+                          ]
+                      },
+                      expected_status={200},
+                  )
+                  _, body, text = request_json(
+                      "GET",
+                      "/workspaces/current/default-model?model_type=llm",
+                      expected_status={200},
+                  )
+                  if not isinstance(body, dict) or not isinstance(body.get("data"), dict):
+                      fail(f"默认模型校验失败，body={text}")
+                  current_model = body["data"].get("model")
+                  current_provider = body["data"].get("provider", {}).get("provider")
+                  if current_model != model_name or current_provider != provider_name:
+                      fail(
+                          f"默认模型未生效，期望 provider={provider_name}, model={model_name}；"
+                          f"实际 provider={current_provider}, model={current_model}"
+                      )
+                  print(
+                      f"[INFO] 默认 LLM 已设置为 provider={provider_name}, model={model_name}。"
+                  )
+
+
+              wait_for_api_ready()
+              ensure_setup()
+              login_console()
+
+              providers = list_llm_providers()
+              provider_item = pick_provider(providers, PROVIDER_HINT)
+              selected_provider_name = str(provider_item.get("provider", PROVIDER_HINT))
+              provider_credentials = build_provider_credentials(provider_item)
+
+              ensure_provider_credentials(selected_provider_name, provider_credentials)
+              set_default_model(selected_provider_name, DEFAULT_MODEL)
+              print("[INFO] Dify 默认 LLM 自动化配置完成。")
+              PY
+          envFrom:
+            - configMapRef:
+                name: ljwx-dify-config
+            - secretRef:
+                name: ljwx-dify-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"

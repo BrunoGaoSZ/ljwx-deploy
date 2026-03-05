@@ -33,3 +33,10 @@ data:
 
   PLUGIN_DAEMON_URL: "http://plugin-daemon:5002"
   PLUGIN_DAEMON_PORT: "5002"
+
+  DIFY_API_BASE_URL: "http://api:5001"
+  DIFY_CONSOLE_API_BASE: "http://api:5001/console/api"
+  DIFY_INIT_WAIT_SECONDS: "300"
+  DIFY_INIT_REQUEST_TIMEOUT_SECONDS: "15"
+  DIFY_DEFAULT_LLM_PROVIDER: "anthropic"
+  DIFY_DEFAULT_LLM_MODEL: "claude-sonnet-4-6"
