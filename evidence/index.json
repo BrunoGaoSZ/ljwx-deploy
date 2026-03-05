@@ -18,12 +18,14 @@
       "queueId": "20260305T143105Z-ljwx-website-sha-e2efinal",
       "argocdApp": "ljwx-website-dev",
       "overlayPath": "apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml",
-      "syncedAt": "2026-03-05T14:34:16Z"
+      "syncedAt": "2026-03-05T14:34:16Z",
+      "smokedAt": "2026-03-05T14:35:54Z"
     },
     "tests": {
       "smoke": {
-        "status": "pending",
-        "checkedAt": ""
+        "status": "pass",
+        "checkedAt": "2026-03-05T14:35:54Z",
+        "details": "argocd check skipped; endpoint=200 body='healthy '"
       }
     },
     "approvals": {},
