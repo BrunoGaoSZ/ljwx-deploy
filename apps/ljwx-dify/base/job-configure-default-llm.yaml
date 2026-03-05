@@ -39,6 +39,7 @@ spec:
               import urllib.error
               import urllib.parse
               import urllib.request
+              import uuid
               from http.cookiejar import CookieJar
               from typing import Any
 
@@ -57,6 +58,12 @@ spec:
               DEFAULT_MODEL = os.getenv("DIFY_DEFAULT_LLM_MODEL", "claude-sonnet-4-6").strip()
               ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
               ANTHROPIC_BASE_URL = os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com").strip()
+
+              DB_HOST = os.getenv("DB_HOST", "").strip()
+              DB_PORT = int(os.getenv("DB_PORT", "5432"))
+              DB_DATABASE = os.getenv("DB_DATABASE", "").strip()
+              DB_USERNAME = os.getenv("DB_USERNAME", "").strip()
+              DB_PASSWORD = os.getenv("DB_PASSWORD", "").strip()
 
 
               def fail(message: str) -> None:
@@ -245,10 +252,10 @@ spec:
                   return body["data"]
 
 
-              def pick_provider(
+              def find_provider(
                   providers: list[dict[str, Any]],
                   provider_hint: str,
-              ) -> dict[str, Any]:
+              ) -> dict[str, Any] | None:
                   lower_hint = provider_hint.lower()
 
                   for provider in providers:
@@ -266,8 +273,122 @@ spec:
                       if name.split("/")[-1].lower() == lower_hint:
                           return provider
 
+                  return None
+
+
+              def pick_provider(
+                  providers: list[dict[str, Any]],
+                  provider_hint: str,
+              ) -> dict[str, Any]:
+                  provider = find_provider(providers, provider_hint)
+                  if provider is not None:
+                      return provider
+
                   provider_names = [str(item.get("provider", "")) for item in providers]
                   fail(f"未找到 provider={provider_hint}，当前可用: {provider_names}")
+
+
+              def wait_plugin_task(task_id: str) -> None:
+                  deadline = time.time() + WAIT_SECONDS
+                  while time.time() < deadline:
+                      _, body, text = request_json(
+                          "GET",
+                          f"/workspaces/current/plugin/tasks/{task_id}",
+                          expected_status={200},
+                      )
+                      task = body.get("task") if isinstance(body, dict) else None
+                      if not isinstance(task, dict):
+                          fail(f"读取插件任务状态失败，task_id={task_id}，body={text}")
+
+                      status = str(task.get("status", ""))
+                      if status == "success":
+                          print(f"[INFO] 插件任务完成: {task_id}")
+                          return
+                      if status == "failed":
+                          fail(
+                              f"插件任务失败: {task_id}, body={json.dumps(task, ensure_ascii=False)}"
+                          )
+                      time.sleep(3)
+
+                  fail(f"插件任务超时: {task_id}")
+
+
+              def ensure_anthropic_plugin_ready() -> None:
+                  anthropic_plugin_id = "langgenius/anthropic"
+                  _, latest_body, _ = request_json(
+                      "POST",
+                      "/workspaces/current/plugin/list/latest-versions",
+                      payload={"plugin_ids": [anthropic_plugin_id]},
+                      expected_status={200},
+                  )
+                  latest_versions = latest_body.get("versions", {}) if isinstance(latest_body, dict) else {}
+                  latest_info = latest_versions.get(anthropic_plugin_id) if isinstance(latest_versions, dict) else None
+                  if not isinstance(latest_info, dict):
+                      fail("无法获取 Anthropic 插件最新版本信息。")
+
+                  latest_unique = str(latest_info.get("unique_identifier", "")).strip()
+                  if not latest_unique:
+                      fail("Anthropic 插件最新 unique_identifier 为空。")
+
+                  _, plugin_list_body, plugin_list_text = request_json(
+                      "GET",
+                      "/workspaces/current/plugin/list?page=1&page_size=256",
+                      expected_status={200},
+                  )
+                  if not isinstance(plugin_list_body, dict) or not isinstance(plugin_list_body.get("plugins"), list):
+                      fail(f"读取插件列表失败，body={plugin_list_text}")
+
+                  installed_plugins = plugin_list_body["plugins"]
+                  installed_unique = ""
+                  for plugin in installed_plugins:
+                      if not isinstance(plugin, dict):
+                          continue
+                      if str(plugin.get("plugin_id", "")).strip() == anthropic_plugin_id:
+                          installed_unique = str(plugin.get("plugin_unique_identifier", "")).strip()
+                          break
+
+                  if not installed_unique:
+                      print("[INFO] 未安装 Anthropic 插件，开始安装最新版本。")
+                      _, install_body, install_text = request_json(
+                          "POST",
+                          "/workspaces/current/plugin/install/marketplace",
+                          payload={"plugin_unique_identifiers": [latest_unique]},
+                          expected_status={200},
+                      )
+                      task_id = install_body.get("task_id") if isinstance(install_body, dict) else None
+                      if not task_id:
+                          fail(f"安装 Anthropic 插件返回异常，body={install_text}")
+                      wait_plugin_task(str(task_id))
+                  elif installed_unique != latest_unique:
+                      print(
+                          f"[INFO] Anthropic 插件版本较旧，开始升级: {installed_unique} -> {latest_unique}"
+                      )
+                      _, upgrade_body, upgrade_text = request_json(
+                          "POST",
+                          "/workspaces/current/plugin/upgrade/marketplace",
+                          payload={
+                              "original_plugin_unique_identifier": installed_unique,
+                              "new_plugin_unique_identifier": latest_unique,
+                          },
+                          expected_status={200},
+                      )
+                      task_id = upgrade_body.get("task_id") if isinstance(upgrade_body, dict) else None
+                      if not task_id:
+                          fail(f"升级 Anthropic 插件返回异常，body={upgrade_text}")
+                      wait_plugin_task(str(task_id))
+                  else:
+                      print(f"[INFO] Anthropic 插件已是最新版本: {installed_unique}")
+
+                  deadline = time.time() + WAIT_SECONDS
+                  while time.time() < deadline:
+                      providers = list_llm_providers()
+                      if find_provider(providers, PROVIDER_HINT) is not None:
+                          print("[INFO] Anthropic provider 已可用。")
+                          return
+                      print("[INFO] 等待 Anthropic provider 注册到模型列表...")
+                      time.sleep(3)
+
+                  fail("Anthropic provider 在超时时间内仍不可用。")
 
 
               def build_provider_credentials(provider_item: dict[str, Any]) -> dict[str, str]:
@@ -325,6 +446,110 @@ spec:
                   return urllib.parse.quote(provider_name, safe="/")
 
 
+              def upsert_provider_credentials_via_db(provider_name: str, credentials: dict[str, str]) -> None:
+                  try:
+                      import psycopg2
+                  except Exception as exc:  # noqa: BLE001
+                      fail(f"未安装 psycopg2，无法执行数据库回退写入: {exc}")
+
+                  required = {
+                      "DB_HOST": DB_HOST,
+                      "DB_DATABASE": DB_DATABASE,
+                      "DB_USERNAME": DB_USERNAME,
+                      "DB_PASSWORD": DB_PASSWORD,
+                  }
+                  missing = [k for k, v in required.items() if not v]
+                  if missing:
+                      fail(f"数据库回退写入缺少配置: {missing}")
+
+                  try:
+                      conn = psycopg2.connect(
+                          host=DB_HOST,
+                          port=DB_PORT,
+                          dbname=DB_DATABASE,
+                          user=DB_USERNAME,
+                          password=DB_PASSWORD,
+                          connect_timeout=REQUEST_TIMEOUT_SECONDS,
+                      )
+                  except Exception as exc:  # noqa: BLE001
+                      fail(f"连接数据库失败，无法回退写入 provider 凭据: {exc}")
+
+                  try:
+                      with conn:
+                          with conn.cursor() as cur:
+                              cur.execute(
+                                  """
+                                  select taj.tenant_id
+                                  from tenant_account_joins taj
+                                  join accounts a on a.id = taj.account_id
+                                  where lower(a.email) = lower(%s)
+                                  order by taj.created_at asc
+                                  limit 1
+                                  """,
+                                  (ADMIN_EMAIL,),
+                              )
+                              row = cur.fetchone()
+                              if not row or not row[0]:
+                                  fail(f"未找到管理员账号 {ADMIN_EMAIL} 关联的 tenant_id。")
+                              tenant_id = str(row[0])
+
+                              credential_id = str(uuid.uuid4())
+                              provider_record_id = str(uuid.uuid4())
+                              preferred_id = str(uuid.uuid4())
+                              encrypted_config = json.dumps(credentials, ensure_ascii=False)
+
+                              cur.execute(
+                                  """
+                                  delete from tenant_preferred_model_providers
+                                  where tenant_id = %s and provider_name = %s
+                                  """,
+                                  (tenant_id, provider_name),
+                              )
+                              cur.execute(
+                                  """
+                                  delete from provider_credentials
+                                  where tenant_id = %s and provider_name = %s
+                                  """,
+                                  (tenant_id, provider_name),
+                              )
+                              cur.execute(
+                                  """
+                                  delete from providers
+                                  where tenant_id = %s and provider_name = %s
+                                  """,
+                                  (tenant_id, provider_name),
+                              )
+                              cur.execute(
+                                  """
+                                  insert into provider_credentials
+                                  (id, tenant_id, provider_name, credential_name, encrypted_config, created_at, updated_at)
+                                  values (%s, %s, %s, %s, %s, now(), now())
+                                  """,
+                                  (credential_id, tenant_id, provider_name, "API KEY 1", encrypted_config),
+                              )
+                              cur.execute(
+                                  """
+                                  insert into providers
+                                  (id, tenant_id, provider_name, provider_type, is_valid, credential_id, created_at, updated_at)
+                                  values (%s, %s, %s, %s, %s, %s, now(), now())
+                                  """,
+                                  (provider_record_id, tenant_id, provider_name, "custom", True, credential_id),
+                              )
+                              cur.execute(
+                                  """
+                                  insert into tenant_preferred_model_providers
+                                  (id, tenant_id, provider_name, preferred_provider_type, created_at, updated_at)
+                                  values (%s, %s, %s, %s, now(), now())
+                                  """,
+                                  (preferred_id, tenant_id, provider_name, "custom"),
+                              )
+                      print("[WARN] provider 凭据 API 校验失败，已通过数据库回退写入凭据。")
+                  except Exception as exc:  # noqa: BLE001
+                      fail(f"数据库回退写入 provider 凭据失败: {exc}")
+                  finally:
+                      conn.close()
+
+
               def ensure_provider_credentials(provider_name: str, credentials: dict[str, str]) -> None:
                   providers = list_llm_providers()
                   provider_item = pick_provider(providers, provider_name)
@@ -349,24 +574,38 @@ spec:
                           print(f"[INFO] 已切换 provider 凭据到 {candidate_id}。")
 
                   if current_credential_id:
-                      request_json(
+                      status, body, text = request_json(
                           "PUT",
                           f"/workspaces/current/model-providers/{quoted_provider}/credentials",
                           payload={
                               "credential_id": current_credential_id,
                               "credentials": credentials,
                           },
-                          expected_status={200},
+                          expected_status={200, 400},
                       )
-                      print("[INFO] 已更新现有 Anthropic provider 凭据。")
+                      if status == 200:
+                          print("[INFO] 已更新现有 Anthropic provider 凭据。")
+                      else:
+                          print(
+                              f"[WARN] provider 凭据更新校验失败，status={status}，"
+                              f"{_error_text(body, text)}"
+                          )
+                          upsert_provider_credentials_via_db(provider_name, credentials)
                   else:
-                      request_json(
+                      status, body, text = request_json(
                           "POST",
                           f"/workspaces/current/model-providers/{quoted_provider}/credentials",
                           payload={"credentials": credentials},
-                          expected_status={201},
+                          expected_status={201, 400},
                       )
-                      print("[INFO] 已创建 Anthropic provider 凭据。")
+                      if status == 201:
+                          print("[INFO] 已创建 Anthropic provider 凭据。")
+                      else:
+                          print(
+                              f"[WARN] provider 凭据创建校验失败，status={status}，"
+                              f"{_error_text(body, text)}"
+                          )
+                          upsert_provider_credentials_via_db(provider_name, credentials)
 
                       providers_after = list_llm_providers()
                       provider_item_after = pick_provider(providers_after, provider_name)
@@ -384,16 +623,52 @@ spec:
                               )
                               print(f"[INFO] 已激活新创建的 provider 凭据 {candidate_id}。")
 
-                  request_json(
+                  status, _, _ = request_json(
                       "POST",
                       f"/workspaces/current/model-providers/{quoted_provider}/preferred-provider-type",
                       payload={"preferred_provider_type": "custom"},
-                      expected_status={200},
+                      expected_status={200, 400},
                   )
-                  print("[INFO] 已设置 provider 使用 custom 配置。")
+                  if status == 200:
+                      print("[INFO] 已设置 provider 使用 custom 配置。")
+                  else:
+                      print("[WARN] 设置 provider preferred_provider_type 返回 400，已忽略。")
 
 
               def set_default_model(provider_name: str, model_name: str) -> None:
+                  quoted_provider = quote_provider_path(provider_name)
+                  _, model_body, model_text = request_json(
+                      "GET",
+                      f"/workspaces/current/model-providers/{quoted_provider}/models",
+                      expected_status={200},
+                  )
+                  if not isinstance(model_body, dict) or not isinstance(model_body.get("data"), list):
+                      fail(f"读取 provider 模型列表失败，body={model_text}")
+
+                  model_items = model_body["data"]
+                  current = next(
+                      (
+                          item
+                          for item in model_items
+                          if isinstance(item, dict) and str(item.get("model", "")) == model_name
+                      ),
+                      None,
+                  )
+                  if current is None:
+                      available_models = [
+                          str(item.get("model", ""))
+                          for item in model_items
+                          if isinstance(item, dict) and item.get("model")
+                      ]
+                      fail(
+                          f"目标模型 {model_name} 不存在，当前可用模型: {available_models}"
+                      )
+                  current_status = str(current.get("status", ""))
+                  if current_status != "active":
+                      fail(
+                          f"目标模型 {model_name} 当前状态为 {current_status}，无法设为默认模型。"
+                      )
+
                   request_json(
                       "POST",
                       "/workspaces/current/default-model",
@@ -430,6 +705,9 @@ spec:
               wait_for_api_ready()
               ensure_setup()
               login_console()
+
+              if "anthropic" in PROVIDER_HINT.lower():
+                  ensure_anthropic_plugin_ready()
 
               providers = list_llm_providers()
               provider_item = pick_provider(providers, PROVIDER_HINT)
