@@ -1,11 +1,13 @@
 resources:
   - namespace-dev.yaml
   - namespace-ljwx-website-dev.yaml
+  - namespace-ljwx-website-prod.yaml
   - namespace-ljwx-dify-dev.yaml
   - namespace-ljwx-chat-dev.yaml
   - namespace-ljwx-bookstore.yaml
   - namespace-n8n.yaml
   - website-dev-application.yaml
+  - website-prod-application.yaml
   - ljwx-dify-dev-application.yaml
   - ljwx-chat-dev-application.yaml
   - n8n-dev-application.yaml
