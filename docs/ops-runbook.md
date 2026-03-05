@@ -135,7 +135,7 @@ python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence
 Results are recorded in each evidence file under `tests.smoke`.
 Queue health metrics are generated at `evidence/metrics/queue-health.json`.
 When `--auto-tag-local-harbor` is enabled, smoke pass will call Harbor API to add
-`prod-*` tag to local Harbor artifact.  
+`prod-*` tag to local Harbor artifact.
 When `--auto-enqueue-prod` is enabled, only tag-success entries will append `env=prod` pending entries.
 
 ## 4) Common failures

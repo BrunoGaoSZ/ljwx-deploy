@@ -1,6 +1,6 @@
 # Smart CS Data Contract（5 类数据统一契约）
 
-更新时间：2026-03-05  
+更新时间：2026-03-05
 适用范围：`ljwx-website`、`ljwx-chat`、`ljwx-dify`、`n8n`、`openclaw`、`langfuse`、`grafana`
 
 ## 1. 目标

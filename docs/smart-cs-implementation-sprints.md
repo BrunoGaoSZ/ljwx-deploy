@@ -1,6 +1,6 @@
 # 企业级智能客服系统实施清单（按 Sprint 执行，修订版）
 
-更新时间：2026-03-05  
+更新时间：2026-03-05
 适用环境：`ljwx-website`、`ljwx-chat`、`ljwx-dify`、`n8n`、`openclaw`、`k3s`（GitOps）
 
 ## 1. 角色与责任（必须绑定到具体人/组）
@@ -43,11 +43,11 @@
 
 ## 4. 每 Sprint 必过门禁
 
-1. 所有变更必须 PR 合并，禁止长期手工改集群。  
-2. `deploy-repo-gate` 与 `scripts/verify.sh` 必须通过。  
-3. 安全门禁必须通过：Secret 扫描、依赖漏洞扫描、IaC 配置扫描（高危阻断合并）。  
-4. `pgvector` 门禁按路径条件触发：仅当 PR 变更匹配 `apps/ljwx-dify/**`、`apps/n8n/**`、`config/dify/**`、`cluster/**postgres**` 时，必须执行 `scripts/ops/check-pgvector.sh`（必要时 `--runtime`）。  
-5. Argo 目标应用状态必须 `Synced/Healthy`。  
+1. 所有变更必须 PR 合并，禁止长期手工改集群。
+2. `deploy-repo-gate` 与 `scripts/verify.sh` 必须通过。
+3. 安全门禁必须通过：Secret 扫描、依赖漏洞扫描、IaC 配置扫描（高危阻断合并）。
+4. `pgvector` 门禁按路径条件触发：仅当 PR 变更匹配 `apps/ljwx-dify/**`、`apps/n8n/**`、`config/dify/**`、`cluster/**postgres**` 时，必须执行 `scripts/ops/check-pgvector.sh`（必要时 `--runtime`）。
+5. Argo 目标应用状态必须 `Synced/Healthy`。
 6. 发布后必须更新 evidence（smoke 与指标）。
 
 ## 5. S1 “四个入口”定义（必须可探测）
