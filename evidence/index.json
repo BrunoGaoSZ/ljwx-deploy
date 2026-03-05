@@ -19,12 +19,12 @@
       "argocdApp": "ljwx-chat-dev",
       "overlayPath": "apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T08:10:08Z",
-      "smokedAt": "2026-03-05T13:00:19Z"
+      "smokedAt": "2026-03-05T13:15:12Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T13:00:19Z",
+        "checkedAt": "2026-03-05T13:15:12Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html><!--HujP_xzH5aFuugdA_MY7x--><html dir=\"ltr\" lang=\"en-US\"><head><meta charSet=\"utf-8\"/><meta name=\"viewpor'"
       }
     },
@@ -51,12 +51,12 @@
       "argocdApp": "ljwx-dify-web-dev",
       "overlayPath": "apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T08:00:15Z",
-      "smokedAt": "2026-03-05T13:00:19Z"
+      "smokedAt": "2026-03-05T13:15:12Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T13:00:19Z",
+        "checkedAt": "2026-03-05T13:15:12Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html><html lang=\"en-US\" class=\"h-full __variable_1f5468\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" co'"
       }
     },
@@ -83,12 +83,12 @@
       "argocdApp": "ljwx-dify-dev",
       "overlayPath": "apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T07:50:07Z",
-      "smokedAt": "2026-03-05T13:00:18Z"
+      "smokedAt": "2026-03-05T13:15:11Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T13:00:18Z",
+        "checkedAt": "2026-03-05T13:15:11Z",
         "details": "argocd check skipped; endpoint=200 body='{\"pid\": 7, \"status\": \"ok\", \"version\": \"1.11.1\"}'"
       }
     },
@@ -147,12 +147,12 @@
       "argocdApp": "ljwx-website-dev",
       "overlayPath": "apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T07:39:09Z",
-      "smokedAt": "2026-03-05T13:00:16Z"
+      "smokedAt": "2026-03-05T13:15:10Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T13:00:16Z",
+        "checkedAt": "2026-03-05T13:15:10Z",
         "details": "argocd check skipped; endpoint=200 body='healthy '"
       }
     },
@@ -179,12 +179,12 @@
       "argocdApp": "ljwx-stock-agent-dev",
       "overlayPath": "apps/stock-agent/overlays/ljwx-stock/kustomization.yaml",
       "syncedAt": "2026-03-05T04:10:13Z",
-      "smokedAt": "2026-03-05T13:00:17Z"
+      "smokedAt": "2026-03-05T13:15:11Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T13:00:17Z",
+        "checkedAt": "2026-03-05T13:15:11Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"ok\"}'"
       }
     },
@@ -423,12 +423,12 @@
       "argocdApp": "ljwx-platform-prod",
       "overlayPath": "apps/ljwx-platform/overlays/prod/kustomization.yaml",
       "syncedAt": "2026-03-04T07:49:45Z",
-      "smokedAt": "2026-03-05T13:00:17Z"
+      "smokedAt": "2026-03-05T13:15:10Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T13:00:17Z",
+        "checkedAt": "2026-03-05T13:15:10Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"UP\"}'"
       }
     },
