@@ -1,5 +1,35 @@
 [
   {
+    "evidenceId": "20260305-ljwx-website-sha-e2efinal143105",
+    "service": "ljwx-website",
+    "env": "dev",
+    "source": {
+      "repo": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website",
+      "commit": "e2efinal143105",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9",
+      "harbor": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9",
+      "deployed": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9"
+    },
+    "deploy": {
+      "deployRepoCommit": "ca0ace2b0de04b308d693f0da38f9eca72d9dae1",
+      "queueId": "20260305T143105Z-ljwx-website-sha-e2efinal",
+      "argocdApp": "ljwx-website-dev",
+      "overlayPath": "apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml",
+      "syncedAt": "2026-03-05T14:34:16Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pending",
+        "checkedAt": ""
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260305-ljwx-website-sha-e2efinal143105.yaml"
+  },
+  {
     "evidenceId": "20260305-ljwx-chat-sha-50db64d",
     "service": "ljwx-chat",
     "env": "dev",

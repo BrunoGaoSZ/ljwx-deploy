@@ -8,8 +8,8 @@ patches:
 - path: deployment-probe.yaml
 images:
 - name: ghcr.io/brunogao/ljwx-website
-  newName: ghcr.io/brunogao/ljwx-website
-  digest: sha256:be26e0c85044cc520a12ff0be4b469a216e4e1b55106175f1156a749c1097ac4
+  newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website
+  digest: sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
 replicas:
 - name: ljwx-website
   count: 1
