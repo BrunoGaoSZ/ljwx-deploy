@@ -29,17 +29,22 @@ spec:
 
                   mc alias set qlib "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}"
 
-                  qdata_latest="$(mc cat "qlib/${MINIO_BUCKET}/${MINIO_PREFIX_QDATA}/LATEST" | tr -d '\r\n')"
+                  if ! mc ls "qlib/${MINIO_BUCKET}" >/dev/null 2>&1; then
+                    echo "MinIO bucket 不存在，跳过本次 qlib 同步: ${MINIO_BUCKET}"
+                    exit 0
+                  fi
+
+                  qdata_latest="$(mc cat "qlib/${MINIO_BUCKET}/${MINIO_PREFIX_QDATA}/LATEST" 2>/dev/null | tr -d '\r\n' || true)"
                   if [ -z "${qdata_latest}" ]; then
-                    echo "qlib_data LATEST 为空" >&2
-                    exit 1
+                    echo "qlib_data LATEST 不存在或为空，跳过本次 qlib 同步"
+                    exit 0
                   fi
 
                   model_family="qlib_lightgbm_alpha158"
-                  model_latest="$(mc cat "qlib/${MINIO_BUCKET}/${MINIO_PREFIX_MODELS}/${model_family}/LATEST" | tr -d '\r\n')"
+                  model_latest="$(mc cat "qlib/${MINIO_BUCKET}/${MINIO_PREFIX_MODELS}/${model_family}/LATEST" 2>/dev/null | tr -d '\r\n' || true)"
                   if [ -z "${model_latest}" ]; then
-                    echo "model LATEST 为空" >&2
-                    exit 1
+                    echo "model LATEST 不存在或为空，跳过本次 qlib 同步"
+                    exit 0
                   fi
 
                   mkdir -p /data/qlib/qlib_data/cn
@@ -94,9 +99,35 @@ spec:
               image: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict:bootstrap
               imagePullPolicy: IfNotPresent
               command:
-                - python
-                - -m
-                - qlib_predict.app.predict_to_pg
+                - /bin/sh
+                - -ec
+                - |
+                  set -euo pipefail
+
+                  MODEL_LATEST_FILE="/data/qlib/artifacts/models/qlib_lightgbm_alpha158/LATEST"
+                  if [ ! -f "${MODEL_LATEST_FILE}" ]; then
+                    echo "未检测到模型 LATEST，跳过本次预测"
+                    exit 0
+                  fi
+
+                  MODEL_DATE="$(tr -d '\r\n' < "${MODEL_LATEST_FILE}")"
+                  if [ -z "${MODEL_DATE}" ]; then
+                    echo "模型 LATEST 为空，跳过本次预测"
+                    exit 0
+                  fi
+
+                  MODEL_DIR="/data/qlib/artifacts/models/qlib_lightgbm_alpha158/${MODEL_DATE}"
+                  if [ ! -f "${MODEL_DIR}/model.pkl" ] || [ ! -f "${MODEL_DIR}/handler_config.yaml" ] || [ ! -f "${MODEL_DIR}/meta.json" ]; then
+                    echo "模型产物不完整，跳过本次预测: ${MODEL_DIR}"
+                    exit 0
+                  fi
+
+                  if [ ! -f "/data/qlib/qlib_data/cn/calendars/day.txt" ]; then
+                    echo "未检测到 qlib provider 数据，跳过本次预测"
+                    exit 0
+                  fi
+
+                  exec python -m qlib_predict.app.predict_to_pg
               env:
                 - name: DATABASE_URL
                   valueFrom:
