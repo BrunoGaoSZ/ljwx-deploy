@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ljwx-stock
 resources:
-  - ../../base
+- ../../base
 images:
-  - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
-    newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
-    newTag: bootstrap
+- name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
+  newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
+  digest: sha256:23edfa1f9a62db1d60a4d8aa315047ac4ba9d7f8ea28f166e7e26e3946dcca08
