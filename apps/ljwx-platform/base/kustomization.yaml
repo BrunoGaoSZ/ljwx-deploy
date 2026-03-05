@@ -5,6 +5,7 @@ resources:
   - deployment-screen.yaml
   - deployment.yaml
   - ingress.yaml
+  - servicemonitor.yaml
   - service-admin-ui.yaml
   - service-screen.yaml
   - service.yaml
