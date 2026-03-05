@@ -1,4 +1,19 @@
-pending: []
+pending:
+- id: 20260305T003756Z-ljwx-stock-agent-sha-b8e4adf
+  service: ljwx-stock-agent
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent@sha256:23edfa1f9a62db1d60a4d8aa315047ac4ba9d7f8ea28f166e7e26e3946dcca08
+    tag: sha-b8e4adf
+    digest: sha256:23edfa1f9a62db1d60a4d8aa315047ac4ba9d7f8ea28f166e7e26e3946dcca08
+    gitSha: b8e4adf
+  createdAt: '2026-03-05T00:37:56Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
