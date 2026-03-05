@@ -6,10 +6,10 @@ resources:
 images:
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
-  digest: sha256:9b310ac3e5f1079ac322b6ece4f532e43dc26fccfb9073bd8fce2fb697c0b606
+  digest: sha256:af130411bf6cffe0e8a58ad2aab6f6f30d45d8f8521f591e49074ca7f3a14118
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
   digest: sha256:db529b61617eefd4b383e8f73668af1a272a883856c3e8cd32f5838ef5f03cc4
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
-  digest: sha256:6705bf8c0bb41bc36bbcdcfb021fb49c7b6bb3bb109f0ed37d8bf4118d755a51
+  digest: sha256:3179cf393e708ddc5ce3e3f62837e19f7c2c0d267cdb1bc93370edb170f72eed
