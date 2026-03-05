@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -166,6 +167,20 @@ def harbor_manifest_ready(
     base = ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}"]
     if harbor_user or harbor_pass:
         base += ["-u", f"{harbor_user}:{harbor_pass}"]
+
+    if "/" in repo:
+        project, repository = repo.split("/", 1)
+        project_encoded = urllib.parse.quote(project, safe="")
+        repository_encoded = urllib.parse.quote(repository, safe="")
+        digest_encoded = urllib.parse.quote(digest, safe="")
+        artifact_endpoint = (
+            f"{harbor_url.rstrip('/')}/api/v2.0/projects/{project_encoded}/repositories/"
+            f"{repository_encoded}/artifacts/{digest_encoded}"
+        )
+        api_cmd = base + ["-H", "Accept: application/json", artifact_endpoint]
+        api = subprocess.run(api_cmd, text=True, capture_output=True)
+        if api.returncode == 0 and api.stdout.strip() == "200":
+            return True
 
     accepts = [
         "application/vnd.oci.image.manifest.v1+json",
