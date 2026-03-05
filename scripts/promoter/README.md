@@ -30,6 +30,11 @@ DEPLOY_REPO_TOKEN=*** SKIP_REGISTRY_CHECK=1 \
 # Strict Harbor readiness mode
 DEPLOY_REPO_TOKEN=*** HARBOR_URL=https://harbor.example.com HARBOR_USER=*** HARBOR_PASS=*** \
   bash scripts/promoter/promote.sh
+
+# Env-scoped promotion (only process selected envs)
+DEPLOY_REPO_TOKEN=*** ENV_ALLOWLIST=prod \
+  HARBOR_URL=https://harbor.omniverseai.net HARBOR_USER=*** HARBOR_PASS=*** \
+  bash scripts/promoter/promote.sh
 ```
 
 ## Prebuilt image
@@ -78,6 +83,7 @@ kubectl patch serviceaccount promoter -n shared-platform \
 - `RETRY_MAX` (default: `10`)
 - `DRY_RUN` (`1` or `0`)
 - `SERVICE_MAP_PATH` (default: `release/services.yaml`)
+- `ENV_ALLOWLIST` (optional, comma-separated env filter, e.g. `dev,demo` or `prod`)
 - `GIT_BRANCH` (default: `main`)
 
 ## Queue file
