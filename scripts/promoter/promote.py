@@ -154,7 +154,12 @@ def harbor_repo_path(harbor_image: str, harbor_url: str) -> str:
 
 
 def harbor_manifest_ready(
-    harbor_image: str, digest: str, harbor_url: str, harbor_user: str, harbor_pass: str
+    harbor_image: str,
+    digest: str,
+    harbor_url: str,
+    harbor_user: str,
+    harbor_pass: str,
+    harbor_insecure: bool,
 ) -> bool:
     if not harbor_url.strip():
         return False
@@ -165,6 +170,8 @@ def harbor_manifest_ready(
 
     endpoint = f"{harbor_url.rstrip('/')}/v2/{repo}/manifests/{digest}"
     base = ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}"]
+    if harbor_insecure:
+        base.insert(1, "-k")
     if harbor_user or harbor_pass:
         base += ["-u", f"{harbor_user}:{harbor_pass}"]
 
@@ -375,6 +382,7 @@ def process_pending(
     harbor_url: str,
     harbor_user: str,
     harbor_pass: str,
+    harbor_insecure: bool,
     skip_registry_check: bool,
     env_allowlist: set[str],
 ) -> tuple[
@@ -460,7 +468,12 @@ def process_pending(
                 harbor_url=harbor_url,
             )
             if probe_image and not harbor_manifest_ready(
-                probe_image, digest, harbor_url, harbor_user, harbor_pass
+                probe_image,
+                digest,
+                harbor_url,
+                harbor_user,
+                harbor_pass,
+                harbor_insecure,
             ):
                 continue
 
@@ -760,6 +773,13 @@ def main() -> int:
     parser.add_argument("--harbor-user", default=os.getenv("HARBOR_USER", ""))
     parser.add_argument("--harbor-pass", default=os.getenv("HARBOR_PASS", ""))
     parser.add_argument(
+        "--harbor-insecure",
+        action="store_true",
+        default=os.getenv("HARBOR_INSECURE", "0")
+        in {"1", "true", "TRUE", "yes", "YES"},
+        help="skip Harbor TLS certificate verification for registry checks",
+    )
+    parser.add_argument(
         "--retry-max", type=int, default=int(os.getenv("RETRY_MAX", "10"))
     )
     parser.add_argument(
@@ -811,6 +831,7 @@ def main() -> int:
                 harbor_url=args.harbor_url,
                 harbor_user=args.harbor_user,
                 harbor_pass=args.harbor_pass,
+                harbor_insecure=args.harbor_insecure,
                 skip_registry_check=args.skip_registry_check,
                 env_allowlist=env_allowlist,
             )
