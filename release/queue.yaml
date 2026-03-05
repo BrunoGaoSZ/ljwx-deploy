@@ -47,6 +47,21 @@ pending:
   meta:
     manualE2E: true
     note: website prod flow test
+- id: 20260305T142614Z-ljwx-dify-web-sha-9016453
+  service: ljwx-dify-web
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-dify-web@sha256:ac4a57b73178088ad81feebf3b221b22740a9ae48da41be58e9876a2b8f652d1
+    tag: sha-9016453
+    digest: sha256:ac4a57b73178088ad81feebf3b221b22740a9ae48da41be58e9876a2b8f652d1
+    gitSha: '9016453'
+  createdAt: '2026-03-05T14:26:14Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
