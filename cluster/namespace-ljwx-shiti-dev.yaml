@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-shiti-dev
+  labels:
+    name: ljwx-shiti-dev
+    environment: dev
+    app: ljwx-shiti

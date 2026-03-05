@@ -117,3 +117,10 @@ services:
         kustomizeImageName: ghcr.io/brunogao/ljwx-chat
         harborImage: harbor.eu.lingjingwanxiang.cn/app/ljwx-chat
         argocdApp: ljwx-chat-dev
+  ljwx-shiti:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-shiti/overlays/dev/kustomization.yaml
+        kustomizeImageName: ghcr.io/brunogao/ljwx-shiti
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
+        argocdApp: ljwx-shiti-dev

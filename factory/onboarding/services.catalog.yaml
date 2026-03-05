@@ -32,3 +32,16 @@ services:
     scaffold_app: true
     generate_argocd_app: true
     argocd_app_file: argocd-apps/90-demo-new-service-dev.yaml
+
+  - service: ljwx-shiti
+    environment: dev
+    overlay_path: apps/ljwx-shiti/overlays/dev/kustomization.yaml
+    kustomize_image_name: ghcr.io/brunogao/ljwx-shiti
+    harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
+    argocd_app: ljwx-shiti-dev
+    smoke_endpoint: http://ljwx-shiti.ljwx-shiti-dev.svc.cluster.local/health
+    deploy_namespace: ljwx-shiti-dev
+    profiles: [local-k3s, orbstack-k3s-cn]
+    scaffold_app: true
+    generate_argocd_app: true
+    argocd_app_file: argocd-apps/90-ljwx-shiti-dev.yaml
