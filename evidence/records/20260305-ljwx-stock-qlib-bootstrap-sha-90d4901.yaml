@@ -1,0 +1,22 @@
+evidenceId: 20260305-ljwx-stock-qlib-bootstrap-sha-90d4901
+service: ljwx-stock-qlib-bootstrap
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
+  commit: 90d4901
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap@sha256:6705bf8c0bb41bc36bbcdcfb021fb49c7b6bb3bb109f0ed37d8bf4118d755a51
+  harbor: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap@sha256:6705bf8c0bb41bc36bbcdcfb021fb49c7b6bb3bb109f0ed37d8bf4118d755a51
+  deployed: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap@sha256:6705bf8c0bb41bc36bbcdcfb021fb49c7b6bb3bb109f0ed37d8bf4118d755a51
+deploy:
+  deployRepoCommit: 4c329d73eb61c2ed4a6b4e859159fda98684cd05
+  queueId: 20260305T011142Z-ljwx-stock-qlib-bootstrap-sha-90d4901
+  argocdApp: ljwx-stock-qlib-bootstrap-dev
+  overlayPath: apps/stock-etl/overlays/ljwx-stock/kustomization.yaml
+  syncedAt: '2026-03-05T01:12:54Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}
