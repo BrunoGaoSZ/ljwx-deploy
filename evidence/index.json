@@ -1,5 +1,35 @@
 [
   {
+    "evidenceId": "20260305-ljwx-stock-qlib-predict-sha-2412214",
+    "service": "ljwx-stock-qlib-predict",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict",
+      "commit": "2412214",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:9b310ac3e5f1079ac322b6ece4f532e43dc26fccfb9073bd8fce2fb697c0b606",
+      "harbor": "ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:9b310ac3e5f1079ac322b6ece4f532e43dc26fccfb9073bd8fce2fb697c0b606",
+      "deployed": "ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:9b310ac3e5f1079ac322b6ece4f532e43dc26fccfb9073bd8fce2fb697c0b606"
+    },
+    "deploy": {
+      "deployRepoCommit": "82b3c4d9ded917d9da79be4723188a0b17f79ade",
+      "queueId": "20260305T011542Z-ljwx-stock-qlib-predict-sha-2412214",
+      "argocdApp": "ljwx-stock-qlib-predict-dev",
+      "overlayPath": "apps/stock-etl/overlays/ljwx-stock/kustomization.yaml",
+      "syncedAt": "2026-03-05T01:16:35Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pending",
+        "checkedAt": ""
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260305-ljwx-stock-qlib-predict-sha-2412214.yaml"
+  },
+  {
     "evidenceId": "20260305-ljwx-stock-qlib-bootstrap-sha-90d4901",
     "service": "ljwx-stock-qlib-bootstrap",
     "env": "dev",
