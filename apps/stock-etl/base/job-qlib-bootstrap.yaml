@@ -13,7 +13,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: qlib-bootstrap
-          image: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap:bootstrap
+          image: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap:20260305-fix1
           imagePullPolicy: IfNotPresent
           command:
             - python
@@ -58,7 +58,7 @@ spec:
             - name: EXPORT_LOOKBACK_CALENDAR_DAYS
               value: "4500"
             - name: CODE_VERSION
-              value: p6a
+              value: p6a-fix20260305
           volumeMounts:
             - name: qlib-data
               mountPath: /data/qlib
