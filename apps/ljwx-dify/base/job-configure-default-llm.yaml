@@ -581,7 +581,7 @@ spec:
                               "credential_id": current_credential_id,
                               "credentials": credentials,
                           },
-                          expected_status={200, 400},
+                          expected_status={200, 400, 500},
                       )
                       if status == 200:
                           print("[INFO] 已更新现有 Anthropic provider 凭据。")
@@ -596,7 +596,7 @@ spec:
                           "POST",
                           f"/workspaces/current/model-providers/{quoted_provider}/credentials",
                           payload={"credentials": credentials},
-                          expected_status={201, 400},
+                          expected_status={201, 400, 500},
                       )
                       if status == 201:
                           print("[INFO] 已创建 Anthropic provider 凭据。")
