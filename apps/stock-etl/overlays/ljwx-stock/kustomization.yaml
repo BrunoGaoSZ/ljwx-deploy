@@ -10,3 +10,6 @@ images:
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
   digest: sha256:db529b61617eefd4b383e8f73668af1a272a883856c3e8cd32f5838ef5f03cc4
+- name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
+  newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
+  newTag: bootstrap

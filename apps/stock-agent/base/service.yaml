@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock-agent
+  labels:
+    app: stock-agent
+spec:
+  type: ClusterIP
+  selector:
+    app: stock-agent
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

@@ -76,3 +76,17 @@ services:
         kustomizeImageName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
         harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-kline-etl
         argocdApp: stock-etl-qlib-predict-dev
+  ljwx-stock-qlib-bootstrap:
+    envs:
+      dev:
+        overlayPath: apps/stock-etl/overlays/ljwx-stock/kustomization.yaml
+        kustomizeImageName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-qlib-bootstrap
+        argocdApp: stock-etl-qlib-predict-dev
+  ljwx-stock-agent:
+    envs:
+      dev:
+        overlayPath: apps/stock-agent/overlays/ljwx-stock/kustomization.yaml
+        kustomizeImageName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-agent
+        argocdApp: stock-agent-dev

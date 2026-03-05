@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qlib-bootstrap-manual
+  labels:
+    app.kubernetes.io/component: batch
+spec:
+  ttlSecondsAfterFinished: 86400
+  backoffLimit: 1
+  activeDeadlineSeconds: 21600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: qlib-bootstrap
+          image: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap:bootstrap
+          imagePullPolicy: IfNotPresent
+          command:
+            - python
+            - -m
+            - qlib_bootstrap.app.main
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: stock-etl-secret
+                  key: DATABASE_URL
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: qlib-minio-secret
+                  key: MINIO_ENDPOINT
+            - name: MINIO_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: qlib-minio-secret
+                  key: MINIO_BUCKET
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qlib-minio-secret
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qlib-minio-secret
+                  key: MINIO_SECRET_KEY
+            - name: QLIB_REGION
+              value: cn
+            - name: OUTPUT_ROOT
+              value: /data/qlib/bootstrap-out
+            - name: MODEL_NAME
+              value: qlib_lightgbm_alpha158
+            - name: HORIZON_DAYS
+              value: "5"
+            - name: LOOKBACK_YEARS
+              value: "8"
+            - name: EXPORT_LOOKBACK_CALENDAR_DAYS
+              value: "4500"
+            - name: CODE_VERSION
+              value: p6a
+          volumeMounts:
+            - name: qlib-data
+              mountPath: /data/qlib
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 6Gi
+      volumes:
+        - name: qlib-data
+          persistentVolumeClaim:
+            claimName: qlib-pvc

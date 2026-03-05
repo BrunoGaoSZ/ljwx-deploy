@@ -36,6 +36,12 @@
       "environment": "prod",
       "argocd_app": "ljwx-platform",
       "endpoint": "http://ljwx-platform.ljwx-platform.svc.cluster.local/actuator/health/readiness"
+    },
+    {
+      "service": "ljwx-stock-agent",
+      "environment": "dev",
+      "argocd_app": "stock-agent-dev",
+      "endpoint": "http://stock-agent.ljwx-stock.svc.cluster.local/v1/health"
     }
   ]
 }
