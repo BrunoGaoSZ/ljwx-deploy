@@ -34,12 +34,12 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
 # by digest (preferred by promoter)
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "https://<your-harbor-domain>/v2/app/<svc>/manifests/sha256:<digest>"
+  "https://<your-harbor-domain>/v2/ljwx/<svc>/manifests/sha256:<digest>"
 
 # by tag (manual verification)
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "https://<your-harbor-domain>/v2/app/<svc>/manifests/sha-<shortsha>"
+  "https://<your-harbor-domain>/v2/ljwx/<svc>/manifests/sha-<shortsha>"
 ```
 
 Expected:

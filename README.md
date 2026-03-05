@@ -20,6 +20,30 @@ GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 - 服务仓 enqueue 工作流片段：`docs/service-repo-workflow-snippet.md`
 - Argo dev 自动同步说明：`docs/argocd-dev-autosync.md`
 
+## Harbor 同步基线（2026-03-05）
+
+业务镜像统一命名空间：
+
+- `harbor.eu.lingjingwanxiang.cn/ljwx/<service>`
+
+当前复制策略（本地 Harbor API: `http://127.0.0.1:8080`）：
+
+1. `sync-ljwx-to-cn-event`（event_based）
+   - 源：本地 Harbor `ljwx/**`
+   - 目标：`https://harbor.omniverseai.net` 命名空间 `ljwx`
+2. `sync-ljwx-to-cn-nightly`（scheduled）
+   - cron: `0 0 19 * * *`
+   - 源：本地 Harbor `ljwx/**`
+   - 目标：`https://harbor.omniverseai.net` 命名空间 `ljwx`
+
+快速核验：
+
+```bash
+curl -u admin:Harbor12345 \
+  'http://127.0.0.1:8080/api/v2.0/replication/policies?page=1&page_size=100' \
+  | jq 'map({id,name,enabled,dest_namespace,trigger,speed})'
+```
+
 ## 目录结构
 
 - `infra/` - 基础设施组件（Gitea Runner 等）

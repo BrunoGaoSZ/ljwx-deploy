@@ -21,7 +21,7 @@ echo "[verify] Harbor digest check command:"
 cat <<'CMD'
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "${HARBOR_URL}/v2/app/<service>/manifests/<digest>"
+  "${HARBOR_URL}/v2/ljwx/<service>/manifests/<digest>"
 CMD
 
 echo "[verify] done"
