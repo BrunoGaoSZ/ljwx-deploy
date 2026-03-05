@@ -9,6 +9,6 @@ images:
   digest: sha256:2418c043ccbaf040774dce03c0a4a2e0e92cb678b35b950a962d5b4c12756914
 - name: ghcr.io/brunogao/ljwx-dify-web
   newName: ghcr.io/brunogao/ljwx-dify-web
-  newTag: latest
+  digest: sha256:753f299a03e4af65f3a068394393889077e5acb3065bb4c5aa32c0677ceeffc9
 - name: qdrant/qdrant
   newTag: v1.12.6

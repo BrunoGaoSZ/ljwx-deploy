@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-03-05T07:50:13Z",
+  "generatedAt": "2026-03-05T08:00:23Z",
   "counts": {
     "pending": 0,
-    "promoted": 34,
+    "promoted": 35,
     "failed": 0,
     "superseded": 6
   },
@@ -22,6 +22,6 @@
     "failedMaxAttempts": 0
   },
   "ratios": {
-    "supersededVsPromoted": 0.15
+    "supersededVsPromoted": 0.1463
   }
 }

@@ -2,6 +2,7 @@
 
 | service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
+| ljwx-dify-web | dev | `753f299a03e4af65` | 2026-03-05T08:00:15Z | pending | - |
 | ljwx-dify | dev | `2418c043ccbaf040` | 2026-03-05T07:50:07Z | pending | - |
 | ljwx-dify | dev | `df38aa28c6add15b` | 2026-03-05T07:39:09Z | pass | - |
 | ljwx-website | dev | `be26e0c85044cc52` | 2026-03-05T07:39:09Z | pass | - |
