@@ -36,6 +36,8 @@ spec:
                   value: "0"
                 - name: RETRY_MAX
                   value: "10"
+                - name: HARBOR_INSECURE
+                  value: "1"
                 - name: DEPLOY_REPO_TOKEN
                   valueFrom:
                     secretKeyRef:
@@ -105,11 +107,13 @@ spec:
                     echo "缺少 DEPLOY_REPO_TOKEN（请在 deploy-promoter-secret 中配置 deploy_repo_token）"
                     exit 1
                   fi
+                  rm -rf /work/repo
+                  git clone --depth=1 "https://x-access-token:${DEPLOY_REPO_TOKEN}@${DEPLOY_REPO_URL#https://}" /work/repo
+                  cd /work/repo
 
                   cmd=(
-                    python3 /app/scripts/promoter/promote.py
-                    --deploy-repo-url "${DEPLOY_REPO_URL}"
-                    --deploy-repo-token "${DEPLOY_REPO_TOKEN}"
+                    python3 scripts/promoter/promote.py
+                    --local-repo-dir /work/repo
                     --service-map "${SERVICE_MAP_PATH}"
                     --push-branch "${GIT_BRANCH}"
                     --retry-max "${RETRY_MAX}"
@@ -128,6 +132,9 @@ spec:
                   fi
                   if [ "${SKIP_REGISTRY_CHECK:-0}" = "1" ] || [ "${SKIP_REGISTRY_CHECK:-}" = "true" ] || [ "${SKIP_REGISTRY_CHECK:-}" = "TRUE" ]; then
                     cmd+=(--skip-registry-check)
+                  fi
+                  if [ "${HARBOR_INSECURE:-0}" = "1" ] || [ "${HARBOR_INSECURE:-}" = "true" ] || [ "${HARBOR_INSECURE:-}" = "TRUE" ]; then
+                    cmd+=(--harbor-insecure)
                   fi
                   if [ "${SKIP_EVIDENCE_COLLECT:-0}" = "1" ] || [ "${SKIP_EVIDENCE_COLLECT:-}" = "true" ] || [ "${SKIP_EVIDENCE_COLLECT:-}" = "TRUE" ]; then
                     cmd+=(--skip-evidence-collect)
