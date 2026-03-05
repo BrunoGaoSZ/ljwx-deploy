@@ -2,13 +2,14 @@
 
 This runbook covers day-2 operations for the async promotion path:
 
-`GitHub queue -> Harbor pull replication -> deploy-promoter -> ArgoCD auto-sync -> smoke -> evidence feed`
+`GitHub queue -> 本地 Harbor 就绪 -> deploy-promoter(dev) -> ArgoCD(dev) -> smoke -> prod enqueue -> 生产 Harbor 就绪 -> deploy-promoter-prod -> ArgoCD(prod) -> evidence feed`
 
 ## Bootstrap (GitOps-managed CronJobs)
 
-`deploy-promoter` and `smoke-runner` are now managed by `cluster-bootstrap` from:
+`deploy-promoter`、`deploy-promoter-prod` and `smoke-runner` are now managed by `cluster-bootstrap` from:
 
 - `cluster/deploy-promoter-cronjob.yaml`
+- `cluster/deploy-promoter-prod-cronjob.yaml`
 - `cluster/smoke-runner-cronjob.yaml`
 
 Required secret (not committed with real values):
@@ -19,7 +20,7 @@ Required secret (not committed with real values):
 Cluster rule:
 
 - same GitOps source code for local `k3s` and OrbStack `k3s`
-- cluster variance only via profile files (`SERVICE_MAP_PATH`, `SMOKE_TARGETS`)
+- cluster variance only via profile files (`SERVICE_MAP_PATH`, `SMOKE_TARGETS`) and env gate (`ENV_ALLOWLIST`)
 
 ## Grafana dashboard + TLS (GitOps)
 
@@ -43,12 +44,14 @@ kubectl -n monitoring get certificate grafnana-lingjingwanxiang-cn-tls -o wide
 kubectl -n monitoring get cm ljwx-platform-observability-dashboard
 ```
 
-## 1) Observe deploy-promoter
+## 1) Observe deploy-promoter (dev/prod 两阶段)
 
 ```bash
 # manifests
 kubectl -n dev get cronjob deploy-promoter
+kubectl -n dev get cronjob deploy-promoter-prod
 kubectl -n dev get cronjob deploy-promoter -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
+kubectl -n dev get cronjob deploy-promoter-prod -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env}{"\n"}' | rg "ENV_ALLOWLIST|HARBOR_URL"
 
 # latest job and pod
 kubectl -n dev get jobs --sort-by=.metadata.creationTimestamp | tail -n 5
@@ -58,7 +61,9 @@ kubectl -n dev logs job/<job-name>
 
 Expected:
 
-- If digest is not in Harbor yet: no promotion commit, queue stays in `pending`.
+- `deploy-promoter` 只处理 `ENV_ALLOWLIST=dev,demo`，并等待本地 Harbor digest 就绪。
+- `deploy-promoter-prod` 只处理 `ENV_ALLOWLIST=prod`，并等待生产 Harbor digest 就绪。
+- If digest is not ready in the target Harbor: queue stays in `pending`.
 - If digest exists: queue entry moves to `promoted`, mapped Argo overlay is updated, evidence record written.
 - Promoter job startup should not spend time in `apk/pip` installation (image is prebuilt).
 
@@ -88,6 +93,9 @@ python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence
 
 Results are recorded in each evidence file under `tests.smoke`.
 Queue health metrics are generated at `evidence/metrics/queue-health.json`.
+When `--auto-tag-local-harbor` is enabled, smoke pass will call Harbor API to add
+`prod-*` tag to local Harbor artifact.  
+When `--auto-enqueue-prod` is enabled, only tag-success entries will append `env=prod` pending entries.
 
 ## 4) Common failures
 
@@ -108,16 +116,22 @@ Queue health metrics are generated at `evidence/metrics/queue-health.json`.
    - Inspect `tests.smoke.details` in evidence record.
    - Confirm endpoint DNS/service/ingress and app readiness probe behavior.
 
-## 5) Quick checklist (commit -> pod)
+## 5) Quick checklist (commit -> dev -> prod)
 
 1. Service repo build pushes image to GHCR.
-2. Service repo enqueues release to `release/queue.yaml` (no wait for Harbor replication).
-3. Promoter cluster profile selects mapping:
+2. Service repo enqueues `env=dev` release to `release/queue.yaml` (no wait for Harbor replication).
+3. Local Harbor replication pulls artifact from GHCR.
+4. `deploy-promoter` (dev allowlist) waits local Harbor digest ready, then promotes dev overlay.
+5. Argo auto-sync applies dev revision.
+6. Smoke (profile-based targets) writes pass/fail to evidence record.
+7. Smoke runner auto-tags local Harbor artifact with `prod-*` (Harbor API).
+8. Smoke runner auto-enqueues `env=prod` pending entry when tag succeeds.
+9. Production Harbor replication (filter `prod-*`) receives artifact from local Harbor.
+10. `deploy-promoter-prod` (prod allowlist) waits production Harbor digest ready, then promotes prod overlay.
+11. Argo auto-sync applies prod revision.
+12. Pages feed updates with latest `evidence/index.json`.
+13. Queue health feed updates at `evidence/metrics/queue-health.json`.
+
+Promoter profile notes:
    - local `k3s`: `release/services.local-k3s.yaml`
    - OrbStack `k3s`: `release/services.orbstack-k3s-cn.yaml`
-4. Harbor pull replication mirrors artifact into `app/<svc>`.
-5. Promoter sees digest and writes promotion commit.
-6. Argo auto-sync applies new revision.
-7. Smoke (profile-based targets) writes pass/fail to evidence record.
-8. Pages feed updates with latest `evidence/index.json`.
-9. Queue health feed updates at `evidence/metrics/queue-health.json`.

@@ -39,6 +39,11 @@ def parse_ts(value: Any) -> datetime:
         return datetime.min.replace(tzinfo=timezone.utc)
 
 
+def parse_env_allowlist(raw: str) -> set[str]:
+    items = [item.strip() for item in raw.split(",")]
+    return {item for item in items if item}
+
+
 def yaml_load(path: Path, default: Any) -> Any:
     if not path.exists():
         return copy.deepcopy(default)
@@ -345,6 +350,7 @@ def process_pending(
     harbor_user: str,
     harbor_pass: str,
     skip_registry_check: bool,
+    env_allowlist: set[str],
 ) -> tuple[
     dict[str, list[dict[str, Any]]],
     dict[Path, dict[str, Any]],
@@ -362,6 +368,8 @@ def process_pending(
     for entry in list(queue["pending"]):
         service = str(entry.get("service", "")).strip()
         env = str(entry.get("env", "dev")).strip() or "dev"
+        if env_allowlist and env not in env_allowlist:
+            continue
         source = (
             entry.get("source", {}) if isinstance(entry.get("source"), dict) else {}
         )
@@ -741,6 +749,11 @@ def main() -> int:
         action="store_true",
         help="skip evidence index/summary/metrics collection before commit",
     )
+    parser.add_argument(
+        "--env-allowlist",
+        default=os.getenv("ENV_ALLOWLIST", ""),
+        help="comma separated env filter, e.g. 'dev,demo' or 'prod'",
+    )
     args = parser.parse_args()
 
     dry_run = bool(args.dry_run) or os.getenv("DRY_RUN", "0") in {
@@ -750,6 +763,7 @@ def main() -> int:
         "yes",
         "YES",
     }
+    env_allowlist = parse_env_allowlist(args.env_allowlist)
 
     repo_dir, tmp_root = repo_workdir(args)
     try:
@@ -772,6 +786,7 @@ def main() -> int:
                 harbor_user=args.harbor_user,
                 harbor_pass=args.harbor_pass,
                 skip_registry_check=args.skip_registry_check,
+                env_allowlist=env_allowlist,
             )
         )
 

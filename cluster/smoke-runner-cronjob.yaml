@@ -29,6 +29,52 @@ spec:
                   value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
                 - name: SMOKE_TARGETS
                   value: scripts/smoke/targets.local-k3s.json
+                - name: SMOKE_SERVICE_MAP_PATH
+                  value: release/services.local-k3s.yaml
+                - name: AUTO_TAG_LOCAL_HARBOR
+                  value: "1"
+                - name: LOCAL_HARBOR_PROD_TAG_PREFIX
+                  value: "prod-"
+                - name: AUTO_ENQUEUE_PROD
+                  value: "1"
+                - name: PROD_ENV
+                  value: prod
+                - name: HARBOR_LOCAL_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_local_url
+                      optional: true
+                - name: HARBOR_LOCAL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_local_username
+                      optional: true
+                - name: HARBOR_LOCAL_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_local_password
+                      optional: true
+                - name: HARBOR_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_url
+                      optional: true
+                - name: HARBOR_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_username
+                      optional: true
+                - name: HARBOR_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: harbor_password
+                      optional: true
                 - name: DEPLOY_REPO_TOKEN
                   valueFrom:
                     secretKeyRef:
@@ -69,7 +115,14 @@ spec:
                   git clone --depth=1 "https://x-access-token:${DEPLOY_REPO_TOKEN}@${DEPLOY_REPO_URL#https://}" /work/repo
                   cd /work/repo
                   set +e
-                  python3 scripts/smoke/run_smoke.py --targets "${SMOKE_TARGETS}" --queue release/queue.yaml
+                  SMOKE_EXTRA_ARGS=""
+                  if [ "${AUTO_TAG_LOCAL_HARBOR:-0}" = "1" ] || [ "${AUTO_TAG_LOCAL_HARBOR:-}" = "true" ] || [ "${AUTO_TAG_LOCAL_HARBOR:-}" = "TRUE" ]; then
+                    SMOKE_EXTRA_ARGS="${SMOKE_EXTRA_ARGS} --auto-tag-local-harbor"
+                  fi
+                  if [ "${AUTO_ENQUEUE_PROD:-0}" = "1" ] || [ "${AUTO_ENQUEUE_PROD:-}" = "true" ] || [ "${AUTO_ENQUEUE_PROD:-}" = "TRUE" ]; then
+                    SMOKE_EXTRA_ARGS="${SMOKE_EXTRA_ARGS} --auto-enqueue-prod --prod-env ${PROD_ENV:-prod}"
+                  fi
+                  python3 scripts/smoke/run_smoke.py --targets "${SMOKE_TARGETS}" --queue release/queue.yaml --service-map "${SMOKE_SERVICE_MAP_PATH}" ${SMOKE_EXTRA_ARGS}
                   SMOKE_EXIT=$?
                   set -e
                   python3 scripts/evidence/validate.py
@@ -81,7 +134,7 @@ spec:
                   fi
                   git config user.name "smoke-runner[bot]"
                   git config user.email "smoke-runner[bot]@users.noreply.github.com"
-                  git add evidence/records evidence/index.json evidence/summary/latest.md evidence/metrics/queue-health.json
+                  git add release/queue.yaml evidence/records evidence/index.json evidence/summary/latest.md evidence/metrics/queue-health.json
                   git commit -m "chore(smoke): update smoke evidence [skip ci]"
                   git pull --rebase origin "${GIT_BRANCH}"
                   git push origin "HEAD:${GIT_BRANCH}"

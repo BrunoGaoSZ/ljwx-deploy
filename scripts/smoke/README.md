@@ -9,6 +9,8 @@ Runs post-deploy smoke checks and writes results to YAML evidence records.
 3. Wait for Argo app `Synced + Healthy` (if Argo credentials/app name are configured).
 4. Check service endpoint readiness (`HTTP 2xx/3xx`).
 5. Update evidence record `tests.smoke.status`, `tests.smoke.checkedAt`, `tests.smoke.details`.
+6. (Optional) Auto-tag local Harbor artifact as `prod-*` when smoke passes.
+7. (Optional) Auto-enqueue `prod` release after tag is ready.
 
 ## Queue precision
 
@@ -39,6 +41,18 @@ python3 scripts/smoke/run_smoke.py --dry-run --allow-failures --queue release/qu
 ARGOCD_SERVER=https://argocd.example.com \
 ARGOCD_TOKEN=*** \
 python3 scripts/smoke/run_smoke.py --queue release/queue.yaml
+
+# auto enqueue prod when smoke passed
+python3 scripts/smoke/run_smoke.py \
+  --queue release/queue.yaml \
+  --service-map release/services.local-k3s.yaml \
+  --auto-tag-local-harbor \
+  --local-harbor-url https://harbor.eu.lingjingwanxiang.cn \
+  --local-harbor-user admin \
+  --local-harbor-pass '***' \
+  --local-harbor-prod-tag-prefix prod- \
+  --auto-enqueue-prod \
+  --prod-env prod
 ```
 
 ## Cluster profiles

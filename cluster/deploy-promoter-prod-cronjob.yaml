@@ -1,13 +1,13 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: deploy-promoter
+  name: deploy-promoter-prod
   namespace: dev
   labels:
-    app.kubernetes.io/name: deploy-promoter
+    app.kubernetes.io/name: deploy-promoter-prod
     app.kubernetes.io/part-of: bid-mvp-factory
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "5-59/10 * * * *"
   timeZone: Asia/Tokyo
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
@@ -18,7 +18,7 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-            - name: promoter
+            - name: promoter-prod
               image: ghcr.io/brunogao/ljwx-deploy-promoter:main
               imagePullPolicy: Always
               env:
@@ -27,9 +27,9 @@ spec:
                 - name: DEPLOY_REPO_URL
                   value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
                 - name: SERVICE_MAP_PATH
-                  value: release/services.local-k3s.yaml
+                  value: release/services.orbstack-k3s-cn.yaml
                 - name: ENV_ALLOWLIST
-                  value: "dev,demo"
+                  value: "prod"
                 - name: SKIP_REGISTRY_CHECK
                   value: "0"
                 - name: SKIP_EVIDENCE_COLLECT
@@ -52,7 +52,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       name: deploy-promoter-secret
-                      key: harbor_local_url
+                      key: harbor_prod_url
                       optional: true
                 - name: HARBOR_URL_FALLBACK
                   valueFrom:
@@ -64,7 +64,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       name: deploy-promoter-secret
-                      key: harbor_local_username
+                      key: harbor_prod_username
                       optional: true
                 - name: HARBOR_USER_FALLBACK
                   valueFrom:
@@ -76,7 +76,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       name: deploy-promoter-secret
-                      key: harbor_local_password
+                      key: harbor_prod_password
                       optional: true
                 - name: HARBOR_PASS_FALLBACK
                   valueFrom:

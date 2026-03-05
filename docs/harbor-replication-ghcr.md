@@ -5,9 +5,12 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
 ## Target behavior
 
 1. Service CI pushes `ghcr.io/<org>/<svc>:sha-*` or `v*`.
-2. Harbor policy pulls into local project `app`.
-3. (Optional) Promoter checks Harbor v2 manifest API when `HARBOR_URL` is configured.
-4. Promoter updates deploy repo using standard `source.ghcr` image path.
+2. Local Harbor (`harbor.eu.lingjingwanxiang.cn`) pulls from GHCR.
+3. Dev promoter waits local Harbor digest readiness, then deploys dev/demo.
+4. Smoke passes, then auto-tags local Harbor artifact as `prod-*` (Harbor API).
+5. Smoke runner auto-enqueues `env=prod`.
+6. Production Harbor (`harbor.omniverseai.net`) receives artifact from local Harbor (filter `prod-*`).
+7. Prod promoter waits production Harbor digest readiness, then deploys prod.
 
 ## Harbor UI steps
 
@@ -27,6 +30,15 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
      - Tag: `sha-*`
      - Tag: `v*`
 3. Enable rule and execute once for bootstrap.
+
+## Recommended 2-stage replication split
+
+1. GHCR -> local Harbor (`harbor.eu.lingjingwanxiang.cn/ljwx`)
+   - keep existing rule for `sha-*` / `v*`
+2. local Harbor -> production Harbor (`harbor.omniverseai.net/ljwx`)
+   - recommended filter: only production-ready tags (for example `prod-*`)
+   - trigger mode: event-based + scheduled fallback
+   - this avoids syncing every dev candidate to production Harbor
 
 ## Verification commands
 

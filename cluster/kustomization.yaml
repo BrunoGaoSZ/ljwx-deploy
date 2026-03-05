@@ -9,6 +9,7 @@ resources:
   - ljwx-chat-dev-application.yaml
   - ljwx-platform-observability-application.yaml
   - deploy-promoter-cronjob.yaml
+  - deploy-promoter-prod-cronjob.yaml
   - smoke-runner-cronjob.yaml
   - regcred.yaml
   - default-sa.yaml
