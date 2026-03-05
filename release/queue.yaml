@@ -1,4 +1,19 @@
-pending: []
+pending:
+- id: 20260305T011542Z-ljwx-stock-qlib-predict-sha-2412214
+  service: ljwx-stock-qlib-predict
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict@sha256:9b310ac3e5f1079ac322b6ece4f532e43dc26fccfb9073bd8fce2fb697c0b606
+    tag: sha-2412214
+    digest: sha256:9b310ac3e5f1079ac322b6ece4f532e43dc26fccfb9073bd8fce2fb697c0b606
+    gitSha: '2412214'
+  createdAt: '2026-03-05T01:15:42Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
