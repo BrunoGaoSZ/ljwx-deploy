@@ -1,0 +1,22 @@
+evidenceId: 20260305-ljwx-website-sha-905bafb
+service: ljwx-website
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-website
+  commit: 905bafb
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-website@sha256:be26e0c85044cc520a12ff0be4b469a216e4e1b55106175f1156a749c1097ac4
+  harbor: harbor.eu.lingjingwanxiang.cn/app/ljwx-website@sha256:be26e0c85044cc520a12ff0be4b469a216e4e1b55106175f1156a749c1097ac4
+  deployed: ghcr.io/brunogao/ljwx-website@sha256:be26e0c85044cc520a12ff0be4b469a216e4e1b55106175f1156a749c1097ac4
+deploy:
+  deployRepoCommit: bd5a2762c5e0aabe5f60c582027d2c8b64e43d8f
+  queueId: 20260305T071839Z-ljwx-website-sha-905bafb
+  argocdApp: ljwx-website-dev
+  overlayPath: apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml
+  syncedAt: '2026-03-05T07:39:09Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}

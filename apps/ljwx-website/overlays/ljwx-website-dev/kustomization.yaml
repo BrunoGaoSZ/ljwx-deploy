@@ -9,7 +9,7 @@ patches:
 images:
 - name: ghcr.io/brunogao/ljwx-website
   newName: ghcr.io/brunogao/ljwx-website
-  newTag: latest
+  digest: sha256:be26e0c85044cc520a12ff0be4b469a216e4e1b55106175f1156a749c1097ac4
 replicas:
 - name: ljwx-website
   count: 1

@@ -1,17 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: ljwx-dify-dev
-
 resources:
-  - ../../base
-
+- ../../base
 images:
-  - name: ghcr.io/brunogao/ljwx-dify-api
-    newName: ghcr.io/brunogao/ljwx-dify-api
-    newTag: latest
-  - name: ghcr.io/brunogao/ljwx-dify-web
-    newName: ghcr.io/brunogao/ljwx-dify-web
-    newTag: latest
-  - name: qdrant/qdrant
-    newTag: v1.12.6
+- name: ghcr.io/brunogao/ljwx-dify-api
+  newName: ghcr.io/brunogao/ljwx-dify-api
+  digest: sha256:df38aa28c6add15b920886a3ce6c41a68a0c5e15f05eb7220b2dcb0aac4c8c52
+- name: ghcr.io/brunogao/ljwx-dify-web
+  newName: ghcr.io/brunogao/ljwx-dify-web
+  newTag: latest
+- name: qdrant/qdrant
+  newTag: v1.12.6
