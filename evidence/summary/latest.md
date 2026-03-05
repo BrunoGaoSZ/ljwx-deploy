@@ -1,7 +1,17 @@
 # Latest Evidence Summary
 
-| service | env | harbor digest | syncedAt | smoke | links |
+| service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
+| ljwx-website | prod | `c4f4a59ca033b0c3` | 2026-03-05T14:36:45Z | pending | - |
+| ljwx-chat | dev | `8124e9c5b483595f` | 2026-03-05T08:10:08Z | pass | - |
+| ljwx-dify-web | dev | `753f299a03e4af65` | 2026-03-05T08:00:15Z | pass | - |
+| ljwx-dify | dev | `2418c043ccbaf040` | 2026-03-05T07:50:07Z | pass | - |
+| ljwx-dify | dev | `df38aa28c6add15b` | 2026-03-05T07:39:09Z | pass | - |
+| ljwx-website | dev | `be26e0c85044cc52` | 2026-03-05T07:39:09Z | pass | - |
+| ljwx-stock-agent | dev | `077c33f22a0d2950` | 2026-03-05T04:10:13Z | pass | - |
+| ljwx-stock-qlib-predict | dev | `9b310ac3e5f1079a` | 2026-03-05T01:16:35Z | pending | - |
+| ljwx-stock-qlib-bootstrap | dev | `6705bf8c0bb41bc3` | 2026-03-05T01:12:54Z | pending | - |
+| ljwx-stock-agent | dev | `23edfa1f9a62db1d` | 2026-03-05T00:40:12Z | pass | - |
 | ljwx-stock-kline-etl | dev | `db529b61617eefd4` | 2026-03-04T10:10:25Z | pending | - |
 | ljwx-stock-kline-etl | dev | `d0599cde7eb4275c` | 2026-03-04T09:04:08Z | pending | - |
 | ljwx-stock-kline-etl | dev | `e406266dfcd0fff5` | 2026-03-04T08:59:17Z | pending | - |
