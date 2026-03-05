@@ -14,6 +14,7 @@ This runbook covers day-2 operations for the async promotion path:
 Required secret (not committed with real values):
 
 - `cluster/deploy-promoter-secret.example.yaml`
+- 推荐使用 `deploy_repo_token`（最小权限）替代通用 `github_token`
 
 Cluster rule:
 
@@ -86,6 +87,7 @@ python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence
 ```
 
 Results are recorded in each evidence file under `tests.smoke`.
+Queue health metrics are generated at `evidence/metrics/queue-health.json`.
 
 ## 4) Common failures
 
@@ -118,3 +120,4 @@ Results are recorded in each evidence file under `tests.smoke`.
 6. Argo auto-sync applies new revision.
 7. Smoke (profile-based targets) writes pass/fail to evidence record.
 8. Pages feed updates with latest `evidence/index.json`.
+9. Queue health feed updates at `evidence/metrics/queue-health.json`.

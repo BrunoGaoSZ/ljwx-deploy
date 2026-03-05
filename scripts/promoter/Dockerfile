@@ -1,11 +1,11 @@
-FROM python:3.11-alpine
+FROM ghcr.io/astral-sh/uv:python3.11-alpine
 
-RUN apk add --no-cache git curl
+RUN apk add --no-cache bash git curl openssh-client ca-certificates
 
 WORKDIR /app
 
-COPY scripts/promoter/promote.py /app/promote.py
+COPY scripts /app/scripts
 
-RUN pip install --no-cache-dir pyyaml jsonschema
+RUN uv pip install --system pyyaml jsonschema
 
-ENTRYPOINT ["python3", "/app/promote.py"]
+ENTRYPOINT ["python3", "/app/scripts/promoter/promote.py"]

@@ -1,6 +1,8 @@
 (function () {
   const FEED_URL = "./evidence/index.json";
+  const METRICS_URL = "./evidence/metrics/queue-health.json";
   let allRecords = [];
+  let queueMetrics = null;
 
   const envFilter = document.getElementById("env-filter");
   const testFilter = document.getElementById("test-filter");
@@ -11,11 +13,11 @@
     return String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   }
 
-  function digestFromHarbor(harbor) {
-    if (!harbor) return "-";
-    const idx = harbor.indexOf("@sha256:");
-    if (idx === -1) return harbor;
-    return "sha256:" + harbor.slice(idx + 8, idx + 8 + 16);
+  function digestFromImage(imageRef) {
+    if (!imageRef) return "-";
+    const idx = imageRef.indexOf("@sha256:");
+    if (idx === -1) return imageRef;
+    return "sha256:" + imageRef.slice(idx + 8, idx + 8 + 16);
   }
 
   function smokeStatus(rec) {
@@ -57,14 +59,17 @@
         <td><code>${text(r.evidenceId || "-")}</code></td>
         <td>${text(r.service || "-")}</td>
         <td>${text(r.env || "-")}</td>
-        <td><code>${text(digestFromHarbor(r?.image?.harbor || ""))}</code></td>
+        <td><code>${text(digestFromImage(r?.image?.deployed || r?.image?.harbor || ""))}</code></td>
         <td>${text(r?.deploy?.syncedAt || r?.promotedAt || "-")}</td>
         <td><span class="pill ${klass}">${text(smoke)}</span></td>
         <td>${linksHtml(r)}</td>
       </tr>`;
     }).join("") || '<tr><td colspan="7">No records</td></tr>';
 
-    metaEl.textContent = `records: ${filtered.length} / ${allRecords.length}`;
+    const queueMeta = queueMetrics?.counts
+      ? ` | queue pending=${queueMetrics.counts.pending}, failed=${queueMetrics.counts.failed}, superseded=${queueMetrics.counts.superseded}`
+      : "";
+    metaEl.textContent = `records: ${filtered.length} / ${allRecords.length}${queueMeta}`;
   }
 
   function fillEnvOptions() {
@@ -85,6 +90,14 @@
     }
     allRecords = await res.json();
     if (!Array.isArray(allRecords)) allRecords = [];
+
+    const metricsRes = await fetch(METRICS_URL, { cache: "no-store" });
+    if (metricsRes.ok) {
+      const payload = await metricsRes.json();
+      if (payload && typeof payload === "object") {
+        queueMetrics = payload;
+      }
+    }
     fillEnvOptions();
     render();
   }

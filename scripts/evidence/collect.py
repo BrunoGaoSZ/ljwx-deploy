@@ -83,7 +83,7 @@ def write_summary(records: list[dict[str, Any]], out_path: Path) -> None:
     lines = [
         "# Latest Evidence Summary",
         "",
-        "| service | env | harbor digest | syncedAt | smoke | links |",
+        "| service | env | deployed digest | syncedAt | smoke | links |",
         "| --- | --- | --- | --- | --- | --- |",
     ]
 
@@ -91,8 +91,10 @@ def write_summary(records: list[dict[str, Any]], out_path: Path) -> None:
         service = str(record.get("service", "-"))
         env = str(record.get("env", "-"))
         image = record.get("image", {})
-        harbor = image.get("harbor", "") if isinstance(image, dict) else ""
-        digest = short_digest(str(harbor)) or "-"
+        deployed = ""
+        if isinstance(image, dict):
+            deployed = str(image.get("deployed", "") or image.get("harbor", ""))
+        digest = short_digest(deployed) or "-"
         deploy = record.get("deploy", {})
         synced_at = deploy.get("syncedAt", "-") if isinstance(deploy, dict) else "-"
         tests = record.get("tests", {})

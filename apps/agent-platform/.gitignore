@@ -1,0 +1,3 @@
+base/secret.yaml
+base/secret.local.yaml
+base/secret.*.local.yaml

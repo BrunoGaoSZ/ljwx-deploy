@@ -16,11 +16,13 @@ After first successful publish, the URLs are typically:
 
 - Dashboard: `https://<owner>.github.io/<repo>/`
 - Feed JSON: `https://<owner>.github.io/<repo>/evidence/index.json`
+- Queue health: `https://<owner>.github.io/<repo>/evidence/metrics/queue-health.json`
 
 Example for `BrunoGaoSZ/ljwx-deploy`:
 
 - `https://brunogaosz.github.io/ljwx-deploy/`
 - `https://brunogaosz.github.io/ljwx-deploy/evidence/index.json`
+- `https://brunogaosz.github.io/ljwx-deploy/evidence/metrics/queue-health.json`
 
 ## Access Control Notes
 
@@ -32,7 +34,7 @@ Example for `BrunoGaoSZ/ljwx-deploy`:
 
 `nightly-evidence` now publishes with an explicit branch-content contract:
 
-- only `index.html`, `app.js`, `evidence/index.json`, `evidence/summary/latest.md` are kept in `gh-pages`
+- only `index.html`, `app.js`, `evidence/index.json`, `evidence/summary/latest.md`, `evidence/metrics/queue-health.json` are kept in `gh-pages`
 - all other files in `gh-pages` root are deleted before each publish
 
 This prevents deployment manifests or source files from being accidentally retained in the Pages branch.

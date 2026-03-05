@@ -39,14 +39,16 @@ jobs:
         run: |
           uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
           uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+          uvx --with pyyaml python scripts/promoter/queue_metrics.py --queue release/queue.yaml --out evidence/metrics/queue-health.json
 
       - name: Build publish payload (atomic staging)
         run: |
           rm -rf .publish-tmp
-          mkdir -p .publish-tmp/evidence/summary
+          mkdir -p .publish-tmp/evidence/summary .publish-tmp/evidence/metrics
           cp pages/index.html pages/app.js .publish-tmp/
           cp evidence/index.json .publish-tmp/evidence/index.json
           cp evidence/summary/latest.md .publish-tmp/evidence/summary/latest.md
+          cp evidence/metrics/queue-health.json .publish-tmp/evidence/metrics/queue-health.json
           python3 - <<'PY'
           import json, pathlib
           feed = pathlib.Path('.publish-tmp/evidence/index.json')
@@ -87,7 +89,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
-          extra_tracked="$(git ls-files | grep -Ev '^(index\.html|app\.js|evidence/index\.json|evidence/summary/latest\.md)$' || true)"
+          extra_tracked="$(git ls-files | grep -Ev '^(index\.html|app\.js|evidence/index\.json|evidence/summary/latest\.md|evidence/metrics/queue-health\.json)$' || true)"
           if [ -n "${extra_tracked}" ]; then
             echo "Unexpected tracked files in gh-pages branch:"
             echo "${extra_tracked}"

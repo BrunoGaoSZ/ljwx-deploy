@@ -19,15 +19,33 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: promoter
-              image: ghcr.io/astral-sh/uv:python3.11-alpine
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/brunogaosz/ljwx-deploy-promoter:main
+              imagePullPolicy: Always
               env:
                 - name: GIT_BRANCH
                   value: main
+                - name: DEPLOY_REPO_URL
+                  value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
                 - name: SERVICE_MAP_PATH
                   value: release/services.local-k3s.yaml
                 - name: SKIP_REGISTRY_CHECK
                   value: "1"
+                - name: SKIP_EVIDENCE_COLLECT
+                  value: "0"
+                - name: RETRY_MAX
+                  value: "10"
+                - name: DEPLOY_REPO_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: deploy_repo_token
+                      optional: true
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: github_token
+                      optional: true
                 - name: HARBOR_URL
                   valueFrom:
                     secretKeyRef:
@@ -46,32 +64,31 @@ spec:
                       name: deploy-promoter-secret
                       key: harbor_password
                       optional: true
-                - name: GITHUB_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: deploy-promoter-secret
-                      key: github_token
-                      optional: true
               command:
-                - /bin/sh
-                - -c
+                - /bin/bash
+                - -lc
                 - |
                   set -euo pipefail
-                  apk add --no-cache bash git openssh-client curl py3-pip
-                  pip3 install --no-cache-dir pyyaml jsonschema
-                  rm -rf /work/repo
-                  git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
-                  cd /work/repo
-                  export LOCAL_REPO_DIR=/work/repo
-                  bash scripts/promoter/promote.sh
-                  uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
-                  if git diff --quiet; then
-                    echo "No promoter changes"
-                    exit 0
+                  if [ -z "${DEPLOY_REPO_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ]; then
+                    export DEPLOY_REPO_TOKEN="${GITHUB_TOKEN}"
                   fi
-                  git config user.name "deploy-promoter[bot]"
-                  git config user.email "deploy-promoter[bot]@users.noreply.github.com"
-                  git add release/queue.yaml envs/dev evidence/records evidence/index.json evidence/summary/latest.md
-                  git commit -m "chore(promoter): auto promote pending services [skip ci]"
-                  git pull --rebase origin "${GIT_BRANCH}"
-                  git push origin "HEAD:${GIT_BRANCH}"
+                  if [ -z "${DEPLOY_REPO_TOKEN:-}" ]; then
+                    echo "缺少 DEPLOY_REPO_TOKEN（请在 deploy-promoter-secret 中配置 deploy_repo_token）"
+                    exit 1
+                  fi
+
+                  cmd=(
+                    python3 /app/scripts/promoter/promote.py
+                    --deploy-repo-url "${DEPLOY_REPO_URL}"
+                    --deploy-repo-token "${DEPLOY_REPO_TOKEN}"
+                    --service-map "${SERVICE_MAP_PATH}"
+                    --push-branch "${GIT_BRANCH}"
+                    --retry-max "${RETRY_MAX}"
+                  )
+                  if [ "${SKIP_REGISTRY_CHECK:-0}" = "1" ] || [ "${SKIP_REGISTRY_CHECK:-}" = "true" ] || [ "${SKIP_REGISTRY_CHECK:-}" = "TRUE" ]; then
+                    cmd+=(--skip-registry-check)
+                  fi
+                  if [ "${SKIP_EVIDENCE_COLLECT:-0}" = "1" ] || [ "${SKIP_EVIDENCE_COLLECT:-}" = "true" ] || [ "${SKIP_EVIDENCE_COLLECT:-}" = "TRUE" ]; then
+                    cmd+=(--skip-evidence-collect)
+                  fi
+                  "${cmd[@]}"

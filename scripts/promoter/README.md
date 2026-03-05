@@ -7,10 +7,11 @@ Promoter reads `release/queue.yaml` and auto-promotes ready releases by mutating
 - Per-service serialization: at most one pending entry per `service+env`.
 - Older pending entries are moved to `superseded` (not failed).
 - Promotion uses queue `source.ghcr` (standard image path) by default.
-- Optional registry readiness check can be enabled with `HARBOR_URL`.
+- Optional registry readiness check can be enabled with `HARBOR_URL` (probe Harbor-mapped image first).
 - Idempotent rerun: already-promoted items are not promoted again.
 - Promotion target resolution is centralized in `release/services.yaml`.
 - One codebase can target multiple clusters by switching `SERVICE_MAP_PATH`.
+- Queue/evidence/summary/metrics are committed in one promotion transaction.
 
 ## Main Command
 
@@ -73,9 +74,11 @@ kubectl patch serviceaccount promoter -n shared-platform \
 - `HARBOR_URL` (optional; empty by default)
 - `HARBOR_USER`, `HARBOR_PASS`
 - `SKIP_REGISTRY_CHECK` (`1/true` to pass `--skip-registry-check`)
+- `SKIP_EVIDENCE_COLLECT` (`1/true` to skip evidence index/summary/metrics generation)
 - `RETRY_MAX` (default: `10`)
 - `DRY_RUN` (`1` or `0`)
 - `SERVICE_MAP_PATH` (default: `release/services.yaml`)
+- `GIT_BRANCH` (default: `main`)
 
 ## Queue file
 

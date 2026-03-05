@@ -62,7 +62,7 @@ def main() -> int:
                     ("env",),
                     ("source", "repo"),
                     ("source", "commit"),
-                    ("image", "harbor"),
+                    ("image", "deployed"),
                     ("deploy", "deployRepoCommit"),
                 ]
                 for key_path in required:

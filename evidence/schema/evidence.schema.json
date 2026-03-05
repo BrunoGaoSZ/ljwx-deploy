@@ -52,7 +52,7 @@
     "image": {
       "type": "object",
       "required": [
-        "harbor"
+        "deployed"
       ],
       "additionalProperties": true,
       "properties": {
@@ -63,6 +63,12 @@
           ]
         },
         "harbor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "deployed": {
           "type": "string",
           "minLength": 3
         }

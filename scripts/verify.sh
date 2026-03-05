@@ -10,6 +10,7 @@ uvx --with pyyaml python scripts/promoter/validate_queue.py
 echo "[verify] validate and collect evidence feed"
 uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
 uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md
+uvx --with pyyaml python scripts/promoter/queue_metrics.py --queue release/queue.yaml --out /tmp/queue-health.json
 
 echo "[verify] run promoter dry-run on local repo"
 python3 scripts/promoter/promote.py --dry-run --local-repo-dir .

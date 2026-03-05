@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-03-05T04:35:02Z",
+  "counts": {
+    "pending": 0,
+    "promoted": 27,
+    "failed": 0,
+    "superseded": 5
+  },
+  "pending": {
+    "oldestCreatedAt": "",
+    "maxAgeSeconds": 0,
+    "staleThresholdSeconds": 1800,
+    "staleIds": [],
+    "byServiceEnv": {}
+  },
+  "failed": {
+    "last24h": 0,
+    "byServiceEnv": {}
+  },
+  "retries": {
+    "pendingMaxAttempts": 0,
+    "failedMaxAttempts": 0
+  },
+  "ratios": {
+    "supersededVsPromoted": 0.1562
+  }
+}

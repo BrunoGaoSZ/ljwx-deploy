@@ -39,6 +39,15 @@ def read_yaml(path: Path) -> dict[str, Any]:
     return raw
 
 
+def read_queue(path: Path) -> dict[str, Any]:
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        raise ValueError(f"queue root must be mapping: {path}")
+    return raw
+
+
 def write_yaml(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(
         yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8"
@@ -73,7 +82,11 @@ def record_files(evidence_dir: Path) -> list[Path]:
 
 
 def find_record_path(
-    evidence_dir: Path, service: str, environment: str, queue_id: str | None
+    evidence_dir: Path,
+    service: str,
+    environment: str,
+    queue_id: str | None,
+    prefer_pending: bool,
 ) -> Path | None:
     candidates: list[tuple[datetime, Path]] = []
     for path in record_files(evidence_dir):
@@ -100,12 +113,47 @@ def find_record_path(
         )
         if smoke_status not in {"pending", "pass", "fail", "unknown", None}:
             continue
+        if prefer_pending and smoke_status != "pending":
+            continue
 
         candidates.append((record_timestamp(record), path))
 
     if not candidates:
         return None
 
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    return candidates[0][1]
+
+
+def latest_promoted_queue_id(
+    queue_payload: dict[str, Any], service: str, env: str
+) -> str:
+    promoted = queue_payload.get("promoted", [])
+    if not isinstance(promoted, list):
+        return ""
+
+    candidates: list[tuple[datetime, str]] = []
+    for item in promoted:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("service", "")).strip() != service:
+            continue
+        if str(item.get("env", "")).strip() != env:
+            continue
+        queue_id = str(item.get("id", "")).strip()
+        if not queue_id:
+            continue
+        promoted_at = parse_ts(item.get("promotedAt"))
+        created_at = parse_ts(item.get("createdAt"))
+        ts = (
+            promoted_at
+            if promoted_at > datetime.min.replace(tzinfo=timezone.utc)
+            else created_at
+        )
+        candidates.append((ts, queue_id))
+
+    if not candidates:
+        return ""
     candidates.sort(key=lambda item: item[0], reverse=True)
     return candidates[0][1]
 
@@ -193,21 +241,42 @@ def update_smoke_record(path: Path, ok: bool, details: str, dry_run: bool) -> No
         write_yaml(path, record)
 
 
-def run_target(target: dict[str, Any], args: argparse.Namespace) -> tuple[str, str]:
+def run_target(
+    target: dict[str, Any], args: argparse.Namespace, queue_payload: dict[str, Any]
+) -> tuple[str, str]:
     service = str(target.get("service", "")).strip()
     environment = str(target.get("environment", "dev")).strip()
-    queue_id = target.get("queue_id")
+    queue_id = str(target.get("queue_id", "")).strip()
     app = str(target.get("argocd_app", "")).strip()
     endpoint = str(target.get("endpoint", "")).strip()
 
     if not service or not endpoint:
         return "fail", f"invalid target: {target}"
 
-    record_path = find_record_path(args.evidence_dir, service, environment, queue_id)
+    resolved_queue_id = queue_id or latest_promoted_queue_id(
+        queue_payload=queue_payload,
+        service=service,
+        env=environment,
+    )
+    record_path = find_record_path(
+        evidence_dir=args.evidence_dir,
+        service=service,
+        environment=environment,
+        queue_id=resolved_queue_id or None,
+        prefer_pending=True,
+    )
+    if not record_path:
+        record_path = find_record_path(
+            evidence_dir=args.evidence_dir,
+            service=service,
+            environment=environment,
+            queue_id=resolved_queue_id or None,
+            prefer_pending=False,
+        )
     if not record_path:
         return (
             "skip",
-            f"{service}: no promoted evidence record for {service}/{environment}",
+            f"{service}: no promoted evidence record for {service}/{environment} (queue={resolved_queue_id or '-'})",
         )
 
     ok_argocd, argocd_details = wait_for_argocd_health(
@@ -241,12 +310,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--targets", type=Path, default=Path("scripts/smoke/targets.json")
     )
+    parser.add_argument("--queue", type=Path, default=Path("release/queue.yaml"))
     parser.add_argument("--evidence-dir", type=Path, default=Path("evidence/records"))
     parser.add_argument("--argocd-server", default=os.getenv("ARGOCD_SERVER", ""))
     parser.add_argument("--argocd-token", default=os.getenv("ARGOCD_TOKEN", ""))
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument("--interval-seconds", type=int, default=10)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--allow-failures",
+        action="store_true",
+        help="return zero even when smoke failures exist (useful for CI structural checks)",
+    )
     return parser.parse_args()
 
 
@@ -254,12 +329,13 @@ def main() -> int:
     args = parse_args()
     config = read_json(args.targets)
     targets = list(config.get("targets", []))
+    queue_payload = read_queue(args.queue)
 
     passed = 0
     failed = 0
     skipped = 0
     for target in targets:
-        outcome, message = run_target(target, args)
+        outcome, message = run_target(target, args, queue_payload)
         print(message)
         if outcome == "pass":
             passed += 1
@@ -275,10 +351,11 @@ def main() -> int:
                 "failed": failed,
                 "skipped": skipped,
                 "dry_run": args.dry_run,
+                "allow_failures": args.allow_failures,
             }
         )
     )
-    return 0 if failed == 0 else 1
+    return 0 if failed == 0 or args.allow_failures else 1
 
 
 if __name__ == "__main__":

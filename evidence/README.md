@@ -9,13 +9,14 @@
 - `env`
 - `source.repo`
 - `source.commit`
-- `image.harbor`
+- `image.deployed`
 - `deploy.deployRepoCommit`
 
 ## Optional fields
 
 - `source.workflowRun`
 - `image.ghcr`
+- `image.harbor` (legacy compatibility field)
 - `deploy.argocdApp`
 - `deploy.syncedAt`
 - `tests.smoke`
@@ -42,6 +43,7 @@ source:
 image:
   ghcr: ghcr.io/example/frontend@sha256:1111111111111111111111111111111111111111111111111111111111111111
   harbor: harbor.omniverseai.net/app/frontend@sha256:2222222222222222222222222222222222222222222222222222222222222222
+  deployed: ghcr.io/example/frontend@sha256:1111111111111111111111111111111111111111111111111111111111111111
 deploy:
   deployRepoCommit: abcdef1234567890
   argocdApp: frontend-dev

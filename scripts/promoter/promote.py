@@ -17,7 +17,9 @@ from typing import Any
 try:
     import yaml
 except Exception as exc:  # noqa: BLE001
-    raise SystemExit(f"PyYAML is required. Install with: pip3 install pyyaml\n{exc}")
+    raise SystemExit(
+        f"PyYAML is required. Install with: uvx --with pyyaml python <script>\n{exc}"
+    )
 
 
 def now_rfc3339() -> str:
@@ -169,6 +171,25 @@ def harbor_manifest_ready(
     get_cmd = base + ["-X", "GET", "-H", f"Accept: {accept}", endpoint]
     get = subprocess.run(get_cmd, text=True, capture_output=True)
     return get.returncode == 0 and get.stdout.strip() == "200"
+
+
+def image_belongs_to_harbor(image_ref: str, harbor_url: str) -> bool:
+    harbor_host = host_from_url(harbor_url)
+    image_host, _ = image_registry_and_repo(image_ref)
+    if not harbor_host:
+        return False
+    return bool(image_host) and image_host == harbor_host
+
+
+def select_registry_probe_image(
+    harbor_image: str, deploy_image: str, harbor_url: str
+) -> str:
+    # In strict Harbor mode, probe Harbor repository first.
+    if harbor_image and image_belongs_to_harbor(harbor_image, harbor_url):
+        return harbor_image
+    if deploy_image and image_belongs_to_harbor(deploy_image, harbor_url):
+        return deploy_image
+    return ""
 
 
 def ghcr_repo(ghcr_ref: str) -> str:
@@ -398,10 +419,16 @@ def process_pending(
             continue
 
         should_check_registry = (not skip_registry_check) and bool(harbor_url.strip())
-        if should_check_registry and not harbor_manifest_ready(
-            deploy_image, digest, harbor_url, harbor_user, harbor_pass
-        ):
-            continue
+        if should_check_registry:
+            probe_image = select_registry_probe_image(
+                harbor_image=harbor_image,
+                deploy_image=deploy_image,
+                harbor_url=harbor_url,
+            )
+            if probe_image and not harbor_manifest_ready(
+                probe_image, digest, harbor_url, harbor_user, harbor_pass
+            ):
+                continue
 
         overlay_path = repo_dir / overlay_rel
         if not overlay_path.exists():
@@ -450,8 +477,8 @@ def process_pending(
             },
             "image": {
                 "ghcr": ghcr_ref,
-                # Keep legacy key for schema compatibility; value is the actual deployed image.
-                "harbor": f"{deploy_image}@{digest}",
+                # Keep legacy key for schema compatibility; prefer Harbor mirror when available.
+                "harbor": f"{(harbor_image or deploy_image)}@{digest}",
                 "deployed": f"{deploy_image}@{digest}",
             },
             "deploy": {
@@ -489,6 +516,7 @@ def process_pending(
         promoted_meta.append(
             {
                 "service": service,
+                "env": env,
                 "tag": tag,
                 "evidence_path": str(evidence_path),
                 "overlay_path": overlay_rel,
@@ -536,6 +564,8 @@ def validate_queue_shape(queue: dict[str, Any]) -> None:
 def commit_and_push(
     repo_dir: Path,
     promoted_meta: list[dict[str, str]],
+    push_branch: str,
+    collect_evidence: bool,
     dry_run: bool,
 ) -> None:
     if dry_run:
@@ -543,6 +573,29 @@ def commit_and_push(
         return
 
     run(["python3", "scripts/evidence/validate.py"], cwd=repo_dir)
+    if collect_evidence:
+        run(
+            [
+                "python3",
+                "scripts/evidence/collect.py",
+                "--out",
+                "evidence/index.json",
+                "--summary",
+                "evidence/summary/latest.md",
+            ],
+            cwd=repo_dir,
+        )
+        run(
+            [
+                "python3",
+                "scripts/promoter/queue_metrics.py",
+                "--queue",
+                "release/queue.yaml",
+                "--out",
+                "evidence/metrics/queue-health.json",
+            ],
+            cwd=repo_dir,
+        )
 
     run(["git", "config", "user.name", "deploy-promoter[bot]"], cwd=repo_dir)
     run(
@@ -556,6 +609,14 @@ def commit_and_push(
     )
 
     stage_paths = ["release/queue.yaml", "evidence/records"]
+    if collect_evidence:
+        stage_paths.extend(
+            [
+                "evidence/index.json",
+                "evidence/summary/latest.md",
+                "evidence/metrics/queue-health.json",
+            ]
+        )
     stage_paths.extend(
         item["overlay_path"] for item in promoted_meta if item.get("overlay_path")
     )
@@ -568,11 +629,16 @@ def commit_and_push(
         return
 
     if promoted_meta:
-        svc = promoted_meta[0]["service"]
-        tag = promoted_meta[0]["tag"]
-        message = f"promote(dev): {svc} {tag} [skip ci]"
+        env_set = sorted({item.get("env", "dev") for item in promoted_meta})
+        scope = env_set[0] if len(env_set) == 1 else "multi"
+        if len(promoted_meta) == 1:
+            svc = promoted_meta[0]["service"]
+            tag = promoted_meta[0]["tag"]
+            message = f"promote({scope}): {svc} {tag} [skip ci]"
+        else:
+            message = f"promote({scope}): {len(promoted_meta)} services [skip ci]"
     else:
-        message = "promote(dev): queue normalize [skip ci]"
+        message = "promote(ops): queue normalize [skip ci]"
 
     run(["git", "commit", "-m", message], cwd=repo_dir)
     sha = run(["git", "rev-parse", "HEAD"], cwd=repo_dir).stdout.strip()
@@ -594,13 +660,41 @@ def commit_and_push(
 
     if touched:
         run(["python3", "scripts/evidence/validate.py"], cwd=repo_dir)
-        run(
-            ["git", "add", *[str(p.relative_to(repo_dir)) for p in touched]],
-            cwd=repo_dir,
-        )
+        add_paths = [str(p.relative_to(repo_dir)) for p in touched]
+        if collect_evidence:
+            run(
+                [
+                    "python3",
+                    "scripts/evidence/collect.py",
+                    "--out",
+                    "evidence/index.json",
+                    "--summary",
+                    "evidence/summary/latest.md",
+                ],
+                cwd=repo_dir,
+            )
+            run(
+                [
+                    "python3",
+                    "scripts/promoter/queue_metrics.py",
+                    "--queue",
+                    "release/queue.yaml",
+                    "--out",
+                    "evidence/metrics/queue-health.json",
+                ],
+                cwd=repo_dir,
+            )
+            add_paths.extend(
+                [
+                    "evidence/index.json",
+                    "evidence/summary/latest.md",
+                    "evidence/metrics/queue-health.json",
+                ]
+            )
+        run(["git", "add", *add_paths], cwd=repo_dir)
         run(["git", "commit", "--amend", "--no-edit"], cwd=repo_dir)
 
-    run(["git", "push", "origin", "HEAD:main"], cwd=repo_dir)
+    run(["git", "push", "origin", f"HEAD:{push_branch}"], cwd=repo_dir)
 
 
 def main() -> int:
@@ -621,6 +715,11 @@ def main() -> int:
         "--service-map", default=os.getenv("SERVICE_MAP_PATH", "release/services.yaml")
     )
     parser.add_argument(
+        "--push-branch",
+        default=os.getenv("GIT_BRANCH", "main"),
+        help="target branch in deploy repo",
+    )
+    parser.add_argument(
         "--harbor-url",
         default=os.getenv("HARBOR_URL", ""),
     )
@@ -636,6 +735,11 @@ def main() -> int:
         "--skip-registry-check",
         action="store_true",
         help="skip registry manifest check (transparent-cache mode)",
+    )
+    parser.add_argument(
+        "--skip-evidence-collect",
+        action="store_true",
+        help="skip evidence index/summary/metrics collection before commit",
     )
     args = parser.parse_args()
 
@@ -692,7 +796,13 @@ def main() -> int:
         for path, data in evidence_changes.items():
             yaml_dump(path, data)
 
-        commit_and_push(repo_dir, promoted_meta, dry_run=False)
+        commit_and_push(
+            repo_dir=repo_dir,
+            promoted_meta=promoted_meta,
+            push_branch=args.push_branch,
+            collect_evidence=not args.skip_evidence_collect,
+            dry_run=False,
+        )
         print("Promotion completed")
         return 0
     finally:

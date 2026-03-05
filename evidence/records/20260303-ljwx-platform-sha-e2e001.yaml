@@ -8,6 +8,7 @@ source:
 image:
   ghcr: ghcr.io/brunogaosz/ljwx-platform@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   harbor: harbor.omniverseai.net/app/ljwx-platform@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  deployed: ghcr.io/brunogaosz/ljwx-platform@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 deploy:
   deployRepoCommit: 1d679035ed8a78e7e0820228ae59d1e420da5695
   queueId: 2026-03-03T060500Z-ljwx-platform-sha-e2e001

@@ -8,6 +8,7 @@ source:
 image:
   ghcr: ghcr.io/brunogaosz/ljwx-website@sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641
   harbor: harbor.omniverseai.net/app/ljwx-website@sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641
+  deployed: ghcr.io/brunogaosz/ljwx-website@sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641
 deploy:
   deployRepoCommit: 3e1ea9e61cef4876d0807b0e9ec5711ce298449a
   queueId: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25

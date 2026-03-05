@@ -1,6 +1,6 @@
 # Latest Evidence Summary
 
-| service | env | harbor digest | syncedAt | smoke | links |
+| service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
 | ljwx-stock-agent | dev | `077c33f22a0d2950` | 2026-03-05T04:10:13Z | pass | - |
 | ljwx-stock-qlib-predict | dev | `9b310ac3e5f1079a` | 2026-03-05T01:16:35Z | pending | - |

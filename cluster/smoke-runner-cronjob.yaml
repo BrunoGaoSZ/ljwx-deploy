@@ -20,13 +20,21 @@ spec:
           restartPolicy: Never
           containers:
             - name: smoke-runner
-              image: ghcr.io/astral-sh/uv:python3.11-alpine
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/brunogaosz/ljwx-deploy-promoter:main
+              imagePullPolicy: Always
               env:
                 - name: GIT_BRANCH
                   value: main
+                - name: DEPLOY_REPO_URL
+                  value: https://github.com/BrunoGaoSZ/ljwx-deploy.git
                 - name: SMOKE_TARGETS
                   value: scripts/smoke/targets.local-k3s.json
+                - name: DEPLOY_REPO_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: deploy-promoter-secret
+                      key: deploy_repo_token
+                      optional: true
                 - name: ARGOCD_SERVER
                   valueFrom:
                     secretKeyRef:
@@ -50,23 +58,30 @@ spec:
                 - -c
                 - |
                   set -euo pipefail
-                  apk add --no-cache git openssh-client curl py3-pip
-                  pip3 install --no-cache-dir pyyaml jsonschema
+                  if [ -z "${DEPLOY_REPO_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ]; then
+                    export DEPLOY_REPO_TOKEN="${GITHUB_TOKEN}"
+                  fi
+                  if [ -z "${DEPLOY_REPO_TOKEN:-}" ]; then
+                    echo "缺少 DEPLOY_REPO_TOKEN（请在 deploy-promoter-secret 中配置 deploy_repo_token）"
+                    exit 1
+                  fi
                   rm -rf /work/repo
-                  git clone --depth=1 "https://x-access-token:${GITHUB_TOKEN}@github.com/BrunoGaoSZ/ljwx-deploy.git" /work/repo
+                  git clone --depth=1 "https://x-access-token:${DEPLOY_REPO_TOKEN}@${DEPLOY_REPO_URL#https://}" /work/repo
                   cd /work/repo
                   set +e
-                  uvx --with pyyaml --with jsonschema python scripts/smoke/run_smoke.py --targets "${SMOKE_TARGETS}"
+                  python3 scripts/smoke/run_smoke.py --targets "${SMOKE_TARGETS}" --queue release/queue.yaml
                   SMOKE_EXIT=$?
                   set -e
-                  uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+                  python3 scripts/evidence/validate.py
+                  python3 scripts/evidence/collect.py --out evidence/index.json --summary evidence/summary/latest.md
+                  python3 scripts/promoter/queue_metrics.py --queue release/queue.yaml --out evidence/metrics/queue-health.json
                   if git diff --quiet; then
                     echo "No smoke updates"
                     exit "${SMOKE_EXIT}"
                   fi
                   git config user.name "smoke-runner[bot]"
                   git config user.email "smoke-runner[bot]@users.noreply.github.com"
-                  git add evidence/records evidence/index.json evidence/summary/latest.md
+                  git add evidence/records evidence/index.json evidence/summary/latest.md evidence/metrics/queue-health.json
                   git commit -m "chore(smoke): update smoke evidence [skip ci]"
                   git pull --rebase origin "${GIT_BRANCH}"
                   git push origin "HEAD:${GIT_BRANCH}"

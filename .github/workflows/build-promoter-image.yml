@@ -4,8 +4,7 @@ on:
   push:
     branches-ignore: [gh-pages]
     paths:
-      - scripts/promoter/promote.py
-      - scripts/promoter/Dockerfile
+      - scripts/**
       - .github/workflows/build-promoter-image.yml
   workflow_dispatch:
 

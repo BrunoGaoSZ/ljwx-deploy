@@ -1,0 +1,32 @@
+name: monthly-rollback-drill
+
+on:
+  schedule:
+    # Monthly on day 1, 18:00 UTC
+    - cron: "0 18 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drill:
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Run rollback drill (dry-run only)
+        run: bash scripts/ops/run_rollback_drill.sh
