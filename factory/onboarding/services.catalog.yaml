@@ -9,8 +9,8 @@ services:
   - service: ljwx-platform
     environment: prod
     overlay_path: apps/ljwx-platform/overlays/prod/kustomization.yaml
-    kustomize_image_name: harbor.omniverseai.net/app/ljwx-platform
-    harbor_image: harbor.omniverseai.net/app/ljwx-platform
+    kustomize_image_name: ghcr.io/brunogaosz/ljwx-platform
+    harbor_image: harbor.eu.lingjingwanxiang.cn/app/ljwx-platform
     argocd_app: ljwx-platform
     smoke_endpoint: http://ljwx-platform.ljwx-platform.svc.cluster.local/
     deploy_namespace: ljwx-platform
@@ -22,9 +22,9 @@ services:
   # New project onboarding example (generate app skeleton + argocd app)
   - service: demo-new-service
     environment: dev
-    overlay_path: apps/demo-new-service/overlays/dev/kustomization.yaml
-    kustomize_image_name: harbor.omniverseai.net/app/demo-new-service
-    harbor_image: harbor.omniverseai.net/app/demo-new-service
+    overlay_path: apps/demo-new-service/overlays/demo-new-service-dev/kustomization.yaml
+    kustomize_image_name: ghcr.io/brunogaosz/demo-new-service
+    harbor_image: harbor.eu.lingjingwanxiang.cn/app/demo-new-service
     argocd_app: demo-new-service-dev
     smoke_endpoint: http://demo-new-service.demo-new-service-dev.svc.cluster.local/health
     deploy_namespace: demo-new-service-dev

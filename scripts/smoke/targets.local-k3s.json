@@ -42,6 +42,24 @@
       "environment": "dev",
       "argocd_app": "stock-agent-dev",
       "endpoint": "http://stock-agent.ljwx-stock.svc.cluster.local/v1/health"
+    },
+    {
+      "service": "ljwx-dify",
+      "environment": "dev",
+      "argocd_app": "ljwx-dify-dev",
+      "endpoint": "http://api.ljwx-dify-dev.svc.cluster.local:5001/health"
+    },
+    {
+      "service": "ljwx-dify-web",
+      "environment": "dev",
+      "argocd_app": "ljwx-dify-dev",
+      "endpoint": "http://web.ljwx-dify-dev.svc.cluster.local:3000/"
+    },
+    {
+      "service": "ljwx-chat",
+      "environment": "dev",
+      "argocd_app": "ljwx-chat-dev",
+      "endpoint": "http://ljwx-chat.ljwx-chat-dev.svc.cluster.local/"
     }
   ]
 }

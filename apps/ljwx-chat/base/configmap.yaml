@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ljwx-chat-config
+data:
+  NODE_ENV: "production"
+  PORT: "3210"
+  HOSTNAME: "0.0.0.0"
+
+  DATABASE_DRIVER: "node"
+
+  NEXT_PUBLIC_ENABLE_NEXT_AUTH: "0"
+  NEXT_PUBLIC_ENABLE_LOCAL_AUTH: "1"
+  NEXT_AUTH_SSO_SESSION_STRATEGY: "jwt"
+  NEXT_AUTH_SSO_PROVIDERS: ""
+  AUTH_TRUST_HOST: "true"
+
+  EMAIL_ENABLED: "false"
+
+  NEXT_PUBLIC_BASE_URL: "https://chat.lingjingwanxiang.cn"
+  NEXTAUTH_URL: "https://chat.lingjingwanxiang.cn"
+
+  S3_BUCKET: "ljwx-chat"
+  S3_ENABLE_PATH_STYLE: "true"
+
+  MIDDLEWARE_REWRITE_THROUGH_LOCAL: "1"
+
+  ENABLED_OLLAMA: "0"

@@ -7,9 +7,9 @@ patches:
 - path: service-nodeport.yaml
 - path: deployment-probe.yaml
 images:
-- name: harbor.omniverseai.net/ljwx/ljwx-website
-  newName: harbor.omniverseai.net/app/ljwx-website
-  digest: sha256:b6bee6292395deda36062a25cdbae5a7eb81477823736bd3dacbcdc5e6be1641
+- name: ghcr.io/brunogaosz/ljwx-website
+  newName: ghcr.io/brunogaosz/ljwx-website
+  newTag: latest
 replicas:
 - name: ljwx-website
   count: 1
