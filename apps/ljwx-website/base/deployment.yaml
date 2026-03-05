@@ -20,7 +20,7 @@ spec:
         - name: regcred
       containers:
         - name: ljwx-website
-          image: ghcr.io/brunogaosz/ljwx-website:latest
+          image: ghcr.io/brunogao/ljwx-website:latest
           ports:
             - name: http
               containerPort: 80

@@ -28,7 +28,7 @@ spec:
         - name: regcred
       containers:
         - name: api
-          image: ghcr.io/brunogaosz/ljwx-dify-api:latest
+          image: ghcr.io/brunogao/ljwx-dify-api:latest
           ports:
             - containerPort: 5001
               name: http

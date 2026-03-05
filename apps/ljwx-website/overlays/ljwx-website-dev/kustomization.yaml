@@ -7,8 +7,8 @@ patches:
 - path: service-nodeport.yaml
 - path: deployment-probe.yaml
 images:
-- name: ghcr.io/brunogaosz/ljwx-website
-  newName: ghcr.io/brunogaosz/ljwx-website
+- name: ghcr.io/brunogao/ljwx-website
+  newName: ghcr.io/brunogao/ljwx-website
   newTag: latest
 replicas:
 - name: ljwx-website

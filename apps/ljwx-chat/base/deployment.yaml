@@ -16,7 +16,7 @@ spec:
         - name: regcred
       containers:
         - name: ljwx-chat
-          image: ghcr.io/brunogaosz/ljwx-chat:latest
+          image: ghcr.io/brunogao/ljwx-chat:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3210

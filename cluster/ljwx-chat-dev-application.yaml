@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ljwx-chat-dev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/BrunoGaoSZ/ljwx-deploy.git
+    targetRevision: main
+    path: apps/ljwx-chat/overlays/ljwx-chat-dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ljwx-chat-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

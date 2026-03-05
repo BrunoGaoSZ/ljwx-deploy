@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-dify-dev
+  labels:
+    name: ljwx-dify-dev
+    environment: dev
+    app: ljwx-dify

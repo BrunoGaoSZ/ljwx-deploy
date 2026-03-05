@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ljwx-chat-dev
+  labels:
+    name: ljwx-chat-dev
+    environment: dev
+    app: ljwx-chat
