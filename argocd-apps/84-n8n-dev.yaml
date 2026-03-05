@@ -1,0 +1,161 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: n8n-dev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://community-charts.github.io/helm-charts
+    chart: n8n
+    targetRevision: 1.16.29
+    helm:
+      releaseName: n8n
+      values: |
+        image:
+          tag: "2.9.4"
+
+        log:
+          level: info
+
+        diagnostics:
+          enabled: false
+
+        versionNotifications:
+          enabled: true
+
+        db:
+          type: postgresdb
+
+        main:
+          count: 1
+          editorBaseUrl: "https://n8n.lingjingwanxiang.cn"
+          persistence:
+            enabled: true
+            storageClass: local-path
+            accessMode: ReadWriteOnce
+            size: 10Gi
+          extraEnvVars:
+            N8N_HOST: "n8n.lingjingwanxiang.cn"
+            N8N_PROTOCOL: "https"
+            N8N_LISTEN_ADDRESS: "0.0.0.0"
+            N8N_SECURE_COOKIE: "true"
+            N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+            ANTHROPIC_MODEL: "claude-sonnet-4-6"
+          extraSecretNamesForEnvFrom:
+            - n8n-extra-env
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+        worker:
+          mode: queue
+          count: 1
+          concurrency: 10
+          extraEnvVars:
+            N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+            ANTHROPIC_MODEL: "claude-sonnet-4-6"
+          waitMainNodeReady:
+            enabled: true
+            overwriteSchema: "http"
+          extraSecretNamesForEnvFrom:
+            - n8n-extra-env
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+        webhook:
+          mode: queue
+          count: 1
+          url: "https://n8n.lingjingwanxiang.cn/"
+          extraEnvVars:
+            N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+            ANTHROPIC_MODEL: "claude-sonnet-4-6"
+          waitMainNodeReady:
+            enabled: true
+            overwriteSchema: "http"
+          extraSecretNamesForEnvFrom:
+            - n8n-extra-env
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+        existingEncryptionKeySecret: n8n-encryption-secret
+
+        timezone: "Asia/Shanghai"
+        defaultLocale: en
+
+        ingress:
+          enabled: true
+          className: traefik
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+            traefik.ingress.kubernetes.io/redirect-to-https: "true"
+          hosts:
+            - host: n8n.lingjingwanxiang.cn
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - n8n.lingjingwanxiang.cn
+              secretName: n8n-lingjingwanxiang-cn-tls
+
+        serviceMonitor:
+          enabled: true
+          namespace: monitoring
+          labels:
+            release: prometheus
+          interval: 30s
+          timeout: 10s
+          include:
+            defaultMetrics: true
+            queueMetrics: true
+
+        postgresql:
+          enabled: true
+          auth:
+            username: n8n
+            database: n8n
+            existingSecret: n8n-postgresql
+            secretKeys:
+              userPasswordKey: password
+              adminPasswordKey: postgres-password
+          primary:
+            persistence:
+              enabled: true
+              storageClass: local-path
+              size: 20Gi
+
+        redis:
+          enabled: true
+          auth:
+            enabled: true
+            existingSecret: n8n-redis
+            existingSecretPasswordKey: redis-password
+          master:
+            persistence:
+              enabled: true
+              storageClass: local-path
+              size: 8Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: n8n
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
