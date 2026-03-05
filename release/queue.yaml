@@ -77,6 +77,21 @@ pending:
   meta:
     manualE2E: true
     note: website prod flow test r2
+- id: 20260305T142909Z-ljwx-website-sha-f05d6f6
+  service: ljwx-website
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-website@sha256:d74a93cb367036a31e7d997582ab0df88bfb08427cf6ef72c039bb42bb047f6b
+    tag: sha-f05d6f6
+    digest: sha256:d74a93cb367036a31e7d997582ab0df88bfb08427cf6ef72c039bb42bb047f6b
+    gitSha: f05d6f6
+  createdAt: '2026-03-05T14:29:09Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
