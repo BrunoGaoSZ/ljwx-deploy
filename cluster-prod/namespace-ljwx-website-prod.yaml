@@ -6,6 +6,7 @@ metadata:
     name: ljwx-website-prod
     environment: prod
     app: ljwx-website
+    registry-sync.ljwx.io/enabled: "true"
 ---
 apiVersion: v1
 kind: ResourceQuota

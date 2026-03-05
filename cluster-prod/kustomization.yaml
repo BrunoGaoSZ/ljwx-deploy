@@ -2,5 +2,7 @@ resources:
   - namespace-dev.yaml
   - default-sa.yaml
   - namespace-ljwx-website-prod.yaml
+  - registry-pull-secret-sync-rbac.yaml
+  - registry-pull-secret-sync-cronjob.yaml
   - website-prod-application.yaml
   - deploy-promoter-prod-cronjob.yaml

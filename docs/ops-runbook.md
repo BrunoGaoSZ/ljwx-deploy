@@ -14,6 +14,8 @@ This runbook covers day-2 operations for the async promotion path:
 `deploy-promoter-prod` and prod Applications are managed by production-side bootstrap:
 
 - `cluster-prod/deploy-promoter-prod-cronjob.yaml`
+- `cluster-prod/registry-pull-secret-sync-rbac.yaml`
+- `cluster-prod/registry-pull-secret-sync-cronjob.yaml`
 - `cluster-prod/website-prod-application.yaml`
 - bootstrap app manifest: `argocd-apps/02-cluster-prod-bootstrap.yaml` (apply on production Argo only)
 
@@ -36,6 +38,13 @@ kubectl apply -f argocd-apps/02-cluster-prod-bootstrap.yaml
 kubectl -n argocd get app cluster-prod-bootstrap
 kubectl -n argocd get app ljwx-website-prod
 ```
+
+Registry pull secret sync (generic):
+
+- source secret: `default/harbor-registry`
+- target namespaces: label `registry-sync.ljwx.io/enabled=true`
+- synced names: `harbor-registry`, `ghcr-pull`, `regcred`
+- patch target namespace `default` ServiceAccount with `harbor-registry`
 
 ## Grafana dashboard + TLS (GitOps)
 
@@ -124,17 +133,24 @@ When `--auto-enqueue-prod` is enabled, only tag-success entries will append `env
    - Ensure `ghcr-pull` exists in `dev`.
    - Ensure `dev/default` ServiceAccount includes `imagePullSecrets: [{name: ghcr-pull}]`.
    - Recreate stuck jobs after secret/SA fix.
-3. pgvector regression risk (`ljwx-chat` migration fails on `vector` extension):
+3. Prod workload image pull fails (`ImagePullBackOff` on Harbor):
+   - Ensure namespace label exists: `registry-sync.ljwx.io/enabled=true`.
+   - Check sync job logs: `kubectl -n dev logs job/<registry-pull-secret-sync-job-name>`.
+   - Verify secret sync result:
+     - `kubectl -n <ns> get secret harbor-registry ghcr-pull regcred`
+   - Verify `default` SA includes `harbor-registry`:
+     - `kubectl -n <ns> get sa default -o jsonpath='{.imagePullSecrets[*].name}{"\n"}'`
+4. pgvector regression risk (`ljwx-chat` migration fails on `vector` extension):
    - PR Gate blocks merge when `infra/postgres` is not `pgvector/pgvector:pg16`.
    - Local static check: `bash scripts/ops/check-pgvector.sh`
    - Runtime check (k3s): `bash scripts/ops/check-pgvector.sh --runtime`
-4. Queue entry stuck in `failed`:
+5. Queue entry stuck in `failed`:
    - Fix source image/tag/digest.
    - Re-enqueue with a new queue `id`.
-5. Argo app not healthy:
+6. Argo app not healthy:
    - Check sync errors/events in `kubectl -n argocd describe application <app-name>`.
    - Fix manifest/resource issue and re-sync.
-6. Smoke failed:
+7. Smoke failed:
    - Inspect `tests.smoke.details` in evidence record.
    - Confirm endpoint DNS/service/ingress and app readiness probe behavior.
 
