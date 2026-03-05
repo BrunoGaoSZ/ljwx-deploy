@@ -1,0 +1,22 @@
+evidenceId: 20260305-ljwx-dify-sha-aa50c1c
+service: ljwx-dify
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-dify-api
+  commit: aa50c1c
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-dify-api@sha256:2418c043ccbaf040774dce03c0a4a2e0e92cb678b35b950a962d5b4c12756914
+  harbor: harbor.eu.lingjingwanxiang.cn/app/ljwx-dify-api@sha256:2418c043ccbaf040774dce03c0a4a2e0e92cb678b35b950a962d5b4c12756914
+  deployed: ghcr.io/brunogao/ljwx-dify-api@sha256:2418c043ccbaf040774dce03c0a4a2e0e92cb678b35b950a962d5b4c12756914
+deploy:
+  deployRepoCommit: 6a83f78d491b162cfe518aa7bdf5dcc88b91abff
+  queueId: 20260305T074809Z-ljwx-dify-sha-aa50c1c
+  argocdApp: ljwx-dify-dev
+  overlayPath: apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml
+  syncedAt: '2026-03-05T07:50:07Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}
