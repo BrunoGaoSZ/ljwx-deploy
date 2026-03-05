@@ -1,27 +1,7 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: n8n-dev
-  namespace: argocd
-spec:
-  project: default
-  sources:
-    - repoURL: https://community-charts.github.io/helm-charts
-      chart: n8n
-      targetRevision: 1.16.29
-      helm:
-        releaseName: n8n
-        valueFiles:
-          - $values/cluster/n8n-dev-values.yaml
-    - repoURL: https://github.com/BrunoGaoSZ/ljwx-deploy.git
-      targetRevision: main
-      ref: values
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: n8n
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+# This file is intentionally documentation-only.
+# Source of truth for n8n Argo CD Application:
+#   cluster/n8n-dev-application.yaml
+#
+# Reason:
+# - n8n is bootstrapped by cluster-bootstrap from cluster/kustomization.yaml
+# - keeping a second deployable Application here creates dual-entry drift risk
