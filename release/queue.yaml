@@ -62,6 +62,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260305T142654Z-ljwx-dify-sha-9016453
+  service: ljwx-dify
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-dify-api@sha256:73328a0b8a5b0d24ee07e0fb724d33e9daeb937ce63403e27acd511798294fcf
+    tag: sha-9016453
+    digest: sha256:73328a0b8a5b0d24ee07e0fb724d33e9daeb937ce63403e27acd511798294fcf
+    gitSha: '9016453'
+  createdAt: '2026-03-05T14:26:54Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
