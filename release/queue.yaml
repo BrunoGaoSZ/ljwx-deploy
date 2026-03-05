@@ -1,4 +1,19 @@
-pending: []
+pending:
+- id: 20260305T075939Z-ljwx-dify-web-sha-aa50c1c
+  service: ljwx-dify-web
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-dify-web@sha256:753f299a03e4af65f3a068394393889077e5acb3065bb4c5aa32c0677ceeffc9
+    tag: sha-aa50c1c
+    digest: sha256:753f299a03e4af65f3a068394393889077e5acb3065bb4c5aa32c0677ceeffc9
+    gitSha: aa50c1c
+  createdAt: '2026-03-05T07:59:39Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
