@@ -35,6 +35,7 @@ class OnboardEntry:
     overlay_path: str
     kustomize_image_name: str
     harbor_image: str
+    deploy_image: str
     argocd_app: str
     smoke_endpoint: str
     deploy_namespace: str
@@ -115,6 +116,7 @@ def parse_entry(raw: dict[str, object]) -> OnboardEntry:
     overlay_path = get_required_str(raw, "overlay_path")
     kustomize_image_name = get_required_str(raw, "kustomize_image_name")
     harbor_image = get_required_str(raw, "harbor_image")
+    deploy_image = str(raw.get("deploy_image", "")).strip()
     argocd_app = get_required_str(raw, "argocd_app")
     smoke_endpoint = get_required_str(raw, "smoke_endpoint")
     deploy_namespace = get_required_str(raw, "deploy_namespace")
@@ -132,6 +134,7 @@ def parse_entry(raw: dict[str, object]) -> OnboardEntry:
         overlay_path=overlay_path,
         kustomize_image_name=kustomize_image_name,
         harbor_image=harbor_image,
+        deploy_image=deploy_image,
         argocd_app=argocd_app,
         smoke_endpoint=smoke_endpoint,
         deploy_namespace=deploy_namespace,
@@ -178,6 +181,8 @@ def ensure_service_mapping(path: Path, entry: OnboardEntry, dry_run: bool) -> bo
         "harborImage": entry.harbor_image,
         "argocdApp": entry.argocd_app,
     }
+    if entry.deploy_image:
+        desired["deployImage"] = entry.deploy_image
     changed = current_map != desired
     if changed:
         envs[entry.environment] = desired

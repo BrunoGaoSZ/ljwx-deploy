@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-dify-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ljwx-dify-worker
+  template:
+    metadata:
+      labels:
+        app: ljwx-dify-worker
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: worker
+          image: ghcr.io/brunogaosz/ljwx-dify-api:latest
+          env:
+            - name: MODE
+              value: "worker"
+          envFrom:
+            - configMapRef:
+                name: ljwx-dify-config
+            - secretRef:
+                name: ljwx-dify-secrets
+          volumeMounts:
+            - name: storage
+              mountPath: /app/api/storage
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: ljwx-dify-storage

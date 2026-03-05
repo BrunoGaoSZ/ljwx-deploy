@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ljwx-dify-config
+data:
+  MODE: "api"
+  LOG_LEVEL: "INFO"
+
+  DB_HOST: "postgres-lb.infra.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_DATABASE: "ljwx_dify"
+
+  REDIS_HOST: "redis-lb.infra.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+
+  VECTOR_STORE: "qdrant"
+  QDRANT_URL: "http://qdrant:6333"
+
+  STORAGE_TYPE: "s3"
+  S3_ENDPOINT: "http://minio.infra.svc.cluster.local:9000"
+  S3_USE_AWS_MANAGED_IAM: "false"
+  S3_USE_PATH_STYLE: "true"
+  S3_BUCKET_NAME: "ljwx-dify"
+  S3_REGION: "us-east-1"
+
+  NEXT_PUBLIC_COMPANY_NAME: "灵境万象"
+  NEXT_PUBLIC_SITE_NAME: "灵境万象知识库"
+  NEXT_PUBLIC_DEFAULT_LOCALE: "zh-Hans"
+
+  CONSOLE_API_URL: ""
+  APP_API_URL: ""
+
+  PLUGIN_DAEMON_URL: "http://plugin-daemon:5002"
+  PLUGIN_DAEMON_PORT: "5002"

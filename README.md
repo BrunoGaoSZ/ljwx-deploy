@@ -2,6 +2,11 @@
 
 GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 
+## Start Here
+
+- 新进程/新项目/老项目统一接入入口：`docs/START-HERE-GITOPS-ONBOARDING.md`
+- 自动扫描当前仓库是否已接入：`bash scripts/ops/scan-gitops-context.sh --repo "$PWD"`
+
 ## Bid-MVP Factory Control Plane
 
 - 运行验证：`bash scripts/verify.sh`

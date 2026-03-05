@@ -1,5 +1,14 @@
 # Service Repo Workflow Wrapper (Template-First)
 
+先阅读：`START-HERE-GITOPS-ONBOARDING.md`（deploy 视角）和 `ljwx-workflow-templates/START-HERE-SERVICE-WORKFLOW.md`（服务仓视角）。
+
+推荐优先使用一键脚本：
+
+`bash /root/codes/ljwx-workflow-templates/scripts/quick-onboard.sh --repo "$PWD" --service <service-name>`
+
+该脚本生成的 `build-and-enqueue.yml` 已内置 PR Gate（`gitops-onboarding-gate`），
+未接入完整 GitOps 时会直接失败并阻断合并。
+
 Service repositories should call reusable workflows from:
 
 `BrunoGaoSZ/ljwx-workflow-templates`
@@ -29,7 +38,7 @@ jobs:
     needs: [test]
     uses: BrunoGaoSZ/ljwx-workflow-templates/.github/workflows/build-ghcr.yml@main
     with:
-      image_name: <service>
+      image_name: <ghcr-org>/<image-repo>
       context: .
       dockerfile: Dockerfile
       platforms: linux/amd64,linux/arm64

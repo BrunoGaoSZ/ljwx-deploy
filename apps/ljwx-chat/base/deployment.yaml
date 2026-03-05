@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ljwx-chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ljwx-chat
+  template:
+    metadata:
+      labels:
+        app: ljwx-chat
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: ljwx-chat
+          image: ghcr.io/brunogaosz/ljwx-chat:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3210
+              name: http
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: ljwx-chat-config
+            - secretRef:
+                name: ljwx-chat-secrets
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
