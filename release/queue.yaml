@@ -59,24 +59,6 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
-- id: 20260305T142839Z-ljwx-website-sha-e2eprod142839-r2
-  service: ljwx-website
-  env: dev
-  source:
-    ghcr: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
-    tag: sha-e2eprod142839-r2
-    digest: sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
-    gitSha: e2e-prod-flow
-  createdAt: '2026-03-05T14:28:39Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
-  meta:
-    manualE2E: true
-    note: website prod flow test r2
 - id: 20260305T142909Z-ljwx-website-sha-f05d6f6
   service: ljwx-website
   env: dev
@@ -761,3 +743,22 @@ superseded:
   promotedAt: ''
   supersededAt: '2026-03-05T14:28:51Z'
   failedAt: ''
+- id: 20260305T142839Z-ljwx-website-sha-e2eprod142839-r2
+  service: ljwx-website
+  env: dev
+  source:
+    ghcr: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website@sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
+    tag: sha-e2eprod142839-r2
+    digest: sha256:c4f4a59ca033b0c383590424477c2b6402597aaec68a45ba38ef67b1c784e6c9
+    gitSha: e2e-prod-flow
+  createdAt: '2026-03-05T14:28:39Z'
+  status: superseded
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: '2026-03-05T14:29:33Z'
+  failedAt: ''
+  meta:
+    manualE2E: true
+    note: website prod flow test r2
+  reason: replaced by newer pending release for same service+env
