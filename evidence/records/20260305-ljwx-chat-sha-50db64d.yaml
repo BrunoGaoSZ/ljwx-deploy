@@ -1,0 +1,22 @@
+evidenceId: 20260305-ljwx-chat-sha-50db64d
+service: ljwx-chat
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-chat
+  commit: 50db64d
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-chat@sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
+  harbor: harbor.eu.lingjingwanxiang.cn/app/ljwx-chat@sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
+  deployed: ghcr.io/brunogao/ljwx-chat@sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
+deploy:
+  deployRepoCommit: 48e800385508627867df8cabf69c6412301752db
+  queueId: 20260305T080051Z-ljwx-chat-sha-50db64d
+  argocdApp: ljwx-chat-dev
+  overlayPath: apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml
+  syncedAt: '2026-03-05T08:10:08Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}

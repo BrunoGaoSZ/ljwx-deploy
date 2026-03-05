@@ -1,19 +1,4 @@
-pending:
-- id: 20260305T080051Z-ljwx-chat-sha-50db64d
-  service: ljwx-chat
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-chat@sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
-    tag: sha-50db64d
-    digest: sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
-    gitSha: 50db64d
-  createdAt: '2026-03-05T08:00:51Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
+pending: []
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
@@ -536,6 +521,21 @@ promoted:
   attempts: 0
   lastError: ''
   promotedAt: '2026-03-05T08:00:15Z'
+  supersededAt: ''
+  failedAt: ''
+- id: 20260305T080051Z-ljwx-chat-sha-50db64d
+  service: ljwx-chat
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-chat@sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
+    tag: sha-50db64d
+    digest: sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
+    gitSha: 50db64d
+  createdAt: '2026-03-05T08:00:51Z'
+  status: promoted
+  attempts: 0
+  lastError: ''
+  promotedAt: '2026-03-05T08:10:08Z'
   supersededAt: ''
   failedAt: ''
 failed: []

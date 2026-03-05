@@ -1,12 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: ljwx-chat-dev
-
 resources:
-  - ../../base
-
+- ../../base
 images:
-  - name: ghcr.io/brunogao/ljwx-chat
-    newName: ghcr.io/brunogao/ljwx-chat
-    newTag: latest
+- name: ghcr.io/brunogao/ljwx-chat
+  newName: ghcr.io/brunogao/ljwx-chat
+  digest: sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
