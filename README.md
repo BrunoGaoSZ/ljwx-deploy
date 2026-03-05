@@ -12,6 +12,8 @@ GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 - 运行验证：`bash scripts/verify.sh`
 - Harbor 复制：`docs/harbor-replication-ghcr.md`
 - Promoter/Argo/Smoke 运维：`docs/ops-runbook.md`
+- 生产集群 Bootstrap（仅生产集群执行）：`argocd-apps/02-cluster-prod-bootstrap.yaml`
+- 生产镜像拉取凭据自动同步：`cluster-prod/registry-pull-secret-sync-*.yaml`
 - 回滚演练：`docs/rollback-drill.md`
 - Grafana 可观测看板 + TLS（GitOps）：`apps/ljwx-platform-observability/`
 - 双 k3s 同代码部署规范：`docs/dual-k3s-deployment.md`
@@ -25,7 +27,17 @@ GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 - `infra/` - 基础设施组件（Gitea Runner 等）
 - `argocd-apps/` - ArgoCD Application 定义
 - `apps/` - 应用配置
-- `cluster/` - 集群级别配置
+- `cluster/` - 本地/dev 集群级别配置
+- `cluster-prod/` - 生产集群级别配置（prod app + prod promoter + registry secret sync）
+
+## 生产发布闭环（当前）
+
+1. 服务仓 CI push GHCR（不可变 digest）。
+2. 本地 Harbor 同步 GHCR；`deploy-promoter` 仅处理 `dev,demo`。
+3. smoke 通过后自动给本地 Harbor 打 `prod-*` 标签，并自动 enqueue `env=prod`。
+4. 生产 Harbor 仅同步 `prod-*` 标签。
+5. 生产集群 `deploy-promoter-prod` 等待生产 Harbor digest 就绪后更新 prod overlay。
+6. `registry-pull-secret-sync` 自动把 `default/harbor-registry` 下发到标记 namespace（`registry-sync.ljwx.io/enabled=true`），避免 prod Pod 拉镜像失败。
 
 ## 组件
 

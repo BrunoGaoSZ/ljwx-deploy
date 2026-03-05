@@ -85,22 +85,29 @@ bash scripts/verify.sh
 3. 补 smoke endpoint。
 4. 通过一轮 queue->promoter->argocd->smoke->evidence 验证闭环。
 
-## 5. 三个重点项目接入口径（当前）
+## 5. 生产发布接入补充（必须）
+
+1. `prod` Application 与 `deploy-promoter-prod` 只放在 `cluster-prod/`，不要放到本地 `cluster/`。
+2. 生产集群使用 `argocd-apps/02-cluster-prod-bootstrap.yaml` 作为 bootstrap 入口。
+3. 需要拉私有镜像的 prod namespace 必须带标签：`registry-sync.ljwx.io/enabled=true`，由 `registry-pull-secret-sync` 自动下发 `harbor-registry/ghcr-pull/regcred`。
+## 6. 三个重点项目接入口径（当前）
 
 1. `ljwx-website`：已在 `ljwx-deploy` 管理，需保持映射与健康状态一致。
 2. `ljwx-dify`：必须纳入同一 GitOps 主链路，不再采用独立脚本直发。
 3. `ljwx-chat`：新项目按“新项目快速接入”执行，优先 `dev`，再扩到 `prod`。
 
-## 6. 必过门禁
+## 7. 必过门禁
 
 1. 禁止手工改集群作为长期状态来源。
 2. 禁止 `envs/` 作为主发布入口（仅历史兼容）。
 3. 变更必须经 PR 审核。
 4. Secret 禁止明文入库。
+5. 禁止在本地 `cluster/` 里管理 prod Application（防止误部署到本机集群）。
 
-## 7. 常见错误
+## 8. 常见错误
 
 1. 只改服务仓，不改 deploy repo 映射。
 2. overlay 路径和 argocd app 名不一致。
 3. smoke endpoint 未配置，导致证据链断裂。
 4. 使用脚本直发覆盖了 GitOps 状态，造成漂移。
+5. prod namespace 没有 `registry-sync.ljwx.io/enabled=true`，导致 `ImagePullBackOff`。

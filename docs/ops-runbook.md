@@ -39,6 +39,20 @@ kubectl -n argocd get app cluster-prod-bootstrap
 kubectl -n argocd get app ljwx-website-prod
 ```
 
+Production quick verify:
+
+```bash
+# make sure current kubectl context is production cluster
+kubectl config current-context
+kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}{"\n"}'
+
+# verify generic registry secret sync
+kubectl -n dev get cronjob registry-pull-secret-sync
+kubectl get ns -l registry-sync.ljwx.io/enabled=true
+kubectl -n ljwx-website-prod get secret harbor-registry ghcr-pull regcred
+kubectl -n ljwx-website-prod get sa default -o jsonpath='{.imagePullSecrets[*].name}{"\n"}'
+```
+
 Registry pull secret sync (generic):
 
 - source secret: `default/harbor-registry`

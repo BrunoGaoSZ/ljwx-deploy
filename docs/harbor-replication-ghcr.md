@@ -1,4 +1,4 @@
-# Harbor Pull Replication Runbook (GHCR -> Harbor `app`)
+# Harbor Pull Replication Runbook (GHCR -> Harbor `ljwx`)
 
 Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for replication.
 
@@ -11,6 +11,7 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
 5. Smoke runner auto-enqueues `env=prod`.
 6. Production Harbor (`harbor.omniverseai.net`) receives artifact from local Harbor (filter `prod-*`).
 7. Prod promoter (running on production cluster) waits production Harbor digest readiness, then deploys prod.
+8. Production registry pull secret sync (`cluster-prod/registry-pull-secret-sync-cronjob.yaml`) keeps target namespaces imagePull secrets up to date.
 
 Production Argo bootstrap manifest:
 
@@ -26,7 +27,7 @@ Production Argo bootstrap manifest:
    - Name: `ghcr-to-app`
    - Direction: `Pull-based`
    - Source registry: the GHCR endpoint above
-   - Destination namespace/project: `app`
+   - Destination namespace/project: `ljwx`
    - Trigger mode: `Scheduled`
    - Cron: `*/1 * * * *` (every 1 minute)
    - Resource filters:
@@ -50,12 +51,12 @@ Production Argo bootstrap manifest:
 # by digest (preferred by promoter)
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "https://<your-harbor-domain>/v2/app/<svc>/manifests/sha256:<digest>"
+  "https://<your-harbor-domain>/v2/ljwx/<svc>/manifests/sha256:<digest>"
 
 # by tag (manual verification)
 curl -u "${HARBOR_USER}:${HARBOR_PASS}" -I \
   -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  "https://<your-harbor-domain>/v2/app/<svc>/manifests/sha-<shortsha>"
+  "https://<your-harbor-domain>/v2/ljwx/<svc>/manifests/sha-<shortsha>"
 ```
 
 Expected:
@@ -76,3 +77,10 @@ Expected:
    - Run verification curl manually.
 4. Queue moved to `failed`:
    - Fix root cause, then re-enqueue with a new `id`.
+5. Pod image pull secret error (`FailedToRetrieveImagePullSecret` / `ImagePullBackOff`):
+   - Ensure target namespace has label `registry-sync.ljwx.io/enabled=true`.
+   - Check sync job status/log:
+     - `kubectl -n dev get cronjob registry-pull-secret-sync`
+     - `kubectl -n dev logs job/<registry-pull-secret-sync-job-name>`
+   - Verify synced secret:
+     - `kubectl -n <ns> get secret harbor-registry ghcr-pull regcred`
