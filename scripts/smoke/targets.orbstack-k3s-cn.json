@@ -60,6 +60,12 @@
       "environment": "dev",
       "argocd_app": "ljwx-chat-dev",
       "endpoint": "http://ljwx-chat.ljwx-chat-dev.svc.cluster.local/"
+    },
+    {
+      "service": "ljwx-shiti",
+      "environment": "dev",
+      "argocd_app": "ljwx-shiti-dev",
+      "endpoint": "http://ljwx-shiti.ljwx-shiti-dev.svc.cluster.local/health"
     }
   ]
 }

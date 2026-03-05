@@ -1,16 +1,18 @@
 resources:
-  - namespace-dev.yaml
-  - namespace-ljwx-website-dev.yaml
-  - namespace-ljwx-dify-dev.yaml
-  - namespace-ljwx-chat-dev.yaml
-  - namespace-ljwx-bookstore.yaml
-  - website-dev-application.yaml
-  - ljwx-dify-dev-application.yaml
-  - ljwx-chat-dev-application.yaml
-  - ljwx-platform-observability-application.yaml
-  - deploy-promoter-cronjob.yaml
-  - smoke-runner-cronjob.yaml
-  - regcred.yaml
-  - default-sa.yaml
-  - stock-etl-qlib-predict-application.yaml
-  - stock-agent-application.yaml
+- namespace-dev.yaml
+- namespace-ljwx-website-dev.yaml
+- namespace-ljwx-dify-dev.yaml
+- namespace-ljwx-chat-dev.yaml
+- namespace-ljwx-bookstore.yaml
+- website-dev-application.yaml
+- ljwx-dify-dev-application.yaml
+- ljwx-chat-dev-application.yaml
+- ljwx-platform-observability-application.yaml
+- deploy-promoter-cronjob.yaml
+- smoke-runner-cronjob.yaml
+- regcred.yaml
+- default-sa.yaml
+- stock-etl-qlib-predict-application.yaml
+- stock-agent-application.yaml
+- namespace-ljwx-shiti-dev.yaml
+- ljwx-shiti-dev-application.yaml
