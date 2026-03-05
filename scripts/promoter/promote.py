@@ -163,19 +163,30 @@ def harbor_manifest_ready(
         return False
 
     endpoint = f"{harbor_url.rstrip('/')}/v2/{repo}/manifests/{digest}"
-    accept = "application/vnd.oci.image.manifest.v1+json"
     base = ["curl", "-sS", "-o", "/dev/null", "-w", "%{http_code}"]
     if harbor_user or harbor_pass:
         base += ["-u", f"{harbor_user}:{harbor_pass}"]
 
-    head_cmd = base + ["-I", "-H", f"Accept: {accept}", endpoint]
-    head = subprocess.run(head_cmd, text=True, capture_output=True)
-    if head.returncode == 0 and head.stdout.strip() == "200":
-        return True
+    accepts = [
+        "application/vnd.oci.image.manifest.v1+json",
+        "application/vnd.oci.image.index.v1+json",
+        "application/vnd.docker.distribution.manifest.v2+json",
+        "application/vnd.docker.distribution.manifest.list.v2+json",
+        "*/*",
+    ]
 
-    get_cmd = base + ["-X", "GET", "-H", f"Accept: {accept}", endpoint]
-    get = subprocess.run(get_cmd, text=True, capture_output=True)
-    return get.returncode == 0 and get.stdout.strip() == "200"
+    for accept in accepts:
+        head_cmd = base + ["-I", "-H", f"Accept: {accept}", endpoint]
+        head = subprocess.run(head_cmd, text=True, capture_output=True)
+        if head.returncode == 0 and head.stdout.strip() == "200":
+            return True
+
+    for accept in accepts:
+        get_cmd = base + ["-X", "GET", "-H", f"Accept: {accept}", endpoint]
+        get = subprocess.run(get_cmd, text=True, capture_output=True)
+        if get.returncode == 0 and get.stdout.strip() == "200":
+            return True
+    return False
 
 
 def image_belongs_to_harbor(image_ref: str, harbor_url: str) -> bool:
