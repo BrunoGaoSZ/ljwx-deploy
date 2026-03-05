@@ -2,8 +2,8 @@
 
 | service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
-| ljwx-dify | dev | `df38aa28c6add15b` | 2026-03-05T07:39:09Z | pending | - |
-| ljwx-website | dev | `be26e0c85044cc52` | 2026-03-05T07:39:09Z | pending | - |
+| ljwx-dify | dev | `df38aa28c6add15b` | 2026-03-05T07:39:09Z | pass | - |
+| ljwx-website | dev | `be26e0c85044cc52` | 2026-03-05T07:39:09Z | pass | - |
 | ljwx-stock-agent | dev | `077c33f22a0d2950` | 2026-03-05T04:10:13Z | pass | - |
 | ljwx-stock-qlib-predict | dev | `9b310ac3e5f1079a` | 2026-03-05T01:16:35Z | pending | - |
 | ljwx-stock-qlib-bootstrap | dev | `6705bf8c0bb41bc3` | 2026-03-05T01:12:54Z | pending | - |
