@@ -1,0 +1,22 @@
+evidenceId: 20260305-ljwx-stock-agent-sha-026dc7a
+service: ljwx-stock-agent
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
+  commit: 026dc7a
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent@sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
+  harbor: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent@sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
+  deployed: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent@sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
+deploy:
+  deployRepoCommit: 3782405e330b8e3fef511ab14e18312f51698d16
+  queueId: 20260305T040639Z-ljwx-stock-agent-sha-026dc7a
+  argocdApp: ljwx-stock-agent-dev
+  overlayPath: apps/stock-agent/overlays/ljwx-stock/kustomization.yaml
+  syncedAt: '2026-03-05T04:10:13Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}

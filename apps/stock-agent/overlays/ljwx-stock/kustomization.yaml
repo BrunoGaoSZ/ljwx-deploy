@@ -6,4 +6,4 @@ resources:
 images:
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
-  digest: sha256:23edfa1f9a62db1d60a4d8aa315047ac4ba9d7f8ea28f166e7e26e3946dcca08
+  digest: sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531

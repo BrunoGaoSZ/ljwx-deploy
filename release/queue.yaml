@@ -1,19 +1,4 @@
-pending:
-- id: 20260305T040639Z-ljwx-stock-agent-sha-026dc7a
-  service: ljwx-stock-agent
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent@sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
-    tag: sha-026dc7a
-    digest: sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
-    gitSha: 026dc7a
-  createdAt: '2026-03-05T04:06:39Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
+pending: []
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
@@ -461,6 +446,21 @@ promoted:
   attempts: 0
   lastError: ''
   promotedAt: '2026-03-05T01:16:35Z'
+  supersededAt: ''
+  failedAt: ''
+- id: 20260305T040639Z-ljwx-stock-agent-sha-026dc7a
+  service: ljwx-stock-agent
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent@sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
+    tag: sha-026dc7a
+    digest: sha256:077c33f22a0d2950de2bf21ffd5b7729f51979b09647e097fd9510dd43a36531
+    gitSha: 026dc7a
+  createdAt: '2026-03-05T04:06:39Z'
+  status: promoted
+  attempts: 0
+  lastError: ''
+  promotedAt: '2026-03-05T04:10:13Z'
   supersededAt: ''
   failedAt: ''
 failed: []
