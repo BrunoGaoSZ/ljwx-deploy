@@ -6,11 +6,16 @@ This runbook covers day-2 operations for the async promotion path:
 
 ## Bootstrap (GitOps-managed CronJobs)
 
-`deploy-promoter`、`deploy-promoter-prod` and `smoke-runner` are now managed by `cluster-bootstrap` from:
+`deploy-promoter` and `smoke-runner` are managed by local `cluster-bootstrap` from:
 
 - `cluster/deploy-promoter-cronjob.yaml`
-- `cluster/deploy-promoter-prod-cronjob.yaml`
 - `cluster/smoke-runner-cronjob.yaml`
+
+`deploy-promoter-prod` and prod Applications are managed by production-side bootstrap:
+
+- `cluster-prod/deploy-promoter-prod-cronjob.yaml`
+- `cluster-prod/website-prod-application.yaml`
+- bootstrap app manifest: `argocd-apps/02-cluster-prod-bootstrap.yaml` (apply on production Argo only)
 
 Required secret (not committed with real values):
 
@@ -21,6 +26,16 @@ Cluster rule:
 
 - same GitOps source code for local `k3s` and OrbStack `k3s`
 - cluster variance only via profile files (`SERVICE_MAP_PATH`, `SMOKE_TARGETS`) and env gate (`ENV_ALLOWLIST`)
+- local cluster must not own prod Application manifests; prod rollout is owned by production Argo instance
+
+Production bootstrap (required):
+
+```bash
+# run on production server/cluster context
+kubectl apply -f argocd-apps/02-cluster-prod-bootstrap.yaml
+kubectl -n argocd get app cluster-prod-bootstrap
+kubectl -n argocd get app ljwx-website-prod
+```
 
 ## Grafana dashboard + TLS (GitOps)
 
@@ -47,11 +62,13 @@ kubectl -n monitoring get cm ljwx-platform-observability-dashboard
 ## 1) Observe deploy-promoter (dev/prod 两阶段)
 
 ```bash
-# manifests
+# dev manifests (local cluster)
 kubectl -n dev get cronjob deploy-promoter
+kubectl -n dev get cronjob deploy-promoter -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env}{"\n"}' | rg "ENV_ALLOWLIST|SERVICE_MAP_PATH|HARBOR_URL"
+
+# prod manifests (production cluster)
 kubectl -n dev get cronjob deploy-promoter-prod
-kubectl -n dev get cronjob deploy-promoter -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
-kubectl -n dev get cronjob deploy-promoter-prod -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env}{"\n"}' | rg "ENV_ALLOWLIST|HARBOR_URL"
+kubectl -n dev get cronjob deploy-promoter-prod -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].env}{"\n"}' | rg "ENV_ALLOWLIST|SERVICE_MAP_PATH|HARBOR_URL"
 
 # latest job and pod
 kubectl -n dev get jobs --sort-by=.metadata.creationTimestamp | tail -n 5
@@ -63,6 +80,7 @@ Expected:
 
 - `deploy-promoter` 只处理 `ENV_ALLOWLIST=dev,demo`，并等待本地 Harbor digest 就绪。
 - `deploy-promoter-prod` 只处理 `ENV_ALLOWLIST=prod`，并等待生产 Harbor digest 就绪。
+- `deploy-promoter-prod` should run on the production cluster (not on local cluster).
 - If digest is not ready in the target Harbor: queue stays in `pending`.
 - If digest exists: queue entry moves to `promoted`, mapped Argo overlay is updated, evidence record written.
 - Promoter job startup should not spend time in `apk/pip` installation (image is prebuilt).
@@ -128,7 +146,7 @@ When `--auto-enqueue-prod` is enabled, only tag-success entries will append `env
 8. Smoke runner auto-enqueues `env=prod` pending entry when tag succeeds.
 9. Production Harbor replication (filter `prod-*`) receives artifact from local Harbor.
 10. `deploy-promoter-prod` (prod allowlist) waits production Harbor digest ready, then promotes prod overlay.
-11. Argo auto-sync applies prod revision.
+11. Production Argo auto-sync applies prod revision.
 12. Pages feed updates with latest `evidence/index.json`.
 13. Queue health feed updates at `evidence/metrics/queue-health.json`.
 

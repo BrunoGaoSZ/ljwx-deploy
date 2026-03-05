@@ -10,7 +10,11 @@ Use Harbor 2.x Pull Replication. CI must only push to GHCR and must not wait for
 4. Smoke passes, then auto-tags local Harbor artifact as `prod-*` (Harbor API).
 5. Smoke runner auto-enqueues `env=prod`.
 6. Production Harbor (`harbor.omniverseai.net`) receives artifact from local Harbor (filter `prod-*`).
-7. Prod promoter waits production Harbor digest readiness, then deploys prod.
+7. Prod promoter (running on production cluster) waits production Harbor digest readiness, then deploys prod.
+
+Production Argo bootstrap manifest:
+
+- `argocd-apps/02-cluster-prod-bootstrap.yaml`
 
 ## Harbor UI steps
 
