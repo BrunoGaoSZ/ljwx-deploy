@@ -15,6 +15,9 @@
 ./scripts/create-app-secret.sh ljwx-bookstore
 ```
 
+如果 `/root/codes/.env` 中存在 Claude 代理配置，上面的脚本会额外同步
+`ljwx-bookstore-llm-secret`，供 Deployment 以可选方式注入。
+
 ### 手动创建
 
 如果自动化脚本不可用，使用以下命令手动创建：
@@ -43,8 +46,14 @@ kubectl create secret generic ljwx-bookstore-secret \
   --from-literal=STORAGE_ALIYUN_ACCESS_KEY_SECRET="placeholder" \
   --from-literal=STORAGE_TENCENT_SECRET_ID="placeholder" \
   --from-literal=STORAGE_TENCENT_SECRET_KEY="placeholder" \
-  --from-literal=AI_CLOUD_API_KEY="" \
   --namespace=ljwx-bookstore
+```
+
+如果需要让 `ljwx-bookstore` 使用 `/root/codes/.env` 中的 Claude 代理配置：
+
+```bash
+./scripts/sync-llm-secret.sh ljwx-bookstore /root/codes/.env
+kubectl rollout restart deployment/ljwx-bookstore -n ljwx-bookstore
 ```
 
 ## Secret 架构
@@ -90,7 +99,12 @@ kubectl create secret generic ljwx-bookstore-secret \
    ./scripts/create-app-secret.sh ljwx-bookstore
    ```
 
-3. **部署应用**（Argo CD自动同步）
+3. **如需云端 LLM，创建可选 LLM Secret**
+   ```bash
+   ./scripts/sync-llm-secret.sh ljwx-bookstore /root/codes/.env
+   ```
+
+4. **部署应用**（Argo CD自动同步）
    ```bash
    argocd app sync ljwx-bookstore
    ```
@@ -109,7 +123,10 @@ kubectl patch secret infra-credentials -n infra \
 kubectl delete secret ljwx-bookstore-secret -n ljwx-bookstore
 ./scripts/create-app-secret.sh ljwx-bookstore
 
-# 3. 重启应用
+# 3. 如果修改了 /root/codes/.env，同步 LLM Secret
+./scripts/sync-llm-secret.sh ljwx-bookstore /root/codes/.env
+
+# 4. 重启应用
 kubectl rollout restart deployment ljwx-bookstore -n ljwx-bookstore
 ```
 
@@ -165,6 +182,19 @@ kubectl get secret ljwx-bookstore-secret -n ljwx-bookstore -o jsonpath='{.data.D
 # 如果不一致，重新创建
 kubectl delete secret ljwx-bookstore-secret -n ljwx-bookstore
 ./scripts/create-app-secret.sh ljwx-bookstore
+```
+
+### LLM 配置未生效
+
+```bash
+# 重新同步可选 LLM Secret
+./scripts/sync-llm-secret.sh ljwx-bookstore /root/codes/.env
+
+# 确认 Deployment 已注入 ljwx-bookstore-llm-secret
+kubectl get deployment ljwx-bookstore -n ljwx-bookstore -o yaml | grep -n "ljwx-bookstore-llm-secret"
+
+# 重启应用
+kubectl rollout restart deployment/ljwx-bookstore -n ljwx-bookstore
 ```
 
 ## 相关文档

@@ -1,18 +1,20 @@
 #!/bin/bash
 # =============================================================================
 # 从 infra namespace 创建应用 Secret
-# 用法: ./create-app-secret.sh <app-name>
-# 示例: ./create-app-secret.sh ljwx-bookstore
+# 用法: ./create-app-secret.sh <app-name> [llm-env-file]
+# 示例: ./create-app-secret.sh ljwx-bookstore /root/codes/.env
 # =============================================================================
 
-set -e
+set -euo pipefail
 
-APP_NAME="${1}"
+APP_NAME="${1:-}"
+LLM_ENV_FILE="${2:-${LLM_ENV_FILE:-/root/codes/.env}}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -z "$APP_NAME" ]; then
     echo "错误: 请提供应用名称"
-    echo "用法: $0 <app-name>"
-    echo "示例: $0 ljwx-bookstore"
+    echo "用法: $0 <app-name> [llm-env-file]"
+    echo "示例: $0 ljwx-bookstore /root/codes/.env"
     exit 1
 fi
 
@@ -89,7 +91,6 @@ kubectl create secret generic "${APP_NAME}-secret" \
   --from-literal=STORAGE_ALIYUN_ACCESS_KEY_SECRET="placeholder" \
   --from-literal=STORAGE_TENCENT_SECRET_ID="placeholder" \
   --from-literal=STORAGE_TENCENT_SECRET_KEY="placeholder" \
-  --from-literal=AI_CLOUD_API_KEY="" \
   --namespace="${APP_NAME}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
@@ -116,6 +117,10 @@ else
     echo -e "${RED}✗ Secret 创建失败${NC}"
     exit 1
 fi
+
+echo ""
+echo -e "${YELLOW}同步可选 LLM Secret...${NC}"
+"${SCRIPT_DIR}/sync-llm-secret.sh" "${APP_NAME}" "${LLM_ENV_FILE}"
 
 echo ""
 echo -e "${GREEN}=== 完成！ ===${NC}"
