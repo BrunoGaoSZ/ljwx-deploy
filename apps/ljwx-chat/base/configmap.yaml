@@ -26,3 +26,4 @@ data:
   MIDDLEWARE_REWRITE_THROUGH_LOCAL: "1"
 
   ENABLED_OLLAMA: "0"
+  OPENAI_PROXY_URL: "https://openclaw.lingjingwanxiang.cn/v1"
