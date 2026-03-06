@@ -4,6 +4,6 @@ namespace: ljwx-shiti-dev
 resources:
   - ../../base
 images:
-  - name: ghcr.io/brunogao/ljwx-shiti
+  - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
     newName: ghcr.io/brunogao/ljwx-shiti
     digest: sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
