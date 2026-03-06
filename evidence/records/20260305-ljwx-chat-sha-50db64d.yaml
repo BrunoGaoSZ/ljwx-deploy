@@ -15,11 +15,11 @@ deploy:
   argocdApp: ljwx-chat-dev
   overlayPath: apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml
   syncedAt: '2026-03-05T08:10:08Z'
-  smokedAt: '2026-03-06T22:15:12Z'
+  smokedAt: '2026-03-06T22:30:13Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-06T22:15:12Z'
+    checkedAt: '2026-03-06T22:30:13Z'
     details: argocd check skipped; endpoint=200 body='<!DOCTYPE html><!--HujP_xzH5aFuugdA_MY7x--><html
       dir="ltr" lang="en-US"><head><meta charSet="utf-8"/><meta name="viewpor'
 approvals: {}
