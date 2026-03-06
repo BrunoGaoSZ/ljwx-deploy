@@ -17,6 +17,9 @@ spec:
       containers:
         - name: ljwx-shiti
           image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti:latest
+          envFrom:
+            - secretRef:
+                name: ljwx-shiti-env
           ports:
             - name: http
               containerPort: 8000
