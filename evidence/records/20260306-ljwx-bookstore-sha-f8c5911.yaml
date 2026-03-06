@@ -15,8 +15,11 @@ deploy:
   argocdApp: ljwx-bookstore-dev
   overlayPath: apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml
   syncedAt: '2026-03-06T11:26:18Z'
+  smokedAt: '2026-03-06T11:33:15Z'
 tests:
   smoke:
-    status: pending
-    checkedAt: ''
+    status: fail
+    checkedAt: '2026-03-06T11:33:15Z'
+    details: 'argocd check skipped; endpoint wait timeout: <urlopen error [Errno 111]
+      Connection refused>'
 approvals: {}

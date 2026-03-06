@@ -2,8 +2,8 @@
 
 | service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
-| ljwx-bookstore | dev | `21072d47881b2bd3` | 2026-03-06T11:26:18Z | pending | - |
-| ljwx-shiti | dev | `a17b3da43adf6b0a` | 2026-03-06T11:26:18Z | pending | - |
+| ljwx-bookstore | dev | `21072d47881b2bd3` | 2026-03-06T11:26:18Z | fail | - |
+| ljwx-shiti | dev | `a17b3da43adf6b0a` | 2026-03-06T11:26:18Z | pass | - |
 | ljwx-website | prod | `c4f4a59ca033b0c3` | 2026-03-05T14:36:45Z | pending | - |
 | ljwx-chat | dev | `8124e9c5b483595f` | 2026-03-05T08:10:08Z | pass | - |
 | ljwx-dify-web | dev | `753f299a03e4af65` | 2026-03-05T08:00:15Z | pass | - |
