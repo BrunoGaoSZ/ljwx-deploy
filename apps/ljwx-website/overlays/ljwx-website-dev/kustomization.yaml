@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: ljwx-website-dev
 resources:
 - ../../base
+- ingress.yaml
 patches:
 - path: service-nodeport.yaml
 - path: deployment-probe.yaml

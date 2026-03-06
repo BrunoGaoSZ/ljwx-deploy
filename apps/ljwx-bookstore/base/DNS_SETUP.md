@@ -2,17 +2,15 @@
 
 ## 域名信息
 
-- **生产域名**: `book.omniverseai.net`
-- **DNS提供商**: Cloudflare
-- **SSL证书**: Let's Encrypt (自动通过cert-manager获取)
+- **生产域名**: `bookstore.lingjingwanxiang.cn`
+- **入口控制器**: Traefik
+- **SSL证书**: Let's Encrypt (自动通过 cert-manager 获取)
 
 ## DNS记录配置
 
-### 步骤1: 登录 Cloudflare
+### 步骤1: 配置域名解析
 
-1. 访问 https://dash.cloudflare.com/
-2. 选择域名 `omniverseai.net`
-3. 进入 DNS 管理页面
+将 `bookstore.lingjingwanxiang.cn` 解析到 k3s 对外入口 IP。
 
 ### 步骤2: 添加 A 记录
 
@@ -20,7 +18,7 @@
 
 | 类型 | 名称 | 内容 | 代理状态 | TTL |
 |------|------|------|----------|-----|
-| A | book | `<INGRESS_IP>` | 仅DNS（灰色云朵） | Auto |
+| A | bookstore | `<INGRESS_IP>` | 仅DNS | Auto |
 
 **获取 Ingress IP**:
 ```bash
@@ -34,20 +32,16 @@ kubectl get ingress ljwx-bookstore -n ljwx-bookstore \
 192.168.194.177  # 示例，请使用实际IP
 ```
 
-### 步骤3: Cloudflare 配置建议
+### 步骤3: HTTPS 配置建议
 
 #### SSL/TLS 设置
 1. 进入 `SSL/TLS` → `概述`
 2. 加密模式选择: **完全（严格）** 或 **完全**
 3. 推荐: **完全（严格）** - 确保端到端加密
 
-#### 代理状态
-- **开发/测试**: 仅DNS（灰色云朵）- 直连Kubernetes
-- **生产环境**: 代理（橙色云朵）- 使用Cloudflare CDN和DDoS防护
-
 #### 其他推荐配置
-- 启用 **自动HTTPS重写**
-- 启用 **始终使用HTTPS**
+- DNS 记录生效前不要切换业务入口
+- 保证 `bookstore.lingjingwanxiang.cn` 已解析到 Traefik 对外 IP
 - 配置 **最小TLS版本**: TLS 1.2
 
 ## 验证步骤
@@ -56,10 +50,10 @@ kubectl get ingress ljwx-bookstore -n ljwx-bookstore \
 
 ```bash
 # 检查DNS记录
-dig book.omniverseai.net +short
+dig bookstore.lingjingwanxiang.cn +short
 
 # 或使用nslookup
-nslookup book.omniverseai.net
+nslookup bookstore.lingjingwanxiang.cn
 ```
 
 **期望输出**: 应该返回Ingress Controller的IP地址
@@ -73,10 +67,10 @@ nslookup book.omniverseai.net
 kubectl get certificate -n ljwx-bookstore
 
 # 查看证书详情
-kubectl describe certificate ljwx-bookstore-tls -n ljwx-bookstore
+kubectl describe certificate bookstore-lingjingwanxiang-cn-tls -n ljwx-bookstore
 
 # 检查证书Secret
-kubectl get secret ljwx-bookstore-tls -n ljwx-bookstore
+kubectl get secret bookstore-lingjingwanxiang-cn-tls -n ljwx-bookstore
 ```
 
 **期望状态**: `READY=True`
@@ -85,26 +79,26 @@ kubectl get secret ljwx-bookstore-tls -n ljwx-bookstore
 
 ```bash
 # HTTP 自动重定向到 HTTPS
-curl -I http://book.omniverseai.net
+curl -I http://bookstore.lingjingwanxiang.cn
 
 # HTTPS 访问
-curl -I https://book.omniverseai.net
+curl -I https://bookstore.lingjingwanxiang.cn
 
 # 浏览器访问
-open https://book.omniverseai.net/fiction/index
+open https://bookstore.lingjingwanxiang.cn/fiction/index
 ```
 
 ### 4. SSL证书检查
 
 ```bash
 # 使用 openssl 检查证书
-echo | openssl s_client -servername book.omniverseai.net \
-  -connect book.omniverseai.net:443 2>/dev/null | \
+echo | openssl s_client -servername bookstore.lingjingwanxiang.cn \
+  -connect bookstore.lingjingwanxiang.cn:443 2>/dev/null | \
   openssl x509 -noout -dates -subject
 
 # 在线检查
 # 访问 https://www.ssllabs.com/ssltest/
-# 输入: book.omniverseai.net
+# 输入: bookstore.lingjingwanxiang.cn
 ```
 
 ## 故障排查
@@ -112,7 +106,7 @@ echo | openssl s_client -servername book.omniverseai.net \
 ### DNS未解析
 
 ```bash
-# 检查Cloudflare DNS设置
+# 检查 DNS 设置
 # 1. 确认A记录存在
 # 2. 确认IP地址正确
 # 3. 清除本地DNS缓存: sudo dscacheutil -flushcache (macOS)
@@ -125,16 +119,16 @@ echo | openssl s_client -servername book.omniverseai.net \
 kubectl logs -n cert-manager -l app=cert-manager --tail=50
 
 # 检查 Certificate Events
-kubectl describe certificate ljwx-bookstore-tls -n ljwx-bookstore
+kubectl describe certificate bookstore-lingjingwanxiang-cn-tls -n ljwx-bookstore
 
 # 检查 CertificateRequest
 kubectl get certificaterequest -n ljwx-bookstore
 kubectl describe certificaterequest -n ljwx-bookstore
 
 # 常见问题:
-# 1. Cloudflare API Token权限不足
-# 2. DNS记录配置错误
-# 3. ClusterIssuer配置问题
+# 1. DNS记录配置错误
+# 2. ClusterIssuer配置问题
+# 3. Traefik 未接住 HTTP01 challenge
 ```
 
 ### HTTPS访问失败
@@ -144,8 +138,8 @@ kubectl describe certificaterequest -n ljwx-bookstore
 kubectl get ingress ljwx-bookstore -n ljwx-bookstore
 kubectl describe ingress ljwx-bookstore -n ljwx-bookstore
 
-# 检查 Ingress Controller 日志
-kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=50
+# 检查 Traefik 日志
+kubectl logs -n kube-system -l app.kubernetes.io/name=traefik --tail=50
 ```
 
 ## 生产环境清单
@@ -156,18 +150,16 @@ kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=5
 - [ ] SSL证书自动获取成功（`kubectl get certificate -n ljwx-bookstore`）
 - [ ] HTTPS强制重定向已启用
 - [ ] 健康检查正常工作
-- [ ] 应用可通过 https://book.omniverseai.net 访问
+- [ ] 应用可通过 https://bookstore.lingjingwanxiang.cn 访问
 - [ ] SSL证书A级评分（ssllabs.com测试）
-- [ ] Cloudflare防火墙规则已配置（可选）
 - [ ] 监控和告警已设置（可选）
 
 ## 相关资源
 
 - Ingress配置: `ingress.yaml`
 - cert-manager文档: https://cert-manager.io/docs/
-- Cloudflare API: https://developers.cloudflare.com/api/
 - Let's Encrypt文档: https://letsencrypt.org/docs/
 
 ## 更新历史
 
-- 2026-01-01: 初始配置，添加 book.omniverseai.net 域名
+- 2026-03-06: 切换到 bookstore.lingjingwanxiang.cn，并统一到 Traefik + cert-manager 基线

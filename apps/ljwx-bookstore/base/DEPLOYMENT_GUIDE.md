@@ -194,7 +194,7 @@ kubectl get servicemonitor -n ljwx-bookstore
 kubectl get ingress -n ljwx-bookstore
 
 # 访问应用
-curl http://book.omniverseai.net/fiction/index
+curl https://bookstore.lingjingwanxiang.cn/fiction/index
 curl http://bookstore.192.168.1.83.nip.io/fiction/index
 ```
 

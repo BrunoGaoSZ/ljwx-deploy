@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ljwx-stock-agent-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+    cert-manager.io/cluster-issuer: dnspod-letsencrypt
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: stock-agent.lingjingwanxiang.cn
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: stock-agent
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - stock-agent.lingjingwanxiang.cn
+    secretName: stock-agent-lingjingwanxiang-cn-tls

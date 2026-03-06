@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ljwx-website-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+    cert-manager.io/cluster-issuer: dnspod-letsencrypt
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: website.lingjingwanxiang.cn
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ljwx-website
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - website.lingjingwanxiang.cn
+    secretName: website-lingjingwanxiang-cn-tls

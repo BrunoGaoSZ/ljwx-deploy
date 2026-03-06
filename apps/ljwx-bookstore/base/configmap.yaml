@@ -87,7 +87,7 @@ data:
   # 微信支付配置（非敏感）
   HGBOOK_WX_APP_ID: "wxe92bc58a93b04a87"
   HGBOOK_WX_MCH_ID: "1623644809"
-  HGBOOK_WX_NOTIFY_URL: "http://bookstore.192.168.1.83.nip.io/wx/order/pay-notify"
+  HGBOOK_WX_NOTIFY_URL: "https://bookstore.lingjingwanxiang.cn/wx/order/pay-notify"
 
   # 邮件配置（非敏感）
   HGBOOK_NOTIFY_MAIL_ENABLE: "true"

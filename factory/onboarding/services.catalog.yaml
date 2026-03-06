@@ -1,44 +1,117 @@
 version: 1
 services:
-- service: ljwx-platform
-  environment: prod
-  overlay_path: apps/ljwx-platform/overlays/prod/kustomization.yaml
-  kustomize_image_name: ghcr.io/brunogao/ljwx-platform
-  harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-platform
-  argocd_app: ljwx-platform
-  smoke_endpoint: http://ljwx-platform.ljwx-platform.svc.cluster.local/
-  deploy_namespace: ljwx-platform
-  profiles:
-  - local-k3s
-  - orbstack-k3s-cn
-  scaffold_app: false
-  generate_argocd_app: false
-  argocd_app_file: ''
-- service: demo-new-service
-  environment: dev
-  overlay_path: apps/demo-new-service/overlays/demo-new-service-dev/kustomization.yaml
-  kustomize_image_name: ghcr.io/brunogao/demo-new-service
-  harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/demo-new-service
-  argocd_app: demo-new-service-dev
-  smoke_endpoint: http://demo-new-service.demo-new-service-dev.svc.cluster.local/health
-  deploy_namespace: demo-new-service-dev
-  profiles:
-  - local-k3s
-  - orbstack-k3s-cn
-  scaffold_app: true
-  generate_argocd_app: true
-  argocd_app_file: argocd-apps/90-demo-new-service-dev.yaml
-- service: ljwx-shiti
-  environment: dev
-  overlay_path: apps/ljwx-shiti/overlays/dev/kustomization.yaml
-  kustomize_image_name: ghcr.io/brunogao/ljwx-shiti
-  harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
-  argocd_app: ljwx-shiti-dev
-  smoke_endpoint: http://ljwx-shiti.ljwx-shiti-dev.svc.cluster.local/health
-  deploy_namespace: ljwx-shiti-dev
-  profiles:
-  - local-k3s
-  - orbstack-k3s-cn
-  scaffold_app: true
-  generate_argocd_app: true
-  argocd_app_file: argocd-apps/90-ljwx-shiti-dev.yaml
+  - service: ljwx-platform
+    environment: prod
+    template: legacy-service
+    overlay_name: prod
+    deploy_namespace: ljwx-platform
+    argocd_app: ljwx-platform
+    generate_argocd_app: false
+    registry_profile: harbor-only
+    kustomize_image_name: harbor.omniverseai.net/app/ljwx-platform
+    harbor_image: harbor.omniverseai.net/app/ljwx-platform
+    smoke_path: /actuator/health/readiness
+  - service: ljwx-website
+    environment: dev
+    template: legacy-service
+    overlay_name: ljwx-website-dev
+    overlay_path: apps/ljwx-website/overlays/ljwx-website-dev/kustomization.yaml
+    deploy_namespace: ljwx-website-dev
+    argocd_app: ljwx-website-dev
+    generate_argocd_app: false
+    cluster_bootstrap: false
+    runtime_secret_profile: none
+    kustomize_image_name: ghcr.io/brunogao/ljwx-website
+    harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-website
+    public_host: website.lingjingwanxiang.cn
+    smoke_path: /health
+  - service: ljwx-website
+    environment: prod
+    template: legacy-service
+    overlay_name: ljwx-website-prod
+    overlay_path: apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml
+    deploy_namespace: ljwx-website-prod
+    argocd_app: ljwx-website-prod
+    generate_argocd_app: false
+    cluster_bootstrap: false
+    runtime_secret_profile: none
+    kustomize_image_name: ghcr.io/brunogao/ljwx-website
+    harbor_image: harbor.omniverseai.net/ljwx/ljwx-website
+    deploy_image: harbor.omniverseai.net/ljwx/ljwx-website
+    smoke_path: /health
+  - service: ljwx-bookstore
+    environment: dev
+    template: legacy-service
+    overlay_name: ljwx-bookstore
+    overlay_path: apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml
+    deploy_namespace: ljwx-bookstore
+    argocd_app: ljwx-bookstore
+    generate_argocd_app: false
+    cluster_bootstrap: false
+    registry_profile: harbor-only
+    runtime_secret_profile: none
+    kustomize_image_name: harbor.omniverseai.net/ljwx/ljwx-bookstore
+    harbor_image: harbor.omniverseai.net/app/ljwx-bookstore
+    smoke_path: /fiction/actuator/health
+  - service: ljwx-shiti
+    environment: dev
+    template: service-default
+    overlay_name: dev
+    public_host: shiti.lingjingwanxiang.cn
+  - service: ljwx-dify
+    environment: dev
+    template: multi-image-service
+    overlay_name: ljwx-dify-dev
+    capabilities:
+      - db_init_job
+    argocd_order: 82
+    components:
+      - service: ljwx-dify
+        image_repo: ljwx-dify-api
+        smoke_host: api
+        smoke_port: "5001"
+        smoke_path: /health
+      - service: ljwx-dify-web
+        image_repo: ljwx-dify-web
+        smoke_host: web
+        smoke_port: "3000"
+        smoke_path: /
+  - service: ljwx-stock-qlib-predict
+    environment: dev
+    template: batch-multi-image-service
+    overlay_name: ljwx-stock
+    overlay_path: apps/stock-etl/overlays/ljwx-stock/kustomization.yaml
+    deploy_namespace: ljwx-stock
+    argocd_app: stock-etl-qlib-predict-dev
+    argocd_app_file: argocd-apps/80-stock-etl-qlib-predict-dev.yaml
+    argocd_order: 80
+    components:
+      - service: ljwx-stock-qlib-predict
+        kustomize_image_name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-predict
+        harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-qlib-predict
+      - service: ljwx-stock-kline-etl
+        kustomize_image_name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-kline-etl
+        harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-kline-etl
+      - service: ljwx-stock-qlib-bootstrap
+        kustomize_image_name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-qlib-bootstrap
+        harbor_image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-stock-qlib-bootstrap
+  - service: ljwx-stock-agent
+    environment: dev
+    template: batch-legacy-service
+    overlay_name: ljwx-stock
+    overlay_path: apps/stock-agent/overlays/ljwx-stock/kustomization.yaml
+    deploy_namespace: ljwx-stock
+    argocd_app: stock-agent-dev
+    argocd_app_file: argocd-apps/81-stock-agent-dev.yaml
+    argocd_order: 81
+    ghcr_org: brunogao/ljwx-stock
+    image_repo: ljwx-stock-agent
+    public_host: stock-agent.lingjingwanxiang.cn
+    public_service_name: stock-agent
+    smoke_host: stock-agent
+    smoke_path: /v1/health
+  - service: ljwx-chat
+    environment: dev
+    template: legacy-service
+    overlay_name: ljwx-chat-dev
+    argocd_order: 83

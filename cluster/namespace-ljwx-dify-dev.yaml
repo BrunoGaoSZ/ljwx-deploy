@@ -6,3 +6,58 @@ metadata:
     name: ljwx-dify-dev
     environment: dev
     app: ljwx-dify
+  annotations:
+    gitops.ljwx.io/namespace-profile: dev-default
+    gitops.ljwx.io/registry-profile: ghcr-and-harbor
+    gitops.ljwx.io/runtime-secret-profile: app-runtime
+    gitops.ljwx.io/capabilities: ghcr_pull,harbor_pull,runtime_app_secret,db_init_job
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: ljwx-dify-dev
+  annotations:
+    gitops.ljwx.io/namespace-profile: dev-default
+    gitops.ljwx.io/registry-profile: ghcr-and-harbor
+    gitops.ljwx.io/runtime-secret-profile: app-runtime
+    gitops.ljwx.io/capabilities: ghcr_pull,harbor_pull,runtime_app_secret,db_init_job
+imagePullSecrets:
+- name: ghcr-pull
+- name: regcred
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ljwx-dify-dev-quota
+  namespace: ljwx-dify-dev
+spec:
+  hard:
+    requests.cpu: '1'
+    requests.memory: 2Gi
+    limits.cpu: '2'
+    limits.memory: 4Gi
+    persistentvolumeclaims: '10'
+    services: '10'
+    pods: '20'
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ljwx-dify-dev-limits
+  namespace: ljwx-dify-dev
+spec:
+  limits:
+  - max:
+      cpu: '1'
+      memory: 2Gi
+    min:
+      cpu: 50m
+      memory: 128Mi
+    default:
+      cpu: 500m
+      memory: 1Gi
+    defaultRequest:
+      cpu: 250m
+      memory: 512Mi
+    type: Container

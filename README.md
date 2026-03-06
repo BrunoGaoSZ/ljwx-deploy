@@ -14,6 +14,7 @@ GitOps 配置仓库，使用 ArgoCD 管理 Kubernetes 集群。
 - Promoter/Argo/Smoke 运维：`docs/ops-runbook.md`
 - 回滚演练：`docs/rollback-drill.md`
 - Grafana 可观测看板 + TLS（GitOps）：`apps/ljwx-platform-observability/`
+- Public ingress + Let's Encrypt（Traefik HTTP01，GitOps）：`argocd-apps/03-cert-manager-dev.yaml`、`argocd-apps/04-cert-manager-config-dev.yaml`、`apps/cert-manager-config/`
 - 双 k3s 同代码部署规范：`docs/dual-k3s-deployment.md`
 - CronJob secret 示例：`cluster/deploy-promoter-secret.example.yaml`
 - 模板化批量接入：`docs/onboarding-automation.md`

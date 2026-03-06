@@ -31,6 +31,29 @@ bash scripts/ops/scan-gitops-context.sh --repo "$PWD"
 
 编辑 `factory/onboarding/services.catalog.yaml`，新增服务项。
 
+平台基线定义位于：
+
+- `factory/onboarding/namespace-profiles.yaml`
+- `factory/onboarding/capability-profiles.yaml`
+- `factory/onboarding/service-templates.yaml`
+- `factory/onboarding/ingress-profiles.yaml`
+
+推荐优先使用模板化写法：
+
+- 最少只填：`service`、`environment`、`template`
+- 现有项目按需追加：`overlay_name`、`image_repo`、`smoke_host`、`smoke_path`、`smoke_port`
+- 需要公网域名 + HTTPS 的服务，优先用 `public-service` 或 `public-web-service`；若沿用其他模板，则显式补 `ingress_profile`、`public_host`、`public_path`、`public_service_name`、`public_service_port`
+- 一个 overlay 下如果有多个发布镜像/多个 smoke 服务，改用 `template: multi-image-service` + `components`
+- 共享 namespace 或已有 cluster 历史清单的旧项目：单镜像优先用 `batch-legacy-service`，多镜像优先用 `batch-multi-image-service`
+- 只有确实偏离标准命名时，才显式写 `deploy_namespace`、`argocd_app`、`argocd_app_file`
+
+公网 HTTPS 平台基线由以下 GitOps Application 统一管理：
+
+- `argocd-apps/03-cert-manager-dev.yaml`
+- `argocd-apps/04-cert-manager-config-dev.yaml`
+
+兼容旧清单的 `ClusterIssuer` 名称仍为 `dnspod-letsencrypt`，当前实现已经切到 cert-manager + Traefik HTTP01。
+
 然后执行：
 
 ```bash
@@ -50,7 +73,12 @@ bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yam
 
 - `apps/<service>/base/*`
 - `apps/<service>/overlays/<env>/kustomization.yaml`
+- `apps/<service>/overlays/<env>/ingress.yaml`（声明 `public_host` 时）
 - `argocd-apps/<xx>-<service>-dev.yaml`
+- `apps/<service>/overlays/<env>/runtime-contract/*`
+- `cluster/namespace-<namespace>.yaml`
+- `cluster/<service>-<env>-application.yaml`
+- `cluster/kustomization.yaml` 资源引用
 
 ## Step B: 服务仓接入标准 workflow
 
@@ -59,6 +87,18 @@ bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yam
 ```bash
 bash /root/codes/ljwx-workflow-templates/scripts/quick-onboard.sh --repo "$PWD" --service <service-name>
 ```
+
+如果服务需要公网域名 + HTTPS，新项目优先直接使用：
+
+```bash
+bash /root/codes/ljwx-workflow-templates/scripts/quick-onboard.sh \
+  --repo "$PWD" \
+  --service <service-name> \
+  --service-template public-service \
+  --public-host <domain>
+```
+
+前端类服务优先改用 `--service-template public-web-service`。
 
 生成：
 
@@ -74,21 +114,32 @@ bash /root/codes/ljwx-workflow-templates/scripts/quick-onboard.sh --repo "$PWD" 
 ## Step C: 验证
 
 ```bash
+bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yaml dry-run
 python3 scripts/promoter/validate_queue.py --queue release/queue.yaml
 bash scripts/verify.sh
 ```
+
+如果该服务声明了 `public_host`，还要补一轮公网验收：
+
+1. `argocd` 中对应 Application 为 `Synced` / `Healthy`
+2. `kubectl get certificate -A` 中证书状态为 `Ready=True`
+3. `curl -I https://<public-host>` 可成功握手，浏览器访问无证书告警
 
 ## 4. 老项目接入（仅补流程，不改业务代码）
 
 1. 保留现有构建方式，先接入 `build-and-enqueue` workflow。
 2. 在 deploy repo 建立 service map 与 overlay 映射。
-3. 补 smoke endpoint。
-4. 通过一轮 queue->promoter->argocd->smoke->evidence 验证闭环。
+3. 如果一个 overlay 下挂多个镜像或多个 service key，使用 `multi-image-service` + `components` 统一生成 release/smoke 映射。
+4. 如果共享 namespace 或已有 cluster 历史文件，单镜像优先用 `batch-legacy-service`，多镜像优先用 `batch-multi-image-service`，不要硬迁 cluster baseline。
+5. 补 smoke endpoint。
+6. 通过一轮 queue->promoter->argocd->smoke->evidence 验证闭环。
+
+说明：新的公网接入口径统一走 `Traefik + cert-manager + Let's Encrypt HTTP01`。现有手写 `nginx`/HTTP-only ingress 先视为历史兼容，后续再单独迁移。
 
 ## 5. 三个重点项目接入口径（当前）
 
 1. `ljwx-website`：已在 `ljwx-deploy` 管理，需保持映射与健康状态一致。
-2. `ljwx-dify`：必须纳入同一 GitOps 主链路，不再采用独立脚本直发。
+2. `ljwx-dify`：使用 `multi-image-service` + `components` 统一管理 `ljwx-dify` / `ljwx-dify-web`，不再手工维护额外 release/smoke 条目。
 3. `ljwx-chat`：新项目按“新项目快速接入”执行，优先 `dev`，再扩到 `prod`。
 
 ## 6. 必过门禁
@@ -103,4 +154,4 @@ bash scripts/verify.sh
 1. 只改服务仓，不改 deploy repo 映射。
 2. overlay 路径和 argocd app 名不一致。
 3. smoke endpoint 未配置，导致证据链断裂。
-4. 使用脚本直发覆盖了 GitOps 状态，造成漂移。
+4. 在 `onboard_services.sh` 之外另写 cluster 清单，覆盖 namespace baseline 或 Argo Application，造成漂移。

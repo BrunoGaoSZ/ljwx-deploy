@@ -4,6 +4,11 @@ metadata:
   name: ljwx-shiti
   labels:
     app: ljwx-shiti
+  annotations: &id001
+    gitops.ljwx.io/namespace-profile: dev-default
+    gitops.ljwx.io/registry-profile: ghcr-and-harbor
+    gitops.ljwx.io/runtime-secret-profile: app-runtime
+    gitops.ljwx.io/capabilities: ghcr_pull,harbor_pull,runtime_app_secret
 spec:
   replicas: 1
   selector:
@@ -13,23 +18,28 @@ spec:
     metadata:
       labels:
         app: ljwx-shiti
+      annotations: *id001
     spec:
       containers:
-        - name: ljwx-shiti
-          image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti:latest
-          ports:
-            - name: http
-              containerPort: 8000
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
+      - name: ljwx-shiti
+        image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti:latest
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        envFrom:
+        - secretRef:
+            name: runtime-app
+            optional: true

@@ -31,8 +31,8 @@ services:
         overlayPath: apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml
         kustomizeImageName: ghcr.io/brunogao/ljwx-website
         harborImage: harbor.omniverseai.net/ljwx/ljwx-website
-        deployImage: harbor.omniverseai.net/ljwx/ljwx-website
         argocdApp: ljwx-website-prod
+        deployImage: harbor.omniverseai.net/ljwx/ljwx-website
   ljwx-bookstore:
     envs:
       dev:
@@ -65,7 +65,7 @@ services:
     envs:
       prod:
         overlayPath: apps/ljwx-platform/overlays/prod/kustomization.yaml
-        kustomizeImageName: ghcr.io/brunogao/ljwx-platform/ljwx-platform
+        kustomizeImageName: harbor.omniverseai.net/app/ljwx-platform
         harborImage: harbor.omniverseai.net/app/ljwx-platform
         argocdApp: ljwx-platform
   ljwx-stock-qlib-predict:

@@ -66,6 +66,12 @@
       "environment": "dev",
       "argocd_app": "ljwx-shiti-dev",
       "endpoint": "http://ljwx-shiti.ljwx-shiti-dev.svc.cluster.local/health"
+    },
+    {
+      "service": "ljwx-website",
+      "environment": "prod",
+      "argocd_app": "ljwx-website-prod",
+      "endpoint": "http://ljwx-website.ljwx-website-prod.svc.cluster.local/health"
     }
   ]
 }

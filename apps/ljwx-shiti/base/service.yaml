@@ -9,7 +9,7 @@ spec:
   selector:
     app: ljwx-shiti
   ports:
-    - name: http
-      port: 80
-      targetPort: http
-      protocol: TCP
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP

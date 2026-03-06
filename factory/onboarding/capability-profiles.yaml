@@ -1,0 +1,56 @@
+version: 1
+registry_profiles:
+  none:
+    description: No private registry pull secret is injected.
+    image_pull_secrets: []
+  harbor-only:
+    description: Inject Harbor pull credentials via regcred.
+    image_pull_secrets:
+      - regcred
+  ghcr-only:
+    description: Inject GHCR pull credentials via ghcr-pull.
+    image_pull_secrets:
+      - ghcr-pull
+  ghcr-and-harbor:
+    description: Inject both GHCR and Harbor pull credentials.
+    image_pull_secrets:
+      - ghcr-pull
+      - regcred
+runtime_secret_profiles:
+  none:
+    description: No standard runtime secret contract.
+    contract_secret_names: []
+  app-runtime:
+    description: Service-specific runtime secret only.
+    contract_secret_names:
+      - runtime-app
+  shared-infra:
+    description: Shared DB/Redis runtime secret plus service-specific secret.
+    contract_secret_names:
+      - runtime-infra
+      - runtime-app
+  shared-infra-with-llm:
+    description: Shared DB/Redis runtime secret, optional LLM secret, and service-specific secret.
+    contract_secret_names:
+      - runtime-infra
+      - runtime-llm
+      - runtime-app
+capabilities:
+  harbor_pull:
+    scope: namespace
+    description: Bind Harbor pull secret regcred to the namespace baseline.
+  ghcr_pull:
+    scope: namespace
+    description: Bind GHCR pull secret ghcr-pull to the namespace baseline.
+  runtime_app_secret:
+    scope: application
+    description: Standardize service-specific runtime secret as runtime-app.
+  runtime_infra_secret:
+    scope: namespace
+    description: Standardize shared DB/Redis runtime secret as runtime-infra.
+  runtime_llm_secret:
+    scope: namespace
+    description: Standardize optional LLM runtime secret as runtime-llm.
+  db_init_job:
+    scope: application
+    description: Declare that the workload uses a database initialization or migration hook job.

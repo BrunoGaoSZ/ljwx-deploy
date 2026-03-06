@@ -1,0 +1,22 @@
+version: 1
+profiles:
+  none:
+    description: Do not generate ingress artifacts.
+    ingress_class_name: ""
+    annotations: {}
+    tls_enabled: false
+    cluster_issuer: ""
+    path: /
+    path_type: Prefix
+    service_port: 80
+  traefik-letsencrypt-public:
+    description: Publish a public HTTPS endpoint through Traefik and cert-manager.
+    ingress_class_name: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    tls_enabled: true
+    cluster_issuer: dnspod-letsencrypt
+    path: /
+    path_type: Prefix
+    service_port: 80
