@@ -74,21 +74,6 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
-- id: 20260306T004001Z-ljwx-shiti-sha-8f483e7
-  service: ljwx-shiti
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-shiti@sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
-    tag: sha-8f483e7
-    digest: sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
-    gitSha: 8f483e7
-  createdAt: '2026-03-06T00:40:01Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
 - id: 20260306T105525Z-ljwx-shiti-sha-2eacc3c
   service: ljwx-shiti
   env: dev
@@ -857,5 +842,21 @@ superseded:
   lastError: ''
   promotedAt: ''
   supersededAt: '2026-03-06T00:50:07Z'
+  failedAt: ''
+  reason: replaced by newer pending release for same service+env
+- id: 20260306T004001Z-ljwx-shiti-sha-8f483e7
+  service: ljwx-shiti
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-shiti@sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
+    tag: sha-8f483e7
+    digest: sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
+    gitSha: 8f483e7
+  createdAt: '2026-03-06T00:40:01Z'
+  status: superseded
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: '2026-03-06T11:00:45Z'
   failedAt: ''
   reason: replaced by newer pending release for same service+env
