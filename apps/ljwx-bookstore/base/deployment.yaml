@@ -43,7 +43,7 @@ spec:
             - -c
             - |
               echo "Waiting for MySQL to be ready..."
-              until nc -z mysql-infra.infra.svc.cluster.local 3306; do
+              until nc -z mysql.infra.svc.cluster.local 3306; do
                 echo "MySQL not ready, sleeping for 2 seconds..."
                 sleep 2
               done

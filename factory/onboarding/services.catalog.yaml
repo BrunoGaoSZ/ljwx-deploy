@@ -45,3 +45,16 @@ services:
     scaffold_app: true
     generate_argocd_app: true
     argocd_app_file: argocd-apps/90-ljwx-shiti-dev.yaml
+
+  - service: ljwx-bookstore
+    environment: dev
+    overlay_path: apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml
+    kustomize_image_name: harbor.omniverseai.net/ljwx/ljwx-bookstore
+    harbor_image: harbor.omniverseai.net/app/ljwx-bookstore
+    argocd_app: ljwx-bookstore
+    smoke_endpoint: http://ljwx-bookstore.ljwx-bookstore.svc.cluster.local/fiction/actuator/health
+    deploy_namespace: ljwx-bookstore
+    profiles: [local-k3s, orbstack-k3s-cn]
+    scaffold_app: false
+    generate_argocd_app: false
+    argocd_app_file: argocd-apps/70-ljwx-bookstore-dev.yaml
