@@ -5,5 +5,5 @@ resources:
   - ../../base
 images:
   - name: ghcr.io/brunogao/ljwx-shiti
-    newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
-    newTag: "latest"
+    newName: ghcr.io/brunogao/ljwx-shiti
+    digest: sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
