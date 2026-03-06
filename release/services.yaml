@@ -121,6 +121,6 @@ services:
     envs:
       dev:
         overlayPath: apps/ljwx-shiti/overlays/dev/kustomization.yaml
-        kustomizeImageName: ghcr.io/brunogao/ljwx-shiti
+        kustomizeImageName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
         harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
         argocdApp: ljwx-shiti-dev
