@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ljwx-shiti-dev
 resources:
-  - ../../base
+- ../../base
 images:
-  - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
-    newName: ghcr.io/brunogao/ljwx-shiti
-    digest: sha256:ff4e4967e21750050b76dcba9d79c5ced19e19f0b67d1f30425d66d67d947e4e
+- name: ghcr.io/brunogao/ljwx-shiti
+  newName: ghcr.io/brunogao/ljwx-shiti
+  digest: sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe

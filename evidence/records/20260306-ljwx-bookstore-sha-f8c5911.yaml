@@ -1,0 +1,22 @@
+evidenceId: 20260306-ljwx-bookstore-sha-f8c5911
+service: ljwx-bookstore
+env: dev
+source:
+  repo: ghcr.io/brunogaosz/ljwx-bookstore
+  commit: f8c5911
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogaosz/ljwx-bookstore@sha256:21072d47881b2bd303fb3dc104d6704a71974790396d2ad9d433ed46bdc2bc24
+  harbor: harbor.omniverseai.net/app/ljwx-bookstore@sha256:21072d47881b2bd303fb3dc104d6704a71974790396d2ad9d433ed46bdc2bc24
+  deployed: ghcr.io/brunogaosz/ljwx-bookstore@sha256:21072d47881b2bd303fb3dc104d6704a71974790396d2ad9d433ed46bdc2bc24
+deploy:
+  deployRepoCommit: 066bf959c7e0ae3e21373a4aee100dcecb0e0938
+  queueId: 20260306T112141Z-ljwx-bookstore-sha-f8c5911
+  argocdApp: ljwx-bookstore-dev
+  overlayPath: apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml
+  syncedAt: '2026-03-06T11:26:18Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}

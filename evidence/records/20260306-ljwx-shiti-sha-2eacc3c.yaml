@@ -1,0 +1,22 @@
+evidenceId: 20260306-ljwx-shiti-sha-2eacc3c
+service: ljwx-shiti
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-shiti
+  commit: 2eacc3c
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe
+  harbor: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe
+  deployed: ghcr.io/brunogao/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe
+deploy:
+  deployRepoCommit: 066bf959c7e0ae3e21373a4aee100dcecb0e0938
+  queueId: 20260306T105525Z-ljwx-shiti-sha-2eacc3c
+  argocdApp: ljwx-shiti-dev
+  overlayPath: apps/ljwx-shiti/overlays/dev/kustomization.yaml
+  syncedAt: '2026-03-06T11:26:18Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}
