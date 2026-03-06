@@ -34,6 +34,8 @@ spec:
         prometheus.io/port: "8844"
         prometheus.io/path: "/fiction/actuator/prometheus"
     spec:
+      imagePullSecrets:
+        - name: ghcr-pull
       # 初始化容器 - 等待数据库就绪
       initContainers:
         - name: wait-for-mysql
