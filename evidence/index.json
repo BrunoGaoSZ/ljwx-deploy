@@ -1,5 +1,101 @@
 [
   {
+    "evidenceId": "20260306-ljwx-bookstore-sha-114e0ee",
+    "service": "ljwx-bookstore",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogaosz/ljwx-bookstore",
+      "commit": "114e0ee",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogaosz/ljwx-bookstore@sha256:9a5046ac7c7303949a8630919d4bd280c40362b00820a7ae0c98467ab36ec599",
+      "harbor": "harbor.omniverseai.net/app/ljwx-bookstore@sha256:9a5046ac7c7303949a8630919d4bd280c40362b00820a7ae0c98467ab36ec599",
+      "deployed": "ghcr.io/brunogaosz/ljwx-bookstore@sha256:9a5046ac7c7303949a8630919d4bd280c40362b00820a7ae0c98467ab36ec599"
+    },
+    "deploy": {
+      "deployRepoCommit": "945599f3fb1568b3c6993b6a7582b0a38e5df0da",
+      "queueId": "20260306T121226Z-ljwx-bookstore-sha-114e0ee",
+      "argocdApp": "ljwx-bookstore-dev",
+      "overlayPath": "apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml",
+      "syncedAt": "2026-03-06T12:20:26Z",
+      "smokedAt": "2026-03-06T17:30:13Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pass",
+        "checkedAt": "2026-03-06T17:30:13Z",
+        "details": "argocd check skipped; endpoint=200 body='{\"status\":\"UP\",\"components\":{\"db\":{\"status\":\"UP\",\"details\":{\"database\":\"MySQL\",\"validationQuery\":\"SELECT 1\",\"result\":1}}'"
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260306-ljwx-bookstore-sha-114e0ee.yaml"
+  },
+  {
+    "evidenceId": "20260306-ljwx-bookstore-sha-f8c5911",
+    "service": "ljwx-bookstore",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogaosz/ljwx-bookstore",
+      "commit": "f8c5911",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogaosz/ljwx-bookstore@sha256:21072d47881b2bd303fb3dc104d6704a71974790396d2ad9d433ed46bdc2bc24",
+      "harbor": "harbor.omniverseai.net/app/ljwx-bookstore@sha256:21072d47881b2bd303fb3dc104d6704a71974790396d2ad9d433ed46bdc2bc24",
+      "deployed": "ghcr.io/brunogaosz/ljwx-bookstore@sha256:21072d47881b2bd303fb3dc104d6704a71974790396d2ad9d433ed46bdc2bc24"
+    },
+    "deploy": {
+      "deployRepoCommit": "066bf959c7e0ae3e21373a4aee100dcecb0e0938",
+      "queueId": "20260306T112141Z-ljwx-bookstore-sha-f8c5911",
+      "argocdApp": "ljwx-bookstore-dev",
+      "overlayPath": "apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml",
+      "syncedAt": "2026-03-06T11:26:18Z",
+      "smokedAt": "2026-03-06T12:15:15Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pass",
+        "checkedAt": "2026-03-06T12:15:15Z",
+        "details": "argocd check skipped; endpoint=200 body='{\"status\":\"UP\",\"components\":{\"db\":{\"status\":\"UP\",\"details\":{\"database\":\"MySQL\",\"validationQuery\":\"SELECT 1\",\"result\":1}}'"
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260306-ljwx-bookstore-sha-f8c5911.yaml"
+  },
+  {
+    "evidenceId": "20260306-ljwx-shiti-sha-2eacc3c",
+    "service": "ljwx-shiti",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogao/ljwx-shiti",
+      "commit": "2eacc3c",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogao/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe",
+      "harbor": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe",
+      "deployed": "ghcr.io/brunogao/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe"
+    },
+    "deploy": {
+      "deployRepoCommit": "066bf959c7e0ae3e21373a4aee100dcecb0e0938",
+      "queueId": "20260306T105525Z-ljwx-shiti-sha-2eacc3c",
+      "argocdApp": "ljwx-shiti-dev",
+      "overlayPath": "apps/ljwx-shiti/overlays/dev/kustomization.yaml",
+      "syncedAt": "2026-03-06T11:26:18Z",
+      "smokedAt": "2026-03-06T17:30:16Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pass",
+        "checkedAt": "2026-03-06T17:30:16Z",
+        "details": "argocd check skipped; endpoint=200 body='{\"status\":\"healthy\"}'"
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260306-ljwx-shiti-sha-2eacc3c.yaml"
+  },
+  {
     "evidenceId": "20260305-ljwx-website-sha-e2efinal143105",
     "service": "ljwx-website",
     "env": "prod",
@@ -18,12 +114,14 @@
       "queueId": "20260305T143554Z-ljwx-website-sha-e2efinal143105-prod",
       "argocdApp": "ljwx-website-prod",
       "overlayPath": "apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml",
-      "syncedAt": "2026-03-05T14:36:45Z"
+      "syncedAt": "2026-03-05T14:36:45Z",
+      "smokedAt": "2026-03-06T17:33:18Z"
     },
     "tests": {
       "smoke": {
-        "status": "pending",
-        "checkedAt": ""
+        "status": "fail",
+        "checkedAt": "2026-03-06T17:33:18Z",
+        "details": "argocd check skipped; endpoint wait timeout: <urlopen error [Errno -2] Name does not resolve>"
       }
     },
     "approvals": {},
@@ -49,12 +147,12 @@
       "argocdApp": "ljwx-chat-dev",
       "overlayPath": "apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T08:10:08Z",
-      "smokedAt": "2026-03-05T18:45:11Z"
+      "smokedAt": "2026-03-06T17:30:16Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T18:45:11Z",
+        "checkedAt": "2026-03-06T17:30:16Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html><!--HujP_xzH5aFuugdA_MY7x--><html dir=\"ltr\" lang=\"en-US\"><head><meta charSet=\"utf-8\"/><meta name=\"viewpor'"
       }
     },
@@ -81,12 +179,12 @@
       "argocdApp": "ljwx-dify-web-dev",
       "overlayPath": "apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T08:00:15Z",
-      "smokedAt": "2026-03-05T18:45:11Z"
+      "smokedAt": "2026-03-06T17:30:15Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T18:45:11Z",
+        "checkedAt": "2026-03-06T17:30:15Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html><html lang=\"en-US\" class=\"h-full __variable_1f5468\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" co'"
       }
     },
@@ -113,12 +211,12 @@
       "argocdApp": "ljwx-dify-dev",
       "overlayPath": "apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T07:50:07Z",
-      "smokedAt": "2026-03-05T18:45:10Z"
+      "smokedAt": "2026-03-06T17:30:15Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T18:45:10Z",
+        "checkedAt": "2026-03-06T17:30:15Z",
         "details": "argocd check skipped; endpoint=200 body='{\"pid\": 7, \"status\": \"ok\", \"version\": \"1.11.1\"}'"
       }
     },
@@ -209,12 +307,12 @@
       "argocdApp": "ljwx-stock-agent-dev",
       "overlayPath": "apps/stock-agent/overlays/ljwx-stock/kustomization.yaml",
       "syncedAt": "2026-03-05T04:10:13Z",
-      "smokedAt": "2026-03-05T18:45:10Z"
+      "smokedAt": "2026-03-06T17:30:14Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T18:45:10Z",
+        "checkedAt": "2026-03-06T17:30:14Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"ok\"}'"
       }
     },
@@ -453,12 +551,12 @@
       "argocdApp": "ljwx-platform-prod",
       "overlayPath": "apps/ljwx-platform/overlays/prod/kustomization.yaml",
       "syncedAt": "2026-03-04T07:49:45Z",
-      "smokedAt": "2026-03-05T18:45:10Z"
+      "smokedAt": "2026-03-06T17:30:14Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-05T18:45:10Z",
+        "checkedAt": "2026-03-06T17:30:14Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"UP\"}'"
       }
     },
