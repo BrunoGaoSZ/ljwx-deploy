@@ -89,6 +89,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260306T105525Z-ljwx-shiti-sha-2eacc3c
+  service: ljwx-shiti
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-shiti@sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe
+    tag: sha-2eacc3c
+    digest: sha256:a17b3da43adf6b0a112862e5151ab2fd6997ae4c1a659fe371f3c21abbcfb0fe
+    gitSha: 2eacc3c
+  createdAt: '2026-03-06T10:55:25Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
