@@ -93,7 +93,7 @@ kubectl exec -n ljwx-bookstore deployment/ljwx-bookstore -- \
 kubectl get servicemonitor -n ljwx-bookstore
 
 # 访问应用
-curl http://book.omniverseai.net/fiction/index
+curl https://bookstore.lingjingwanxiang.cn/fiction/index
 ```
 
 ### 📊 监控验证

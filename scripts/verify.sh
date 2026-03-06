@@ -13,6 +13,13 @@ bash scripts/ci/check-smart-cs-contract.sh
 echo "[verify] smart-cs smoke targets gate"
 bash scripts/ci/check-smart-cs-smoke-targets.sh
 
+echo "[verify] ingress tls contract gate"
+uvx --with pyyaml python scripts/ci/check-ingress-tls-contract.py
+
+echo "[verify] validate onboarding catalog and platform profiles"
+ONBOARD_FAIL_ON_DRIFT=true \
+  bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yaml dry-run
+
 echo "[verify] validate and collect evidence feed"
 uvx --with pyyaml --with jsonschema python scripts/evidence/validate.py
 uvx --with pyyaml --with jsonschema python scripts/evidence/collect.py --out /tmp/evidence-index.json --summary /tmp/evidence-latest.md

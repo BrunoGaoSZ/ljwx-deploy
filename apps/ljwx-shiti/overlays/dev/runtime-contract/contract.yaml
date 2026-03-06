@@ -1,0 +1,20 @@
+service: ljwx-shiti
+environment: dev
+namespace: ljwx-shiti-dev
+cluster_bootstrap: true
+ingress_profile: traefik-letsencrypt-public
+public_host: shiti.lingjingwanxiang.cn
+ingress_class_name: traefik
+cluster_issuer: dnspod-letsencrypt
+tls_secret_name: shiti-lingjingwanxiang-cn-tls
+namespace_profile: dev-default
+registry_profile: ghcr-and-harbor
+runtime_secret_profile: none
+capabilities:
+- ghcr_pull
+- harbor_pull
+- runtime_app_secret
+image_pull_secrets:
+- ghcr-pull
+- regcred
+contract_secret_names: []

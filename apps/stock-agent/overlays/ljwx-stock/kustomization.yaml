@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: ljwx-stock
 resources:
 - ../../base
+- ingress.yaml
 images:
 - name: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent
   newName: ghcr.io/brunogao/ljwx-stock/ljwx-stock-agent

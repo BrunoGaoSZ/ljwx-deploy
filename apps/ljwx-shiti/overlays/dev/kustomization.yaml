@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: ljwx-shiti-dev
 resources:
 - ../../base
+- ingress.yaml
 images:
 - name: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
   newName: ghcr.io/brunogao/ljwx-shiti

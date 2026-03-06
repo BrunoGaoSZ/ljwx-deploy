@@ -31,8 +31,8 @@ services:
         overlayPath: apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml
         kustomizeImageName: ghcr.io/brunogao/ljwx-website
         harborImage: harbor.omniverseai.net/ljwx/ljwx-website
-        deployImage: harbor.omniverseai.net/ljwx/ljwx-website
         argocdApp: ljwx-website-prod
+        deployImage: harbor.omniverseai.net/ljwx/ljwx-website
   ljwx-bookstore:
     envs:
       dev:
@@ -101,26 +101,26 @@ services:
       dev:
         overlayPath: apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml
         kustomizeImageName: ghcr.io/brunogao/ljwx-dify-api
-        harborImage: harbor.eu.lingjingwanxiang.cn/app/ljwx-dify-api
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-dify-api
         argocdApp: ljwx-dify-dev
   ljwx-dify-web:
     envs:
       dev:
         overlayPath: apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml
         kustomizeImageName: ghcr.io/brunogao/ljwx-dify-web
-        harborImage: harbor.eu.lingjingwanxiang.cn/app/ljwx-dify-web
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-dify-web
         argocdApp: ljwx-dify-dev
   ljwx-chat:
     envs:
       dev:
         overlayPath: apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml
         kustomizeImageName: ghcr.io/brunogao/ljwx-chat
-        harborImage: harbor.eu.lingjingwanxiang.cn/app/ljwx-chat
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-chat
         argocdApp: ljwx-chat-dev
   ljwx-shiti:
     envs:
       dev:
         overlayPath: apps/ljwx-shiti/overlays/dev/kustomization.yaml
-        kustomizeImageName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
+        kustomizeImageName: ghcr.io/brunogao/ljwx-shiti
         harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
         argocdApp: ljwx-shiti-dev

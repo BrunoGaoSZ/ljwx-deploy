@@ -1,0 +1,20 @@
+service: ljwx-website
+environment: prod
+namespace: ljwx-website-prod
+cluster_bootstrap: false
+ingress_profile: none
+public_host: ''
+ingress_class_name: ''
+cluster_issuer: ''
+tls_secret_name: ''
+namespace_profile: prod-default
+registry_profile: ghcr-and-harbor
+runtime_secret_profile: none
+capabilities:
+- ghcr_pull
+- harbor_pull
+- runtime_app_secret
+image_pull_secrets:
+- ghcr-pull
+- regcred
+contract_secret_names: []

@@ -1,0 +1,200 @@
+version: 1
+templates:
+  service-default:
+    description: Scaffold a conventional single-image service with a /health smoke path.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: ""
+    smoke_path: /health
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret
+    scaffold_app: true
+    generate_argocd_app: true
+    cluster_bootstrap: true
+    ingress_profile: none
+    argocd_order: 90
+  legacy-service:
+    description: Reuse an existing overlay and only generate GitOps control-plane artifacts.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: ""
+    smoke_path: /
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret
+    scaffold_app: false
+    generate_argocd_app: true
+    cluster_bootstrap: true
+    ingress_profile: none
+    argocd_order: 90
+  public-service:
+    description: Scaffold a conventional single-image service with public HTTPS ingress.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: "{service}.lingjingwanxiang.cn"
+    smoke_path: /health
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret
+    scaffold_app: true
+    generate_argocd_app: true
+    cluster_bootstrap: true
+    ingress_profile: traefik-letsencrypt-public
+    argocd_order: 90
+  multi-image-service:
+    description: Reuse an existing overlay and register multiple release/smoke components under one Argo application.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: ""
+    smoke_path: /health
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret
+    scaffold_app: false
+    generate_argocd_app: true
+    cluster_bootstrap: true
+    ingress_profile: none
+    argocd_order: 90
+  batch-multi-image-service:
+    description: Reuse a multi-image batch overlay, manage release mappings centrally, and skip cluster bootstrap for shared legacy namespaces.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: ""
+    smoke_path: /health
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: none
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+    scaffold_app: false
+    generate_argocd_app: true
+    cluster_bootstrap: false
+    ingress_profile: none
+    argocd_order: 90
+  batch-legacy-service:
+    description: Reuse a single-image batch or shared-namespace overlay, manage release/smoke centrally, and skip cluster bootstrap for legacy namespaces.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: ""
+    smoke_path: /health
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: none
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+    scaffold_app: false
+    generate_argocd_app: true
+    cluster_bootstrap: false
+    ingress_profile: none
+    argocd_order: 90
+  web-service:
+    description: Scaffold a frontend-like service with a root-path smoke check.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: ""
+    smoke_path: /
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret
+    scaffold_app: true
+    generate_argocd_app: true
+    cluster_bootstrap: true
+    ingress_profile: none
+    argocd_order: 90
+  public-web-service:
+    description: Scaffold a frontend-like service with public HTTPS ingress.
+    overlay_name_template: "{service}-{environment}"
+    smoke_host_template: "{service}"
+    public_host_template: "{service}.lingjingwanxiang.cn"
+    smoke_path: /
+    smoke_port: ""
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: ""
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret
+    scaffold_app: true
+    generate_argocd_app: true
+    cluster_bootstrap: true
+    ingress_profile: traefik-letsencrypt-public
+    argocd_order: 90

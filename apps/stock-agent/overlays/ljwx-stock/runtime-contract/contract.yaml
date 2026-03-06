@@ -1,0 +1,19 @@
+service: ljwx-stock-agent
+environment: dev
+namespace: ljwx-stock
+cluster_bootstrap: false
+ingress_profile: traefik-letsencrypt-public
+public_host: stock-agent.lingjingwanxiang.cn
+ingress_class_name: traefik
+cluster_issuer: dnspod-letsencrypt
+tls_secret_name: stock-agent-lingjingwanxiang-cn-tls
+namespace_profile: dev-default
+registry_profile: ghcr-and-harbor
+runtime_secret_profile: none
+capabilities:
+- ghcr_pull
+- harbor_pull
+image_pull_secrets:
+- ghcr-pull
+- regcred
+contract_secret_names: []

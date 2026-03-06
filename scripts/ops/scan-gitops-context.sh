@@ -63,6 +63,9 @@ if [[ -z "$SERVICE_NAME" ]]; then
 fi
 
 MISSING_COUNT=0
+SERVICE_MAP_HITS=0
+CATALOG_REGISTERED="false"
+HAS_LOCAL_DEPLOY_DIR="false"
 
 ok() {
   echo "[OK] $1"
@@ -90,6 +93,9 @@ echo
 
 check_path_exists "$DEPLOY_ROOT" "deploy repo"
 check_path_exists "$DEPLOY_ROOT/docs/START-HERE-GITOPS-ONBOARDING.md" "deploy start-here doc"
+check_path_exists "$DEPLOY_ROOT/factory/onboarding/ingress-profiles.yaml" "ingress profile catalog"
+check_path_exists "$DEPLOY_ROOT/argocd-apps/03-cert-manager-dev.yaml" "cert-manager app"
+check_path_exists "$DEPLOY_ROOT/argocd-apps/04-cert-manager-config-dev.yaml" "cert-manager config app"
 
 if [[ "$SKIP_TEMPLATES_CHECK" == "false" ]]; then
   check_path_exists "$TEMPLATES_ROOT" "workflow templates repo"
@@ -103,6 +109,10 @@ if [[ -f "$REPO_PATH/.github/workflows/build-and-enqueue.yml" ]]; then
   ok "已存在标准 workflow: .github/workflows/build-and-enqueue.yml"
 elif [[ -f "$REPO_PATH/.gitea/workflows/build-and-enqueue.yml" ]]; then
   ok "已存在标准 workflow: .gitea/workflows/build-and-enqueue.yml"
+elif [[ -f "$REPO_PATH/.github/workflows/release-to-deploy.yml" ]]; then
+  ok "已存在等价 enqueue workflow: .github/workflows/release-to-deploy.yml"
+elif [[ -f "$REPO_PATH/.gitea/workflows/release-to-deploy.yml" ]]; then
+  ok "已存在等价 enqueue workflow: .gitea/workflows/release-to-deploy.yml"
 else
   warn "未发现标准 build-and-enqueue workflow"
 fi
@@ -111,14 +121,17 @@ if [[ -f "$REPO_PATH/.github/workflows/k3s-perf-observability.yml" ]]; then
   ok "已存在观测验证 workflow: .github/workflows/k3s-perf-observability.yml"
 elif [[ -f "$REPO_PATH/.gitea/workflows/k3s-perf-observability.yml" ]]; then
   ok "已存在观测验证 workflow: .gitea/workflows/k3s-perf-observability.yml"
+elif compgen -G "$REPO_PATH/.github/workflows/k3s-perf-observability-*.yml" >/dev/null; then
+  ok "已存在等价观测验证 workflow: $(basename "$(compgen -G "$REPO_PATH/.github/workflows/k3s-perf-observability-*.yml" | head -n 1)")"
+elif compgen -G "$REPO_PATH/.gitea/workflows/k3s-perf-observability-*.yml" >/dev/null; then
+  ok "已存在等价观测验证 workflow: $(basename "$(compgen -G "$REPO_PATH/.gitea/workflows/k3s-perf-observability-*.yml" | head -n 1)")"
 else
   warn "未发现 k3s-perf-observability workflow"
 fi
 
 if [[ -d "$REPO_PATH/k8s" || -d "$REPO_PATH/deploy" ]]; then
+  HAS_LOCAL_DEPLOY_DIR="true"
   ok "发现部署目录（k8s 或 deploy）"
-else
-  warn "未发现部署目录（k8s 或 deploy）"
 fi
 
 echo
@@ -133,6 +146,7 @@ SERVICE_MAP_FILES=(
 for file in "${SERVICE_MAP_FILES[@]}"; do
   if [[ -f "$file" ]]; then
     if rg -q "^[[:space:]]{2}${SERVICE_NAME}:" "$file"; then
+      SERVICE_MAP_HITS=$((SERVICE_MAP_HITS + 1))
       ok "service map 已注册: $(basename "$file")"
     else
       warn "service map 未注册 ${SERVICE_NAME}: $(basename "$file")"
@@ -142,17 +156,41 @@ for file in "${SERVICE_MAP_FILES[@]}"; do
   fi
 done
 
+CATALOG_PATH="$DEPLOY_ROOT/factory/onboarding/services.catalog.yaml"
+if [[ -f "$CATALOG_PATH" ]]; then
+  if rg -q "^[[:space:]]*-[[:space:]]service:[[:space:]]*${SERVICE_NAME}[[:space:]]*$" "$CATALOG_PATH"; then
+    CATALOG_REGISTERED="true"
+    ok "onboarding catalog 已注册: $(basename "$CATALOG_PATH")"
+  else
+    warn "onboarding catalog 未注册 ${SERVICE_NAME}: $(basename "$CATALOG_PATH")"
+  fi
+else
+  warn "onboarding catalog 文件不存在: $CATALOG_PATH"
+fi
+
 if command -v rg >/dev/null 2>&1; then
   if rg -q --glob '*.yaml' --glob '*.yml' "$SERVICE_NAME" "$DEPLOY_ROOT/argocd-apps" "$DEPLOY_ROOT/cluster" 2>/dev/null; then
     ok "发现 ArgoCD/cluster 侧服务引用"
+  elif [[ "$CATALOG_REGISTERED" == "true" ]]; then
+    ok "服务已由 onboarding catalog 管理；ArgoCD/cluster 侧可不直接包含该 service 名"
   else
     warn "未发现 ArgoCD/cluster 侧服务引用"
   fi
 else
   if grep -R -E -q "$SERVICE_NAME" "$DEPLOY_ROOT/argocd-apps" "$DEPLOY_ROOT/cluster" 2>/dev/null; then
     ok "发现 ArgoCD/cluster 侧服务引用"
+  elif [[ "$CATALOG_REGISTERED" == "true" ]]; then
+    ok "服务已由 onboarding catalog 管理；ArgoCD/cluster 侧可不直接包含该 service 名"
   else
     warn "未发现 ArgoCD/cluster 侧服务引用"
+  fi
+fi
+
+if [[ "$HAS_LOCAL_DEPLOY_DIR" == "false" ]]; then
+  if [[ "$SERVICE_MAP_HITS" -gt 0 || "$CATALOG_REGISTERED" == "true" ]]; then
+    ok "未发现本地部署目录，使用 ljwx-deploy 作为唯一部署真相源"
+  else
+    warn "未发现部署目录（k8s 或 deploy）"
   fi
 fi
 
@@ -163,7 +201,11 @@ if [[ "$MISSING_COUNT" -eq 0 ]]; then
   echo "状态: 已完成标准接入，无阻塞项。"
 else
   echo "状态: 发现 ${MISSING_COUNT} 个缺口。"
-  echo "建议先执行:"
+  echo "建议优先执行一键预检:"
+  echo "  bash /root/codes/ljwx-workflow-templates/scripts/quick-onboard-one-shot.sh --repo \"$REPO_PATH\" --service \"$SERVICE_NAME\" --dry-run"
+  echo "如果该服务需要公网域名 + HTTPS，可直接补:"
+  echo "  --service-template public-service --public-host <domain>"
+  echo "若只补服务仓 workflow，可执行:"
   echo "  bash /root/codes/ljwx-workflow-templates/scripts/quick-onboard.sh --repo \"$REPO_PATH\" --service \"$SERVICE_NAME\""
   echo "然后在 deploy repo 执行 catalog onboarding:"
   echo "  bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yaml dry-run"

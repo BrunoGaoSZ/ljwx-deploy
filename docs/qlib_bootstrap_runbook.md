@@ -1,58 +1,66 @@
-# Qlib Bootstrap Runbook
+# Qlib Bootstrap Runbook (ljwx-stock)
 
-## 1. 目标
+## Scope
 
-- 周更离线生成 Qlib provider 数据与模型产物。
-- 产物发布到 MinIO：
-  - `qlib_data/cn/<BUILD_DATE>/...`
-  - `qlib_data/cn/LATEST`
-  - `artifacts/models/qlib_lightgbm_alpha158/<MODEL_DATE>/...`
-  - `artifacts/models/qlib_lightgbm_alpha158/LATEST`
+- Service: `ljwx-stock-qlib-bootstrap`
+- Namespace: `ljwx-stock`
+- Deploy source: `apps/stock-etl/overlays/ljwx-stock`
 
-## 2. 前置条件
+## Runtime Manifests
 
-- PostgreSQL 已有 `ljwx_stock.market.kline_daily`，且 `adjust='qfq'` 非空。
-- `qlib-pvc` 已绑定。
-- `qlib-minio-secret` 在 `ljwx-stock` 命名空间存在。
+- Weekly CronJob: `apps/stock-etl/base/cronjob-qlib-bootstrap-weekly.yaml`
+- Manual Job template: `apps/stock-etl/base/job-qlib-bootstrap.yaml`
+- Predict CronJob (consumer): `apps/stock-etl/base/cronjob-qlib-predict-to-pg.yaml`
+- MinIO secret: `apps/stock-etl/base/secret-qlib-minio.yaml`
 
-## 3. 创建 qlib-minio-secret（推荐从 infra/minio-secret 复制）
+## Preconditions
 
-```bash
-MINIO_USER="$(kubectl -n infra get secret minio-secret -o jsonpath='{.data.MINIO_ROOT_USER}' | base64 -d)"
-MINIO_PASS="$(kubectl -n infra get secret minio-secret -o jsonpath='{.data.MINIO_ROOT_PASSWORD}' | base64 -d)"
+1. `market.kline_daily` exists and has `adjust='qfq'` rows.
+2. Secret `qlib-minio-secret` is present with valid keys:
+   - `MINIO_ENDPOINT`
+   - `MINIO_BUCKET`
+   - `MINIO_ACCESS_KEY`
+   - `MINIO_SECRET_KEY`
+3. PVC `qlib-pvc` is Bound.
 
-kubectl -n ljwx-stock create secret generic qlib-minio-secret \
-  --from-literal=MINIO_ENDPOINT='http://minio.infra.svc.cluster.local:9000' \
-  --from-literal=MINIO_BUCKET='ljwx-qlib' \
-  --from-literal=MINIO_ACCESS_KEY="${MINIO_USER}" \
-  --from-literal=MINIO_SECRET_KEY="${MINIO_PASS}" \
-  --dry-run=client -o yaml | kubectl apply -f -
-```
-
-## 4. 手动触发 bootstrap
+## Trigger Manual Bootstrap
 
 ```bash
-kubectl -n ljwx-stock apply -f apps/stock-etl/base/job-qlib-bootstrap.yaml
-kubectl -n ljwx-stock logs -f job/qlib-bootstrap-manual
+kubectl -n ljwx-stock create job --from=job/qlib-bootstrap-manual qlib-bootstrap-manual-$(date +%Y%m%d%H%M%S)
 ```
 
-## 5. 周期任务
-
-- `cronjob/qlib-bootstrap-weekly` 每周六 03:00（Asia/Shanghai）执行。
-- `cronjob/qlib-predict-to-pg` 每个交易日 16:30，先从 MinIO 同步到 PVC，再写 `market.reco_daily`。
-
-## 6. 验收
-
-```sql
-SELECT trade_date, strategy_name, count(*)
-FROM market.reco_daily
-WHERE strategy_name = 'qlib_lightgbm_v1'
-GROUP BY 1,2
-ORDER BY trade_date DESC
-LIMIT 5;
-```
+Check status:
 
 ```bash
-kubectl -n ljwx-stock get cronjob
-kubectl -n ljwx-stock get jobs --sort-by=.metadata.creationTimestamp
+kubectl -n ljwx-stock get jobs | grep qlib-bootstrap-manual
+kubectl -n ljwx-stock logs job/<job-name>
 ```
+
+## Success Criteria
+
+1. Job exits `Completed`.
+2. Logs include preflight/export/dump/train/publish success path.
+3. MinIO has both latest pointers:
+   - `qlib_data/cn/LATEST`
+   - `artifacts/models/qlib_lightgbm_alpha158/LATEST`
+4. Predict CronJob can run and write to `market.reco_daily`.
+
+## Common Failures
+
+- `market.kline_daily not found`
+  - Cause: ETL schema/data not ready.
+  - Action: complete ETL migration/ingest first.
+- `no qfq data`
+  - Cause: no qfq-adjusted rows.
+  - Action: verify ETL ingest mode and source quality.
+- MinIO auth or bucket errors
+  - Cause: invalid secret values.
+  - Action: rotate/update `qlib-minio-secret`.
+
+## Rollback
+
+If new model/data is bad, repoint MinIO `LATEST` to previous known good date, then rerun predict CronJob:
+
+1. set `qlib_data/cn/LATEST` to previous build date
+2. set `artifacts/models/qlib_lightgbm_alpha158/LATEST` to previous model date
+3. trigger predict run and verify `reco_daily`

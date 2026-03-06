@@ -18,3 +18,5 @@ resources:
   - stock-agent-application.yaml
   - namespace-ljwx-shiti-dev.yaml
   - ljwx-shiti-dev-application.yaml
+  - namespace-ljwx-platform.yaml
+  - ljwx-platform-prod-application.yaml

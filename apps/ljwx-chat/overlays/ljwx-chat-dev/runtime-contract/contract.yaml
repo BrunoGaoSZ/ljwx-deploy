@@ -1,0 +1,21 @@
+service: ljwx-chat
+environment: dev
+namespace: ljwx-chat-dev
+cluster_bootstrap: true
+ingress_profile: none
+public_host: ''
+ingress_class_name: ''
+cluster_issuer: ''
+tls_secret_name: ''
+namespace_profile: dev-default
+registry_profile: ghcr-and-harbor
+runtime_secret_profile: app-runtime
+capabilities:
+- ghcr_pull
+- harbor_pull
+- runtime_app_secret
+image_pull_secrets:
+- ghcr-pull
+- regcred
+contract_secret_names:
+- runtime-app

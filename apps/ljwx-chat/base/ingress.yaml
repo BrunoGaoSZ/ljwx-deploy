@@ -3,13 +3,19 @@ kind: Ingress
 metadata:
   name: ljwx-chat
   annotations:
+    cert-manager.io/cluster-issuer: dnspod-letsencrypt
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "100m"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - chat.lingjingwanxiang.cn
+      secretName: chat-lingjingwanxiang-cn-tls
   rules:
     - host: chat.lingjingwanxiang.cn
       http:

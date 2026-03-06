@@ -1,0 +1,48 @@
+version: 1
+profiles:
+  dev-default:
+    description: Default development namespace baseline.
+    resource_quota:
+      requests.cpu: "1"
+      requests.memory: "2Gi"
+      limits.cpu: "2"
+      limits.memory: "4Gi"
+      persistentvolumeclaims: "10"
+      services: "10"
+      pods: "20"
+    limit_range:
+      max:
+        cpu: "1"
+        memory: "2Gi"
+      min:
+        cpu: "50m"
+        memory: "128Mi"
+      default:
+        cpu: "500m"
+        memory: "1Gi"
+      default_request:
+        cpu: "250m"
+        memory: "512Mi"
+  prod-default:
+    description: Default production namespace baseline.
+    resource_quota:
+      requests.cpu: "2"
+      requests.memory: "4Gi"
+      limits.cpu: "4"
+      limits.memory: "8Gi"
+      persistentvolumeclaims: "10"
+      services: "10"
+      pods: "30"
+    limit_range:
+      max:
+        cpu: "2"
+        memory: "4Gi"
+      min:
+        cpu: "100m"
+        memory: "256Mi"
+      default:
+        cpu: "500m"
+        memory: "1Gi"
+      default_request:
+        cpu: "250m"
+        memory: "512Mi"
