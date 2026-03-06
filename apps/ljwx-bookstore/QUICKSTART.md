@@ -37,6 +37,10 @@ kubectl get crd servicemonitors.monitoring.coreos.com
 
 #### 创建 Secret
 ```bash
+# 推荐：在 ljwx-deploy 仓库根目录执行，自动从 infra-credentials 拉取密码
+./scripts/create-app-secret.sh ljwx-bookstore /root/codes/.env
+
+# 手动方式（如需逐项指定）：
 kubectl create secret generic ljwx-bookstore-secret \
   --namespace=ljwx-bookstore \
   --from-literal=DB_HOST='mysql-infra.infra.svc.cluster.local' \
@@ -53,6 +57,14 @@ kubectl create secret generic ljwx-bookstore-secret \
   --from-literal=SMS_TENCENT_APPKEY='YOUR_KEY' \
   --from-literal=STORAGE_ALIYUN_ACCESS_KEY_ID='YOUR_KEY_ID' \
   --from-literal=STORAGE_ALIYUN_ACCESS_KEY_SECRET='YOUR_SECRET'
+```
+
+如果 `/root/codes/.env` 中存在 Claude 代理配置，也可以单独同步可选的
+`ljwx-bookstore-llm-secret`：
+
+```bash
+./scripts/sync-llm-secret.sh ljwx-bookstore /root/codes/.env
+kubectl rollout restart deployment/ljwx-bookstore -n ljwx-bookstore
 ```
 
 #### 部署应用

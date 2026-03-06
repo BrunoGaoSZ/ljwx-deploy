@@ -77,6 +77,10 @@ kubectl get svc -n tracing otel-collector-opentelemetry-collector
 创建包含敏感信息的 Secret（**不要提交到 Git**）：
 
 ```bash
+# 推荐：在 ljwx-deploy 仓库根目录执行
+./scripts/create-app-secret.sh ljwx-bookstore /root/codes/.env
+
+# 手动方式：
 kubectl create secret generic ljwx-bookstore-secret \
   --namespace=ljwx-bookstore \
   --from-literal=DB_HOST='mysql-infra.infra.svc.cluster.local' \
@@ -94,6 +98,14 @@ kubectl create secret generic ljwx-bookstore-secret \
   --from-literal=STORAGE_ALIYUN_ACCESS_KEY_ID='YOUR_ALIYUN_KEY_ID' \
   --from-literal=STORAGE_ALIYUN_ACCESS_KEY_SECRET='YOUR_ALIYUN_KEY_SECRET' \
   --dry-run=client -o yaml | kubectl apply -f -
+```
+
+如果 `/root/codes/.env` 中存在 Claude 代理配置，可额外同步可选的
+`ljwx-bookstore-llm-secret`，Deployment 会自动读取它覆盖默认 LLM 配置：
+
+```bash
+./scripts/sync-llm-secret.sh ljwx-bookstore /root/codes/.env
+kubectl rollout restart deployment/ljwx-bookstore -n ljwx-bookstore
 ```
 
 **生产环境建议**：使用 External Secrets Operator 或 Sealed Secrets 管理敏感信息。
