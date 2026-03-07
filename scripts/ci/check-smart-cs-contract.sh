@@ -13,6 +13,10 @@ fail() {
 [[ -f "$SPRINT_DOC" ]] || fail "缺少文件: $SPRINT_DOC"
 [[ -f "$CONTRACT_DOC" ]] || fail "缺少文件: $CONTRACT_DOC"
 
+cd "$ROOT_DIR"
+
+uvx --with pyyaml --with jsonschema python scripts/platform/validate_router_contracts.py
+
 required_kpis=(KPI-01 KPI-02 KPI-03 KPI-04 KPI-05 KPI-06 KPI-07)
 for kpi in "${required_kpis[@]}"; do
   if ! rg -q "$kpi" "$SPRINT_DOC"; then

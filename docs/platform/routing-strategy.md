@@ -89,4 +89,5 @@ CI and local review should run:
 
 ```bash
 uvx --with pyyaml --with jsonschema python scripts/platform/validate_router_contracts.py
+bash scripts/ci/check-smart-cs-contract.sh
 ```

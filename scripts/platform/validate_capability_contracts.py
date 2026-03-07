@@ -25,7 +25,9 @@ except ImportError as exc:
 CAPABILITY_REGISTRY_FILE = Path("platform/assembly/capabilities.yaml")
 SERVICE_MAP_FILE = Path("platform/contracts/service-capability-map.yaml")
 RELEASE_VERSION_FILE = Path("release/platform-version.yaml")
-GATEWAY_REQUEST_SCHEMA_FILE = Path("platform/contracts/capability-gateway-request.schema.json")
+GATEWAY_REQUEST_SCHEMA_FILE = Path(
+    "platform/contracts/capability-gateway-request.schema.json"
+)
 AUDIT_EVENT_SCHEMA_FILE = Path("platform/contracts/audit-event.schema.json")
 KNOWN_PLATFORM_SERVICES = {"openclaw", "knowledge-processor", "n8n"}
 
@@ -142,7 +144,9 @@ def validate_version_references(
         "release/platform-version.yaml.config_versions",
     )
 
-    expected_capability_ref = f"{CAPABILITY_REGISTRY_FILE.as_posix()}@{capability_version}"
+    expected_capability_ref = (
+        f"{CAPABILITY_REGISTRY_FILE.as_posix()}@{capability_version}"
+    )
     if config_versions.get("capability_registry") != expected_capability_ref:
         errors.append(
             "release/platform-version.yaml.config_versions.capability_registry "
@@ -250,7 +254,11 @@ def validate_registry_and_service_map(
                     entry.get("dispatch_via"),
                     f"{service_name}.{relation_name}[{index}].dispatch_via",
                 )
-                if dispatch_via and dispatch_via not in services and dispatch_via not in KNOWN_PLATFORM_SERVICES:
+                if (
+                    dispatch_via
+                    and dispatch_via not in services
+                    and dispatch_via not in KNOWN_PLATFORM_SERVICES
+                ):
                     errors.append(
                         f"{service_name}.{relation_name}[{index}].dispatch_via 未知: {dispatch_via}"
                     )
@@ -287,7 +295,9 @@ def validate_registry_and_service_map(
 
     for capability_name in capabilities:
         if capability_name not in providers:
-            errors.append(f"capability {capability_name} 未在 service-capability-map 中声明 provider")
+            errors.append(
+                f"capability {capability_name} 未在 service-capability-map 中声明 provider"
+            )
 
     return errors
 
@@ -304,9 +314,13 @@ def main() -> int:
     errors = []
     try:
         errors.extend(
-            validate_version_references(capability_registry, service_map, release_version)
+            validate_version_references(
+                capability_registry, service_map, release_version
+            )
         )
-        errors.extend(validate_registry_and_service_map(capability_registry, service_map))
+        errors.extend(
+            validate_registry_and_service_map(capability_registry, service_map)
+        )
         errors.extend(validate_examples())
     except ValidationError as exc:
         errors.append(str(exc))

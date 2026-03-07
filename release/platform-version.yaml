@@ -1,46 +1,75 @@
-platform_version: 0.2.1-draft
+platform_version: 0.3.0-dev
 release_channel: dev
 released_at: null
 
 components:
   ljwx-chat:
-    delivery_ref: release/services.yaml
+    delivery_ref: "factory/onboarding/services.catalog.yaml#services[service=ljwx-chat,environment=dev]"
+    promoter_refs:
+      - "release/services.local-k3s.yaml#services.ljwx-chat.envs.dev"
+      - "release/services.orbstack-k3s-cn.yaml#services.ljwx-chat.envs.dev"
     config_ref: apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml
-    image: TBD
-  openclaw:
-    delivery_ref: planned-import
-    config_ref: planned-import
-    image: TBD
+    runtime_contract_ref: apps/ljwx-chat/overlays/ljwx-chat-dev/runtime-contract/contract.yaml
+    image_ref: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-chat:openclaw-ws-20260307-0117
   ljwx-core-api:
-    delivery_ref: repo:ljwx-core-api
-    config_ref: repo:ljwx-core-api
-    image: TBD
+    delivery_ref: "factory/onboarding/services.catalog.yaml#services[service=ljwx-core-api,environment=dev]"
+    promoter_refs:
+      - "release/services.local-k3s.yaml#services.ljwx-core-api.envs.dev"
+      - "release/services.orbstack-k3s-cn.yaml#services.ljwx-core-api.envs.dev"
+    config_ref: apps/ljwx-core-api/overlays/ljwx-core-api-dev/kustomization.yaml
+    runtime_contract_ref: apps/ljwx-core-api/overlays/ljwx-core-api-dev/runtime-contract/contract.yaml
+    image_ref: ghcr.io/brunogao/ljwx-core-api@sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
   ljwx-dify:
-    delivery_ref: release/services.yaml
-    config_ref: apps/ljwx-dify
-    image: TBD
+    delivery_ref: "factory/onboarding/services.catalog.yaml#services[service=ljwx-dify,environment=dev]"
+    promoter_refs:
+      - "release/services.local-k3s.yaml#services.ljwx-dify.envs.dev"
+      - "release/services.orbstack-k3s-cn.yaml#services.ljwx-dify.envs.dev"
+    config_ref: apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml
+    runtime_contract_ref: apps/ljwx-dify/overlays/ljwx-dify-dev/runtime-contract/contract.yaml
+    image_ref: ghcr.io/brunogao/ljwx-dify-api@sha256:2418c043ccbaf040774dce03c0a4a2e0e92cb678b35b950a962d5b4c12756914
+  ljwx-dify-web:
+    delivery_ref: "factory/onboarding/services.catalog.yaml#services[service=ljwx-dify,environment=dev].components[service=ljwx-dify-web]"
+    promoter_refs:
+      - "release/services.local-k3s.yaml#services.ljwx-dify-web.envs.dev"
+      - "release/services.orbstack-k3s-cn.yaml#services.ljwx-dify-web.envs.dev"
+    config_ref: apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml
+    runtime_contract_ref: apps/ljwx-dify/overlays/ljwx-dify-dev/runtime-contract/contract.yaml
+    image_ref: ghcr.io/brunogao/ljwx-dify-web@sha256:753f299a03e4af65f3a068394393889077e5acb3065bb4c5aa32c0677ceeffc9
   n8n:
-    delivery_ref: planned-import
-    config_ref: planned-import
-    image: TBD
-  knowledge-processor:
-    delivery_ref: planned
-    config_ref: planned
-    image: TBD
+    delivery_ref: cluster/n8n-dev-application.yaml
+    config_ref: cluster/n8n-dev-values.yaml
+    runtime_contract_ref: cluster/namespace-n8n.yaml
+    image_ref: chart:n8n@1.16.29 app:2.9.4
 
 config_versions:
   routing_rules: platform/routing/routes.dev.yaml@0.1.2
+  routing_rules_prod: platform/routing/routes.prod.yaml@0.1.2
   model_catalog: platform/routing/model-catalog.yaml@0.1.0
+  router_request_schema: platform/contracts/router-request.schema.json#draft-2020-12
+  router_decision_schema: platform/contracts/router-decision.schema.json#draft-2020-12
+  tool_result_schema: platform/contracts/tool-result.schema.json#draft-2020-12
   capability_registry: platform/assembly/capabilities.yaml@0.2.1
   service_capability_map: platform/contracts/service-capability-map.yaml@0.2.1
   capability_gateway_request: platform/contracts/capability-gateway-request.schema.json@0.1.0
   audit_event_schema: platform/contracts/audit-event.schema.json@0.1.0
+  knowledge_source_registry: platform/knowledge/source-registry.yaml@0.1.0
+  knowledge_taxonomy: platform/knowledge/taxonomy.yaml@0.1.0
+  knowledge_acl_policies: platform/knowledge/acl-policies.yaml@0.1.0
   knowledge_document_schema: platform/contracts/knowledge-document.schema.yaml@0.1.1
   knowledge_chunk_schema: platform/contracts/knowledge-chunk.schema.yaml@0.1.1
-  workflow_template_version: tracked-in-ljwx-workflow-templates
+  workflow_templates_repo: BrunoGaoSZ/ljwx-workflow-templates@406980fc99f7
+  workflow_build_template: BrunoGaoSZ/ljwx-workflow-templates/.github/workflows/build-ghcr.yml@406980fc99f7
+  workflow_enqueue_template: BrunoGaoSZ/ljwx-workflow-templates/.github/workflows/enqueue-release.yml@406980fc99f7
+  workflow_perf_template: BrunoGaoSZ/ljwx-workflow-templates/.github/workflows/k3s-perf-observability.yml@406980fc99f7
+  workflow_onboarding_gate: BrunoGaoSZ/ljwx-workflow-templates/.github/workflows/gitops-onboarding-gate.yml@406980fc99f7
+  service_catalog: factory/onboarding/services.catalog.yaml@1
   core_contract_version: 0.2.1
-  env_profile: platform/assembly/env-matrix.yaml#local-k3s
+  env_matrix: platform/assembly/env-matrix.yaml@0.2.0
+  env_profile_dev: "platform/assembly/env-matrix.yaml#profiles.local-k3s"
+  env_profile_dev_alt: "platform/assembly/env-matrix.yaml#profiles.orbstack-k3s-cn"
+  env_profile_prod: "platform/assembly/env-matrix.yaml#profiles.prod-planned"
 
 notes:
   - This file versions integrated behavior, not only image references.
-  - Update this file whenever routing, capability, or knowledge behavior changes.
+  - Update this file whenever a platform service changes delivery_ref, config_ref, or runtime contract ownership.
+  - Update this file whenever routing, capability, knowledge, workflow-template, or environment-profile references change.

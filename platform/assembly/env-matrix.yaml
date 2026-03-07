@@ -1,34 +1,92 @@
-version: 0.1.0
+version: 0.2.0
 
 profiles:
   local-k3s:
+    description: Default dev profile on the shared public k3s server.
     cluster_class: k3s
+    cluster_scope: dev
     service_map_path: release/services.local-k3s.yaml
     smoke_targets_path: scripts/smoke/targets.local-k3s.json
-    argocd_auto_sync: true
-    public_https: true
-    release_policy: auto-promote
+    argocd:
+      application_root: cluster/
+      auto_sync: true
+      prune: true
+      self_heal: true
+    public_https:
+      enabled: true
+      ingress_profile: traefik-letsencrypt-public
+      certificate_mode: cert-manager-http01
+      host_suffix: lingjingwanxiang.cn
+    release_policy:
+      mode: auto-promote
+      queue_path: release/queue.yaml
+      promoter_entrypoint: scripts/promoter/promote.py
+      release_gate: automated
+    approvals:
+      required: false
+      gate: automated
+      evidence_expectation: verify plus smoke evidence before marking promoted
   orbstack-k3s-cn:
+    description: Alternate dev profile for mainland validation with the same Git source.
     cluster_class: k3s
+    cluster_scope: dev
     service_map_path: release/services.orbstack-k3s-cn.yaml
     smoke_targets_path: scripts/smoke/targets.orbstack-k3s-cn.json
-    argocd_auto_sync: true
-    public_https: true
-    release_policy: auto-promote
+    argocd:
+      application_root: cluster/
+      auto_sync: true
+      prune: true
+      self_heal: true
+    public_https:
+      enabled: true
+      ingress_profile: traefik-letsencrypt-public
+      certificate_mode: cert-manager-http01
+      host_suffix: lingjingwanxiang.cn
+    release_policy:
+      mode: auto-promote
+      queue_path: release/queue.yaml
+      promoter_entrypoint: scripts/promoter/promote.py
+      release_gate: automated
+    approvals:
+      required: false
+      gate: automated
+      evidence_expectation: same release evidence as local-k3s, but verified against OrbStack targets
   prod-planned:
+    description: Manual production release gate with automated Argo reconciliation after Git merge.
     cluster_class: k3s
-    service_map_path: TBD
-    smoke_targets_path: TBD
-    argocd_auto_sync: false
-    public_https: true
-    release_policy: review-gated
+    cluster_scope: prod
+    service_map_path: release/services.yaml
+    smoke_targets_path: scripts/smoke/targets.prod-planned.json
+    argocd:
+      application_root: cluster-prod/
+      auto_sync: true
+      prune: true
+      self_heal: true
+    public_https:
+      enabled: true
+      ingress_profile: traefik-letsencrypt-public
+      certificate_mode: cert-manager-http01
+      host_suffix: lingjingwanxiang.cn
+    release_policy:
+      mode: review-gated
+      queue_path: release/queue.yaml
+      promoter_entrypoint: scripts/promoter/promote.py
+      release_gate: manual-before-prod-promote
+    approvals:
+      required: true
+      gate: release-review
+      evidence_expectation: prod queue approval, Argo synced, and live ingress probe
 
 environments:
   dev:
     default_profile: local-k3s
-    sync_policy: automated
-    approval_required: false
+    alternate_profiles:
+      - orbstack-k3s-cn
+    release_gate: automated
+    argocd_reconcile: automatic-after-merge
+    approval_boundary: no-human-gate
   prod:
     default_profile: prod-planned
-    sync_policy: manual
-    approval_required: true
+    release_gate: manual-before-prod-promote
+    argocd_reconcile: automatic-after-prod-overlay-merge
+    approval_boundary: human-approval-required

@@ -1,0 +1,17 @@
+{
+  "profile": "prod-planned",
+  "targets": [
+    {
+      "service": "ljwx-platform",
+      "environment": "prod",
+      "argocd_app": "ljwx-platform",
+      "endpoint": "http://ljwx-platform.ljwx-platform.svc.cluster.local/actuator/health/readiness"
+    },
+    {
+      "service": "ljwx-website",
+      "environment": "prod",
+      "argocd_app": "ljwx-website-prod",
+      "endpoint": "http://ljwx-website.ljwx-website-prod.svc.cluster.local/health"
+    }
+  ]
+}
