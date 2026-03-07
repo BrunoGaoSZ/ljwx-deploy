@@ -30,6 +30,10 @@ ROUTING_FILES = (
     ROUTING_DIR / "routes.dev.yaml",
     ROUTING_DIR / "routes.prod.yaml",
 )
+RELEASE_ROUTE_REFERENCE_KEYS = (
+    "routing_rules",
+    "routing_rules_prod",
+)
 ALLOWED_TOOL_POLICIES = {"none", "retrieval_only", "capability_registry"}
 ALLOWED_TRANSPORTS = {"openclaw-gateway", "runtime"}
 
@@ -385,28 +389,37 @@ def validate_release_version_reference(
             payload.get("config_versions"),
             f"{path}.config_versions",
         )
-        routing_rules = require_non_empty_str(
-            config_versions.get("routing_rules"),
-            f"{path}.config_versions.routing_rules",
-        )
     except ValidationError as exc:
         return [str(exc)]
 
-    if "@" not in routing_rules:
-        return [f"{path}.config_versions.routing_rules 必须使用 path@version 格式"]
+    for key in RELEASE_ROUTE_REFERENCE_KEYS:
+        raw_reference = config_versions.get(key)
+        if key == "routing_rules" or raw_reference is not None:
+            try:
+                routing_rules = require_non_empty_str(
+                    raw_reference,
+                    f"{path}.config_versions.{key}",
+                )
+            except ValidationError as exc:
+                errors.append(str(exc))
+                continue
 
-    referenced_path, referenced_version = routing_rules.split("@", 1)
-    if referenced_path not in route_versions:
-        errors.append(
-            f"{path}.config_versions.routing_rules 引用了未知路由文件: {referenced_path}"
-        )
-        return errors
+            if "@" not in routing_rules:
+                errors.append(f"{path}.config_versions.{key} 必须使用 path@version 格式")
+                continue
 
-    actual_version = route_versions[referenced_path]
-    if referenced_version != actual_version:
-        errors.append(
-            f"{path}.config_versions.routing_rules 版本不匹配: {referenced_version} != {actual_version}"
-        )
+            referenced_path, referenced_version = routing_rules.split("@", 1)
+            if referenced_path not in route_versions:
+                errors.append(
+                    f"{path}.config_versions.{key} 引用了未知路由文件: {referenced_path}"
+                )
+                continue
+
+            actual_version = route_versions[referenced_path]
+            if referenced_version != actual_version:
+                errors.append(
+                    f"{path}.config_versions.{key} 版本不匹配: {referenced_version} != {actual_version}"
+                )
 
     return errors
 

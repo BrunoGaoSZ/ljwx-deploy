@@ -136,6 +136,7 @@ services:
   - service: ljwx-core-api
     environment: dev
     template: service-default
+    scaffold_app: false
     image_repo: ljwx-core-api
     ghcr_org: brunogao
     harbor_registry: harbor.eu.lingjingwanxiang.cn
