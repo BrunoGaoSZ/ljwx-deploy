@@ -2,6 +2,7 @@
 
 | service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
+| ljwx-core-api | dev | `b7a9760defea2b10` | 2026-03-07T14:20:13Z | pending | - |
 | ljwx-core-api | dev | `6349d1b9c9cdf8aa` | 2026-03-07T13:46:58Z | pass | - |
 | ljwx-bookstore | dev | `7b688c4e973c6028` | 2026-03-07T00:50:16Z | pass | - |
 | ljwx-bookstore | dev | `9a5046ac7c730394` | 2026-03-06T12:20:26Z | pass | - |

@@ -6,4 +6,4 @@ resources:
 images:
 - name: ghcr.io/brunogao/ljwx-core-api
   newName: ghcr.io/brunogao/ljwx-core-api
-  digest: sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
+  digest: sha256:b7a9760defea2b10eabf468b20342ef6775185e147cc384b37fe7dc331b0c5cc

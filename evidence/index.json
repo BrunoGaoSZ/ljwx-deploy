@@ -1,5 +1,35 @@
 [
   {
+    "evidenceId": "20260307-ljwx-core-api-sha-cb89b67",
+    "service": "ljwx-core-api",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogao/ljwx-core-api",
+      "commit": "cb89b67",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogao/ljwx-core-api@sha256:b7a9760defea2b10eabf468b20342ef6775185e147cc384b37fe7dc331b0c5cc",
+      "harbor": "harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-core-api@sha256:b7a9760defea2b10eabf468b20342ef6775185e147cc384b37fe7dc331b0c5cc",
+      "deployed": "ghcr.io/brunogao/ljwx-core-api@sha256:b7a9760defea2b10eabf468b20342ef6775185e147cc384b37fe7dc331b0c5cc"
+    },
+    "deploy": {
+      "deployRepoCommit": "33064b635a09b25a55e2b6c4f93baab032cc3476",
+      "queueId": "20260307T141644Z-ljwx-core-api-sha-cb89b67",
+      "argocdApp": "ljwx-core-api-dev",
+      "overlayPath": "apps/ljwx-core-api/overlays/ljwx-core-api-dev/kustomization.yaml",
+      "syncedAt": "2026-03-07T14:20:13Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pending",
+        "checkedAt": ""
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260307-ljwx-core-api-sha-cb89b67.yaml"
+  },
+  {
     "evidenceId": "20260307-ljwx-core-api-sha-c443f60",
     "service": "ljwx-core-api",
     "env": "dev",
