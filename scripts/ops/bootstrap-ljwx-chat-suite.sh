@@ -13,6 +13,9 @@ DIFY_ADMIN_PASSWORD="${DIFY_ADMIN_PASSWORD:-}"
 DIFY_INIT_PASSWORD="${DIFY_INIT_PASSWORD:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
 ANTHROPIC_BASE_URL="${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
+CHAT_OPENCLAW_GATEWAY_TOKEN="${CHAT_OPENCLAW_GATEWAY_TOKEN:-${CHAT_OPENAI_API_KEY:-${OPENAI_API_KEY:-}}}"
+CHAT_OPENCLAW_GATEWAY_URL="${CHAT_OPENCLAW_GATEWAY_URL:-https://openclaw.lingjingwanxiang.cn/v1}"
+CHAT_OPENCLAW_GATEWAY_ORIGIN="${CHAT_OPENCLAW_GATEWAY_ORIGIN:-https://openclaw.lingjingwanxiang.cn}"
 
 require_cmd() {
   local cmd="$1"
@@ -102,7 +105,7 @@ CHAT_KEY_VAULTS_SECRET="$(openssl rand -base64 32 | tr -d '\n')"
 CHAT_NEXTAUTH_SECRET="$(openssl rand -base64 32 | tr -d '\n')"
 CHAT_DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-lb.infra.svc.cluster.local:5432/ljwx_chat"
 
-kubectl -n "$CHAT_NS" create secret generic ljwx-chat-secrets \
+chat_secret_args=(
   --from-literal=DATABASE_URL="$CHAT_DATABASE_URL" \
   --from-literal=KEY_VAULTS_SECRET="$CHAT_KEY_VAULTS_SECRET" \
   --from-literal=NEXTAUTH_SECRET="$CHAT_NEXTAUTH_SECRET" \
@@ -111,9 +114,24 @@ kubectl -n "$CHAT_NS" create secret generic ljwx-chat-secrets \
   --from-literal=S3_PUBLIC_DOMAIN="https://s3.lingjingwanxiang.cn" \
   --from-literal=S3_ACCESS_KEY_ID="$MINIO_USER" \
   --from-literal=S3_SECRET_ACCESS_KEY="$MINIO_PASSWORD" \
-  --from-literal=REDIS_URL="redis://:${REDIS_PASSWORD}@redis-lb.infra.svc.cluster.local:6379/0" \
+  --from-literal=REDIS_URL="redis://:${REDIS_PASSWORD}@redis-lb.infra.svc.cluster.local:6379/0"
+)
+
+if [[ -n "$CHAT_OPENCLAW_GATEWAY_TOKEN" ]]; then
+  chat_secret_args+=(
+    --from-literal=OPENAI_API_KEY="$CHAT_OPENCLAW_GATEWAY_TOKEN" \
+    --from-literal=OPENCLAW_GATEWAY_TOKEN="$CHAT_OPENCLAW_GATEWAY_TOKEN"
+  )
+else
+  echo "警告: 未设置 CHAT_OPENCLAW_GATEWAY_TOKEN/CHAT_OPENAI_API_KEY/OPENAI_API_KEY，ljwx-chat 将无法通过 OpenClaw 调用模型"
+fi
+
+kubectl -n "$CHAT_NS" create secret generic ljwx-chat-secrets \
+  "${chat_secret_args[@]}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "[7/7] 完成。现在可执行 GitOps/清单部署。"
 echo "- 命名空间: $DIFY_NS, $CHAT_NS, $WEBSITE_NS"
 echo "- 数据库: ljwx_dify, ljwx_chat"
+echo "- ljwx-chat OpenClaw gateway: $CHAT_OPENCLAW_GATEWAY_URL"
+echo "- ljwx-chat OpenClaw origin: $CHAT_OPENCLAW_GATEWAY_ORIGIN"
