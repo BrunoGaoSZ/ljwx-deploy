@@ -13,8 +13,9 @@ DIFY_ADMIN_PASSWORD="${DIFY_ADMIN_PASSWORD:-}"
 DIFY_INIT_PASSWORD="${DIFY_INIT_PASSWORD:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
 ANTHROPIC_BASE_URL="${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
-CHAT_OPENAI_API_KEY="${CHAT_OPENAI_API_KEY:-${OPENAI_API_KEY:-}}"
-CHAT_OPENAI_PROXY_URL="${CHAT_OPENAI_PROXY_URL:-http://openclaw.openclaw.svc.cluster.local:18789/v1}"
+CHAT_OPENCLAW_GATEWAY_TOKEN="${CHAT_OPENCLAW_GATEWAY_TOKEN:-${CHAT_OPENAI_API_KEY:-${OPENAI_API_KEY:-}}}"
+CHAT_OPENCLAW_GATEWAY_URL="${CHAT_OPENCLAW_GATEWAY_URL:-ws://openclaw.openclaw.svc.cluster.local:18789/}"
+CHAT_OPENCLAW_GATEWAY_ORIGIN="${CHAT_OPENCLAW_GATEWAY_ORIGIN:-https://openclaw.lingjingwanxiang.cn}"
 
 require_cmd() {
   local cmd="$1"
@@ -116,10 +117,13 @@ chat_secret_args=(
   --from-literal=REDIS_URL="redis://:${REDIS_PASSWORD}@redis-lb.infra.svc.cluster.local:6379/0"
 )
 
-if [[ -n "$CHAT_OPENAI_API_KEY" ]]; then
-  chat_secret_args+=(--from-literal=OPENAI_API_KEY="$CHAT_OPENAI_API_KEY")
+if [[ -n "$CHAT_OPENCLAW_GATEWAY_TOKEN" ]]; then
+  chat_secret_args+=(
+    --from-literal=OPENAI_API_KEY="$CHAT_OPENCLAW_GATEWAY_TOKEN" \
+    --from-literal=OPENCLAW_GATEWAY_TOKEN="$CHAT_OPENCLAW_GATEWAY_TOKEN"
+  )
 else
-  echo "警告: 未设置 CHAT_OPENAI_API_KEY/OPENAI_API_KEY，ljwx-chat 将无法通过 openclaw 调用模型"
+  echo "警告: 未设置 CHAT_OPENCLAW_GATEWAY_TOKEN/CHAT_OPENAI_API_KEY/OPENAI_API_KEY，ljwx-chat 将无法通过 OpenClaw 调用模型"
 fi
 
 kubectl -n "$CHAT_NS" create secret generic ljwx-chat-secrets \
@@ -129,4 +133,5 @@ kubectl -n "$CHAT_NS" create secret generic ljwx-chat-secrets \
 echo "[7/7] 完成。现在可执行 GitOps/清单部署。"
 echo "- 命名空间: $DIFY_NS, $CHAT_NS, $WEBSITE_NS"
 echo "- 数据库: ljwx_dify, ljwx_chat"
-echo "- ljwx-chat OpenAI proxy: $CHAT_OPENAI_PROXY_URL"
+echo "- ljwx-chat OpenClaw gateway: $CHAT_OPENCLAW_GATEWAY_URL"
+echo "- ljwx-chat OpenClaw origin: $CHAT_OPENCLAW_GATEWAY_ORIGIN"
