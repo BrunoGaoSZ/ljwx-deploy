@@ -89,24 +89,6 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
-- id: 20260307T140318Z-ljwx-core-api-sha-c443f60-prod
-  service: ljwx-core-api
-  env: prod
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-core-api@sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
-    tag: sha-c443f60
-    digest: sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
-    gitSha: c443f60
-  createdAt: '2026-03-07T14:03:18Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
-  meta:
-    autoPromoteBySmoke: true
-    sourceQueueId: 20260307T134603Z-ljwx-core-api-sha-c443f60
 - id: 20260307T143319Z-ljwx-core-api-sha-cb89b67-prod
   service: ljwx-core-api
   env: prod
@@ -1065,4 +1047,23 @@ superseded:
   promotedAt: ''
   supersededAt: '2026-03-07T14:20:07Z'
   failedAt: ''
+  reason: replaced by newer pending release for same service+env
+- id: 20260307T140318Z-ljwx-core-api-sha-c443f60-prod
+  service: ljwx-core-api
+  env: prod
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-core-api@sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
+    tag: sha-c443f60
+    digest: sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
+    gitSha: c443f60
+  createdAt: '2026-03-07T14:03:18Z'
+  status: superseded
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: '2026-03-07T14:40:07Z'
+  failedAt: ''
+  meta:
+    autoPromoteBySmoke: true
+    sourceQueueId: 20260307T134603Z-ljwx-core-api-sha-c443f60
   reason: replaced by newer pending release for same service+env
