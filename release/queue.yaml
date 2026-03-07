@@ -74,6 +74,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260307T043028Z-ljwx-chat-sha-224b8d3
+  service: ljwx-chat
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-chat@sha256:3c2ef59b81c3282a6b6e0a4b67a7af3447f91cdadd4367468b70f1ad9a4b76e0
+    tag: sha-224b8d3
+    digest: sha256:3c2ef59b81c3282a6b6e0a4b67a7af3447f91cdadd4367468b70f1ad9a4b76e0
+    gitSha: 224b8d3
+  createdAt: '2026-03-07T04:30:28Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
