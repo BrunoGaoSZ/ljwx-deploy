@@ -59,21 +59,6 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
-- id: 20260305T143536Z-ljwx-chat-sha-48018f7
-  service: ljwx-chat
-  env: dev
-  source:
-    ghcr: ghcr.io/brunogao/ljwx-chat@sha256:69173da9e05f24a4a8777dac0bc81aface00df306da976d4a4e851a468e245d6
-    tag: sha-48018f7
-    digest: sha256:69173da9e05f24a4a8777dac0bc81aface00df306da976d4a4e851a468e245d6
-    gitSha: 48018f7
-  createdAt: '2026-03-05T14:35:36Z'
-  status: pending
-  attempts: 0
-  lastError: ''
-  promotedAt: ''
-  supersededAt: ''
-  failedAt: ''
 - id: 20260307T043028Z-ljwx-chat-sha-224b8d3
   service: ljwx-chat
   env: dev
@@ -918,5 +903,21 @@ superseded:
   lastError: ''
   promotedAt: ''
   supersededAt: '2026-03-06T11:00:45Z'
+  failedAt: ''
+  reason: replaced by newer pending release for same service+env
+- id: 20260305T143536Z-ljwx-chat-sha-48018f7
+  service: ljwx-chat
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-chat@sha256:69173da9e05f24a4a8777dac0bc81aface00df306da976d4a4e851a468e245d6
+    tag: sha-48018f7
+    digest: sha256:69173da9e05f24a4a8777dac0bc81aface00df306da976d4a4e851a468e245d6
+    gitSha: 48018f7
+  createdAt: '2026-03-05T14:35:36Z'
+  status: superseded
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: '2026-03-07T04:40:06Z'
   failedAt: ''
   reason: replaced by newer pending release for same service+env
