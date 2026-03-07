@@ -19,12 +19,12 @@
       "argocdApp": "ljwx-bookstore-dev",
       "overlayPath": "apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml",
       "syncedAt": "2026-03-07T00:50:16Z",
-      "smokedAt": "2026-03-07T05:45:09Z"
+      "smokedAt": "2026-03-07T06:00:19Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:09Z",
+        "checkedAt": "2026-03-07T06:00:19Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"UP\",\"components\":{\"db\":{\"status\":\"UP\",\"details\":{\"database\":\"MySQL\",\"validationQuery\":\"SELECT 1\",\"result\":1}}'"
       }
     },
@@ -115,12 +115,12 @@
       "argocdApp": "ljwx-shiti-dev",
       "overlayPath": "apps/ljwx-shiti/overlays/dev/kustomization.yaml",
       "syncedAt": "2026-03-06T11:26:18Z",
-      "smokedAt": "2026-03-07T05:45:12Z"
+      "smokedAt": "2026-03-07T06:00:23Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:12Z",
+        "checkedAt": "2026-03-07T06:00:23Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"healthy\"}'"
       }
     },
@@ -147,12 +147,12 @@
       "argocdApp": "ljwx-website-prod",
       "overlayPath": "apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml",
       "syncedAt": "2026-03-05T14:36:45Z",
-      "smokedAt": "2026-03-07T05:48:13Z"
+      "smokedAt": "2026-03-07T06:03:24Z"
     },
     "tests": {
       "smoke": {
         "status": "fail",
-        "checkedAt": "2026-03-07T05:48:13Z",
+        "checkedAt": "2026-03-07T06:03:24Z",
         "details": "argocd check skipped; endpoint wait timeout: <urlopen error [Errno -2] Name does not resolve>"
       }
     },
@@ -179,12 +179,12 @@
       "argocdApp": "ljwx-chat-dev",
       "overlayPath": "apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T08:10:08Z",
-      "smokedAt": "2026-03-07T05:45:12Z"
+      "smokedAt": "2026-03-07T06:00:22Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:12Z",
+        "checkedAt": "2026-03-07T06:00:22Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html><!--QxOhDVy7MbH0IVGH_Ip4L--><html dir=\"ltr\" lang=\"en-US\"><head><meta charSet=\"utf-8\"/><meta name=\"viewpor'"
       }
     },
@@ -211,12 +211,12 @@
       "argocdApp": "ljwx-dify-web-dev",
       "overlayPath": "apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T08:00:15Z",
-      "smokedAt": "2026-03-07T05:45:11Z"
+      "smokedAt": "2026-03-07T06:00:22Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:11Z",
+        "checkedAt": "2026-03-07T06:00:22Z",
         "details": "argocd check skipped; endpoint=200 body='<!DOCTYPE html><html lang=\"en-US\" class=\"h-full __variable_1f5468\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" co'"
       }
     },
@@ -243,12 +243,12 @@
       "argocdApp": "ljwx-dify-dev",
       "overlayPath": "apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml",
       "syncedAt": "2026-03-05T07:50:07Z",
-      "smokedAt": "2026-03-07T05:45:10Z"
+      "smokedAt": "2026-03-07T06:00:21Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:10Z",
+        "checkedAt": "2026-03-07T06:00:21Z",
         "details": "argocd check skipped; endpoint=200 body='{\"pid\": 7, \"status\": \"ok\", \"version\": \"1.11.1\"}'"
       }
     },
@@ -339,12 +339,12 @@
       "argocdApp": "ljwx-stock-agent-dev",
       "overlayPath": "apps/stock-agent/overlays/ljwx-stock/kustomization.yaml",
       "syncedAt": "2026-03-05T04:10:13Z",
-      "smokedAt": "2026-03-07T05:45:10Z"
+      "smokedAt": "2026-03-07T06:00:20Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:10Z",
+        "checkedAt": "2026-03-07T06:00:20Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"ok\"}'"
       }
     },
@@ -583,12 +583,12 @@
       "argocdApp": "ljwx-platform-prod",
       "overlayPath": "apps/ljwx-platform/overlays/prod/kustomization.yaml",
       "syncedAt": "2026-03-04T07:49:45Z",
-      "smokedAt": "2026-03-07T05:45:09Z"
+      "smokedAt": "2026-03-07T06:00:20Z"
     },
     "tests": {
       "smoke": {
         "status": "pass",
-        "checkedAt": "2026-03-07T05:45:09Z",
+        "checkedAt": "2026-03-07T06:00:20Z",
         "details": "argocd check skipped; endpoint=200 body='{\"status\":\"UP\"}'"
       }
     },
