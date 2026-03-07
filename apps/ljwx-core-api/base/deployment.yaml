@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: ljwx-core-api
-        image: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-core-api:latest
+        image: ghcr.io/brunogao/ljwx-core-api:latest
         ports:
         - name: http
           containerPort: 8000
