@@ -54,6 +54,8 @@ class OnboardEntry:
     generate_argocd_app: bool
     argocd_app_file: str
     cluster_bootstrap: bool
+    container_port: int
+    health_path: str
     ingress_profile: str
     public_host: str
     generate_ingress: bool
@@ -488,6 +490,12 @@ def parse_entry(
             smoke_port=smoke_port,
             smoke_path=smoke_path,
         )
+    container_port = get_optional_int(
+        raw,
+        "container_port",
+        int(smoke_port) if smoke_port.isdigit() else 80,
+    )
+    health_path = get_optional_str(raw, "health_path", smoke_path)
 
     profiles = normalize_profiles(raw.get("profiles", list(service_template.profiles)))
     scaffold_app = normalize_bool(
@@ -682,6 +690,8 @@ def parse_entry(
         generate_argocd_app=generate_argocd_app,
         argocd_app_file=argocd_app_file,
         cluster_bootstrap=entry_cluster_bootstrap,
+        container_port=container_port,
+        health_path=health_path,
         ingress_profile=ingress_profile_name,
         public_host=public_host,
         generate_ingress=generate_ingress,
@@ -1139,13 +1149,13 @@ def build_deployment_doc(
         "ports": [
             {
                 "name": "http",
-                "containerPort": 80,
+                "containerPort": entry.container_port,
                 "protocol": "TCP",
             }
         ],
         "livenessProbe": {
             "httpGet": {
-                "path": "/",
+                "path": entry.health_path,
                 "port": "http",
             },
             "initialDelaySeconds": 10,
@@ -1153,7 +1163,7 @@ def build_deployment_doc(
         },
         "readinessProbe": {
             "httpGet": {
-                "path": "/",
+                "path": entry.health_path,
                 "port": "http",
             },
             "initialDelaySeconds": 5,
@@ -1172,6 +1182,15 @@ def build_deployment_doc(
                 }
             )
         container["envFrom"] = env_from
+
+    pod_spec: dict[str, object] = {
+        "containers": [container],
+    }
+    if resolved_entry.registry_profile.image_pull_secrets:
+        pod_spec["imagePullSecrets"] = [
+            {"name": secret_name}
+            for secret_name in resolved_entry.registry_profile.image_pull_secrets
+        ]
 
     return {
         "apiVersion": "apps/v1",
@@ -1197,9 +1216,7 @@ def build_deployment_doc(
                     },
                     "annotations": annotations,
                 },
-                "spec": {
-                    "containers": [container],
-                },
+                "spec": pod_spec,
             },
         },
     }

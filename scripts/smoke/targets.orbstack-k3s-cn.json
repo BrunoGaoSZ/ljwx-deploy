@@ -72,6 +72,12 @@
       "environment": "prod",
       "argocd_app": "ljwx-website-prod",
       "endpoint": "http://ljwx-website.ljwx-website-prod.svc.cluster.local/health"
+    },
+    {
+      "service": "ljwx-core-api",
+      "environment": "dev",
+      "argocd_app": "ljwx-core-api-dev",
+      "endpoint": "http://ljwx-core-api.ljwx-core-api-dev.svc.cluster.local/health"
     }
   ]
 }

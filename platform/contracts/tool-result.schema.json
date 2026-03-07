@@ -4,8 +4,16 @@
   "title": "ToolResult",
   "type": "object",
   "additionalProperties": false,
-  "required": ["tool_name", "success"],
+  "required": ["trace_id", "tool_name", "success"],
   "properties": {
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "route_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
     "tool_name": {
       "type": "string",
       "minLength": 1

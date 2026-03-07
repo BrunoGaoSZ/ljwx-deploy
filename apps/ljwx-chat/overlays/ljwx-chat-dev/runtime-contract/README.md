@@ -15,6 +15,15 @@
 - harbor_pull (namespace): Bind Harbor pull secret regcred to the namespace baseline.
 - runtime_app_secret (application): Standardize service-specific runtime secret as runtime-app.
 
+## Public endpoint
+
+- ingress profile: `traefik-letsencrypt-public`
+- host: `https://chat.lingjingwanxiang.cn`
+- ingress class: `traefik`
+- cluster issuer: `dnspod-letsencrypt`
+- tls secret: `chat-lingjingwanxiang-cn-tls`
+- ingress artifact generation: `disabled (managed by existing manifests)`
+
 ## Bootstrap commands
 
 ```bash

@@ -7,6 +7,7 @@
 | routing behavior | `platform/routing/`, `platform/contracts/`, `release/platform-version.yaml` |
 | knowledge publication | `platform/knowledge/`, knowledge source repos, publish workflow |
 | capability ownership | `platform/assembly/capabilities.yaml`, `platform/contracts/service-capability-map.yaml` |
+| capability gateway | `platform/contracts/capability-gateway-request.schema.json`, `docs/platform/capability-gateway.md`, `ljwx-core-api/config/tool_profiles.yaml` |
 | deployment topology | `apps/`, `cluster/`, `argocd-apps/`, `release/` |
 
 ## Required PR Contents

@@ -123,3 +123,36 @@ services:
     template: legacy-service
     overlay_name: ljwx-chat-dev
     argocd_order: 83
+    overlay_path: apps/ljwx-chat/overlays/ljwx-chat-dev/kustomization.yaml
+    deploy_namespace: ljwx-chat-dev
+    argocd_app: ljwx-chat-dev
+    argocd_app_file: argocd-apps/83-ljwx-chat-dev.yaml
+    ghcr_org: brunogao
+    image_repo: ljwx-chat
+    public_host: chat.lingjingwanxiang.cn
+    generate_ingress: false
+    smoke_host: ljwx-chat
+    smoke_path: /
+  - service: ljwx-core-api
+    environment: dev
+    template: service-default
+    image_repo: ljwx-core-api
+    ghcr_org: brunogao
+    harbor_registry: harbor.eu.lingjingwanxiang.cn
+    harbor_project: ljwx
+    overlay_name: ljwx-core-api-dev
+    smoke_host: ljwx-core-api
+    smoke_path: /health
+    container_port: 8000
+    health_path: /health
+    argocd_order: 84
+    profiles:
+      - local-k3s
+      - orbstack-k3s-cn
+    namespace_profile: dev-default
+    registry_profile: ghcr-and-harbor
+    runtime_secret_profile: app-runtime
+    capabilities:
+      - ghcr_pull
+      - harbor_pull
+      - runtime_app_secret

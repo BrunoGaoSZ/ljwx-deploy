@@ -1,6 +1,18 @@
-version: 0.1.0
+version: 0.2.1
 
 capabilities:
+  conversation.ui:
+    executor: ljwx-chat
+    owner_service: ljwx-chat
+    auth: required
+    audit: summary
+    timeout_ms: 1000
+  session.preferences:
+    executor: ljwx-chat
+    owner_service: ljwx-chat
+    auth: required
+    audit: summary
+    timeout_ms: 1000
   kb.search:
     executor: retrieval
     owner_service: knowledge-processor
@@ -13,12 +25,36 @@ capabilities:
     auth: required
     audit: full
     timeout_ms: 5000
+  auth.check:
+    executor: core-api
+    owner_service: ljwx-core-api
+    auth: internal
+    audit: full
+    timeout_ms: 1500
+  tool.gateway.execute:
+    executor: core-api
+    owner_service: ljwx-core-api
+    auth: internal
+    audit: full
+    timeout_ms: 3000
   ticket.create:
     executor: n8n
     owner_service: n8n
     auth: required
     audit: full
     timeout_ms: 8000
+  notification.dispatch:
+    executor: n8n
+    owner_service: n8n
+    auth: internal
+    audit: full
+    timeout_ms: 5000
+  approval.flow:
+    executor: n8n
+    owner_service: n8n
+    auth: required
+    audit: full
+    timeout_ms: 10000
   conversation.audit.write:
     executor: core-api
     owner_service: ljwx-core-api
@@ -31,3 +67,39 @@ capabilities:
     auth: internal
     audit: full
     timeout_ms: 15000
+  response.stream:
+    executor: openclaw
+    owner_service: openclaw
+    auth: internal
+    audit: summary
+    timeout_ms: 15000
+  tool.orchestrate:
+    executor: openclaw
+    owner_service: openclaw
+    auth: internal
+    audit: full
+    timeout_ms: 15000
+  rag.answer:
+    executor: dify
+    owner_service: ljwx-dify
+    auth: required
+    audit: summary
+    timeout_ms: 12000
+  dataset.retrieve:
+    executor: dify
+    owner_service: ljwx-dify
+    auth: internal
+    audit: summary
+    timeout_ms: 5000
+  knowledge.publish:
+    executor: retrieval
+    owner_service: knowledge-processor
+    auth: internal
+    audit: full
+    timeout_ms: 10000
+  knowledge.invalidate:
+    executor: retrieval
+    owner_service: knowledge-processor
+    auth: internal
+    audit: full
+    timeout_ms: 5000

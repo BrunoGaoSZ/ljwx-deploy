@@ -8,7 +8,9 @@ required:
   - title
   - source_type
   - source_ref
+  - product_area
   - visibility
+  - acl_expression
   - doc_type
   - owner
   - version
@@ -32,12 +34,18 @@ properties:
   source_ref:
     type: string
     minLength: 1
+  product_area:
+    type: string
+    minLength: 1
   visibility:
     type: string
     enum:
       - public
       - internal
       - customer
+  acl_expression:
+    type: string
+    minLength: 1
   customer_id:
     type:
       - string

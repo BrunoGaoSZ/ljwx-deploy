@@ -7,6 +7,12 @@ cd "$ROOT_DIR"
 echo "[verify] validate release queue shape"
 uvx --with pyyaml python scripts/promoter/validate_queue.py
 
+echo "[verify] validate router contracts and routing config"
+uvx --with pyyaml --with jsonschema python scripts/platform/validate_router_contracts.py
+
+echo "[verify] validate capability registry and gateway contracts"
+uvx --with pyyaml --with jsonschema python scripts/platform/validate_capability_contracts.py
+
 echo "[verify] smart-cs contract gate"
 bash scripts/ci/check-smart-cs-contract.sh
 

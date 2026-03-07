@@ -4,9 +4,11 @@
 
 ## 范围
 
-演练走标准链路，但只做 dry-run，不写入生产分支：
+当前演练覆盖三类可回撤对象：
 
-`latest promoted -> synthetic pending rollback entry -> promoter dry-run`
+1. 路由配置回滚
+2. 知识撤回与重新 publish
+3. capability gateway profile 回滚
 
 ## 本地执行
 
@@ -16,17 +18,21 @@ bash scripts/ops/run_rollback_drill.sh
 
 脚本行为：
 
-1. 复制当前仓库到临时目录。
-2. 读取 `release/queue.yaml`，取最近一条 `promoted` 记录。
-3. 生成一条同镜像 digest 的 `pending` 回滚演练记录。
-4. 校验队列结构并执行 promoter dry-run。
+1. 复制 `ljwx-deploy`、`ljwx-knowledge`、`ljwx-core-api` 到临时目录。
+2. 对 `platform/routing/routes.dev.yaml` 打一次临时变更并恢复原文，再跑路由 contract 校验。
+3. 对知识文档执行一次 `invalidate`，确认 dataset 移除后再 `publish` 恢复。
+4. 对 `ljwx-core-api/config/tool_profiles.yaml` 打一次白名单变更并恢复，再跑 gateway tests。
 5. 删除临时目录，不保留任何提交。
+
+说明：
+
+- 该演练不直接改 live cluster。
+- 重点是证明 Git 配置、知识数据集、gateway profile 都存在清晰回滚点。
 
 ## CI 定时
 
 工作流：`.github/workflows/monthly-rollback-drill.yml`
 
 - 定时：每月一次
-- 模式：dry-run only
+- 模式：临时副本内演练
 - 目的：持续验证“可回滚”而非仅验证“可发布”
-
