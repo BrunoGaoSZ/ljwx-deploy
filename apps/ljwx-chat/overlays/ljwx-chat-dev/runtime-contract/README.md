@@ -30,5 +30,5 @@ kubectl create secret generic runtime-app -n ljwx-chat-dev --from-literal=EXAMPL
 - The current `ljwx-chat` deployment still reads application secrets from the legacy `ljwx-chat-secrets` secret.
 - When `lingjingwanxiang:32b` is routed through OpenClaw, `ljwx-chat-secrets` must include `OPENCLAW_GATEWAY_TOKEN`.
 - `OPENAI_API_KEY` is still populated as a compatibility fallback for older builds.
-- `OPENCLAW_GATEWAY_URL` is provided by the base ConfigMap and defaults to `ws://openclaw.openclaw.svc.cluster.local:18789/`.
+- `OPENCLAW_GATEWAY_URL` is provided by the base ConfigMap and defaults to `https://openclaw.lingjingwanxiang.cn/v1`.
 - `OPENCLAW_GATEWAY_ORIGIN` is provided by the base ConfigMap and defaults to `https://openclaw.lingjingwanxiang.cn`.

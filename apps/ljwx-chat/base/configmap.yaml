@@ -26,5 +26,5 @@ data:
   MIDDLEWARE_REWRITE_THROUGH_LOCAL: "1"
 
   ENABLED_OLLAMA: "0"
-  OPENCLAW_GATEWAY_URL: "ws://openclaw.openclaw.svc.cluster.local:18789/"
+  OPENCLAW_GATEWAY_URL: "https://openclaw.lingjingwanxiang.cn/v1"
   OPENCLAW_GATEWAY_ORIGIN: "https://openclaw.lingjingwanxiang.cn"
