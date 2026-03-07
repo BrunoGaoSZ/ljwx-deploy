@@ -1,0 +1,18 @@
+version: 0.1.0
+
+policies:
+  public:
+    allowed_targets:
+      - dify-public
+      - retrieval-public
+    review_required: true
+  internal:
+    allowed_targets:
+      - dify-internal
+      - retrieval-internal
+    review_required: true
+  customer:
+    allowed_targets:
+      - retrieval-customer-template
+    review_required: true
+    requires_customer_id: true

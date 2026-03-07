@@ -1,0 +1,79 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://lingjingwanxiang.cn/schemas/knowledge-document.schema.yaml
+title: KnowledgeDocument
+type: object
+additionalProperties: false
+required:
+  - document_id
+  - title
+  - source_type
+  - source_ref
+  - visibility
+  - doc_type
+  - owner
+  - version
+  - review_status
+properties:
+  document_id:
+    type: string
+    minLength: 1
+  title:
+    type: string
+    minLength: 1
+  source_type:
+    type: string
+    enum:
+      - repo_doc
+      - faq
+      - delivery_doc
+      - deployment_doc
+      - support_record
+      - partner_reference
+  source_ref:
+    type: string
+    minLength: 1
+  visibility:
+    type: string
+    enum:
+      - public
+      - internal
+      - customer
+  customer_id:
+    type:
+      - string
+      - "null"
+  doc_type:
+    type: string
+  owner:
+    type: string
+  version:
+    type: string
+  checksum:
+    type:
+      - string
+      - "null"
+  review_status:
+    type: string
+    enum:
+      - draft
+      - reviewing
+      - approved
+      - rejected
+  approved_by:
+    type:
+      - string
+      - "null"
+  effective_from:
+    type:
+      - string
+      - "null"
+    format: date-time
+  expires_at:
+    type:
+      - string
+      - "null"
+    format: date-time
+  tags:
+    type: array
+    items:
+      type: string

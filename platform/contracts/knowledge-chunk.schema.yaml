@@ -1,0 +1,50 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://lingjingwanxiang.cn/schemas/knowledge-chunk.schema.yaml
+title: KnowledgeChunk
+type: object
+additionalProperties: false
+required:
+  - chunk_id
+  - document_id
+  - chunk_index
+  - visibility
+  - token_count
+  - text_hash
+properties:
+  chunk_id:
+    type: string
+    minLength: 1
+  document_id:
+    type: string
+    minLength: 1
+  chunk_index:
+    type: integer
+    minimum: 0
+  heading_path:
+    type: array
+    items:
+      type: string
+  visibility:
+    type: string
+    enum:
+      - public
+      - internal
+      - customer
+  customer_id:
+    type:
+      - string
+      - "null"
+  token_count:
+    type: integer
+    minimum: 1
+  embedding_model:
+    type:
+      - string
+      - "null"
+  text_hash:
+    type: string
+    minLength: 1
+  published_targets:
+    type: array
+    items:
+      type: string

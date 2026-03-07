@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingjingwanxiang.cn/schemas/router-request.schema.json",
+  "title": "RouterRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_id",
+    "channel",
+    "task_type",
+    "requires_tools",
+    "requires_retrieval",
+    "messages"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_id": {
+      "type": ["string", "null"]
+    },
+    "channel": {
+      "type": "string",
+      "enum": ["web", "api", "im", "system"]
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "general_chat",
+        "long_analysis",
+        "solution_design",
+        "tool_execution",
+        "knowledge_qa",
+        "multi_step"
+      ]
+    },
+    "requires_tools": {
+      "type": "boolean"
+    },
+    "requires_retrieval": {
+      "type": "boolean"
+    },
+    "latency_budget_ms": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "content"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["system", "user", "assistant", "tool"]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "context_meta": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

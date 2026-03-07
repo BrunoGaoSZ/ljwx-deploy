@@ -1,0 +1,49 @@
+version: 0.1.0
+
+targets:
+  dify-public:
+    type: dify_dataset
+    visibility: public
+    dataset_name: public-knowledge
+    invalidate_on:
+      - source_deleted
+      - acl_changed
+      - review_revoked
+      - expired
+  dify-internal:
+    type: dify_dataset
+    visibility: internal
+    dataset_name: internal-knowledge
+    invalidate_on:
+      - source_deleted
+      - acl_changed
+      - review_revoked
+      - expired
+  retrieval-public:
+    type: retrieval_collection
+    visibility: public
+    collection_name: public-knowledge
+    invalidate_on:
+      - source_deleted
+      - acl_changed
+      - review_revoked
+      - expired
+  retrieval-internal:
+    type: retrieval_collection
+    visibility: internal
+    collection_name: internal-knowledge
+    invalidate_on:
+      - source_deleted
+      - acl_changed
+      - review_revoked
+      - expired
+  retrieval-customer-template:
+    type: retrieval_collection
+    visibility: customer
+    collection_name_template: customer-{customer_id}
+    invalidate_on:
+      - source_deleted
+      - acl_changed
+      - review_revoked
+      - expired
+      - customer_scope_changed

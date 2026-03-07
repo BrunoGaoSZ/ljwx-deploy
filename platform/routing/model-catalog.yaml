@@ -1,0 +1,25 @@
+version: 0.1.0
+
+providers:
+  openai:
+    auth_secret_ref: runtime-llm/openai
+    supports_streaming: true
+  anthropic:
+    auth_secret_ref: runtime-llm/anthropic
+    supports_streaming: true
+
+models:
+  gpt-5.4:
+    provider: openai
+    tier: primary
+    supports_tools: true
+    supports_json_mode: true
+    max_context_tokens: 200000
+    cost_profile: standard
+  claude-sonnet-4.6:
+    provider: anthropic
+    tier: complementary
+    supports_tools: true
+    supports_json_mode: true
+    max_context_tokens: 200000
+    cost_profile: analysis
