@@ -15,11 +15,11 @@ deploy:
   argocdApp: ljwx-website-prod
   overlayPath: apps/ljwx-website/overlays/ljwx-website-prod/kustomization.yaml
   syncedAt: '2026-03-05T14:36:45Z'
-  smokedAt: '2026-03-07T11:36:09Z'
+  smokedAt: '2026-03-07T11:51:08Z'
 tests:
   smoke:
     status: fail
-    checkedAt: '2026-03-07T11:36:09Z'
+    checkedAt: '2026-03-07T11:51:08Z'
     details: 'argocd check skipped; endpoint wait timeout: <urlopen error [Errno -2]
       Name does not resolve>'
 approvals: {}
