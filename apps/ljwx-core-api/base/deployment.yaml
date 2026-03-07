@@ -23,6 +23,13 @@ spec:
       containers:
       - name: ljwx-core-api
         image: ghcr.io/brunogao/ljwx-core-api:latest
+        env:
+        - name: LJWX_CORE_API_PORT
+          value: "8000"
+        envFrom:
+        - secretRef:
+            name: runtime-app
+            optional: true
         ports:
         - name: http
           containerPort: 8000
@@ -39,10 +46,6 @@ spec:
             port: http
           initialDelaySeconds: 5
           periodSeconds: 5
-        envFrom:
-        - secretRef:
-            name: runtime-app
-            optional: true
       imagePullSecrets:
       - name: ghcr-pull
       - name: regcred
