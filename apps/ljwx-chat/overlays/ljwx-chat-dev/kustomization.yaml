@@ -5,5 +5,5 @@ resources:
 - ../../base
 images:
 - name: ghcr.io/brunogao/ljwx-chat
-  newName: ghcr.io/brunogao/ljwx-chat
-  digest: sha256:8124e9c5b483595fc9b6a0a0dde712e6219cd78a9bb29256f3051ae21d4c2c66
+  newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-chat
+  newTag: openclaw-ws-20260307-0117
