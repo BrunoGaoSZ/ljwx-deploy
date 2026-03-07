@@ -15,10 +15,10 @@ deploy:
   argocdApp: ljwx-core-api-dev
   overlayPath: apps/ljwx-core-api/overlays/ljwx-core-api-dev/kustomization.yaml
   syncedAt: '2026-03-07T14:20:13Z'
-  smokedAt: '2026-03-07T22:33:13Z'
+  smokedAt: '2026-03-07T22:48:11Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-07T22:33:13Z'
+    checkedAt: '2026-03-07T22:48:11Z'
     details: argocd check skipped; endpoint=200 body='{"status":"ok","service":"ljwx-core-api"}'
 approvals: {}
