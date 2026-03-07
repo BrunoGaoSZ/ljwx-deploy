@@ -22,6 +22,7 @@ spec:
               image: ghcr.io/brunogao/ljwx-deploy-promoter:main
               imagePullPolicy: Always
               env:
+                # Dev promoter only: wait for local Harbor candidate images and update dev/demo overlays.
                 - name: GIT_BRANCH
                   value: main
                 - name: DEPLOY_REPO_URL
@@ -50,6 +51,7 @@ spec:
                       name: deploy-promoter-secret
                       key: github_token
                       optional: true
+                # Local Harbor is the dev gate; prod Harbor is handled only by cluster-prod/deploy-promoter-prod.
                 - name: HARBOR_URL
                   valueFrom:
                     secretKeyRef:

@@ -4,12 +4,19 @@
 
 ## 1. 先理解这条主链路
 
-`service repo build -> enqueue release/queue.yaml -> promoter 更新 overlay -> ArgoCD 同步 -> smoke -> evidence/pages`
+`service repo build -> GHCR -> local Harbor -> enqueue release/queue.yaml -> deploy-promoter(dev) 更新 dev overlay -> ArgoCD(dev) 同步 -> smoke -> local Harbor 打 prod-* tag -> enqueue env=prod -> production Harbor(https://harbor.omniverseai.net/) -> deploy-promoter-prod 更新 prod overlay -> production ArgoCD 检测并部署 -> evidence/pages`
 
 对应仓库职责：
 
 - `ljwx-workflow-templates`：服务仓可复用 workflow 模板
 - `ljwx-deploy`：唯一部署真相源（queue、service map、argocd apps、overlays、evidence）
+
+生产发布口径：
+
+- dev 镜像先进入本地 Harbor，再由 smoke 通过后打 `prod-*` 标签并入队 `env=prod`
+- 生产 Harbor 固定为 `https://harbor.omniverseai.net/`
+- prod overlay 的部署必须由生产环境 ArgoCD 发现 Git 变更后执行；本地集群不应作为长期 prod Application owner
+- 生产 Harbor / ArgoCD 凭据只放在 `deploy-promoter-secret` 等运行时 Secret 中，不写入仓库
 
 ## 2. 新进程第一次进入时必须先读
 
@@ -43,6 +50,7 @@ bash scripts/ops/scan-gitops-context.sh --repo "$PWD"
 - 最少只填：`service`、`environment`、`template`
 - 现有项目按需追加：`overlay_name`、`image_repo`、`smoke_host`、`smoke_path`、`smoke_port`
 - 需要公网域名 + HTTPS 的服务，优先用 `public-service` 或 `public-web-service`；若沿用其他模板，则显式补 `ingress_profile`、`public_host`、`public_path`、`public_service_name`、`public_service_port`
+- 如果旧 overlay 已经保留手写 ingress（例如多路径 / 多后端场景），仍应登记 `public_host` / TLS 字段，但要补 `generate_ingress: false`，避免 onboarding 额外生成一个标准单后端 ingress
 - 一个 overlay 下如果有多个发布镜像/多个 smoke 服务，改用 `template: multi-image-service` + `components`
 - 共享 namespace 或已有 cluster 历史清单的旧项目：单镜像优先用 `batch-legacy-service`，多镜像优先用 `batch-multi-image-service`
 - 只有确实偏离标准命名时，才显式写 `deploy_namespace`、`argocd_app`、`argocd_app_file`
@@ -73,12 +81,14 @@ bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yam
 
 - `apps/<service>/base/*`
 - `apps/<service>/overlays/<env>/kustomization.yaml`
-- `apps/<service>/overlays/<env>/ingress.yaml`（声明 `public_host` 时）
+- `apps/<service>/overlays/<env>/ingress.yaml`（声明 `public_host` 且 `generate_ingress` 未关闭时）
 - `argocd-apps/<xx>-<service>-dev.yaml`
 - `apps/<service>/overlays/<env>/runtime-contract/*`
-- `cluster/namespace-<namespace>.yaml`
-- `cluster/<service>-<env>-application.yaml`
-- `cluster/kustomization.yaml` 资源引用
+- `cluster/namespace-<namespace>.yaml`（dev/demos）
+- `cluster/<service>-<env>-application.yaml`（dev/demos）
+- `cluster-prod/namespace-<namespace>.yaml`（prod）
+- `cluster-prod/<service>-<env>-application.yaml`（prod）
+- 对应 `cluster/kustomization.yaml` 或 `cluster-prod/kustomization.yaml` 资源引用
 
 ## Step B: 服务仓接入标准 workflow
 
@@ -123,7 +133,8 @@ bash scripts/verify.sh
 
 1. `argocd` 中对应 Application 为 `Synced` / `Healthy`
 2. `kubectl get certificate -A` 中证书状态为 `Ready=True`
-3. `curl -I https://<public-host>` 可成功握手，浏览器访问无证书告警
+3. `python3 scripts/ops/public_ingress_access.py probe --host <public-host>` 可从 live Ingress 选择可达地址完成本机 HTTPS 探测
+4. 如果当前终端存在 DNS / 公网回环限制，先执行 `python3 scripts/ops/public_ingress_access.py hosts --host <public-host>` 生成推荐映射，再写入 `/etc/hosts` 后做浏览器验收
 
 ## 4. 老项目接入（仅补流程，不改业务代码）
 
@@ -133,6 +144,10 @@ bash scripts/verify.sh
 4. 如果共享 namespace 或已有 cluster 历史文件，单镜像优先用 `batch-legacy-service`，多镜像优先用 `batch-multi-image-service`，不要硬迁 cluster baseline。
 5. 补 smoke endpoint。
 6. 通过一轮 queue->promoter->argocd->smoke->evidence 验证闭环。
+
+如果包含 prod 链路，则应进一步验证：
+
+7. `smoke -> local Harbor prod tag -> queue(env=prod) -> production Harbor -> deploy-promoter-prod -> production ArgoCD` 的完整闭环。
 
 说明：新的公网接入口径统一走 `Traefik + cert-manager + Let's Encrypt HTTP01`。现有手写 `nginx`/HTTP-only ingress 先视为历史兼容，后续再单独迁移。
 

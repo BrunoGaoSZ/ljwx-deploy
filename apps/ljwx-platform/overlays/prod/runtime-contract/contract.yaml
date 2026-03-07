@@ -4,6 +4,7 @@ namespace: ljwx-platform
 cluster_bootstrap: true
 ingress_profile: none
 public_host: ''
+generate_ingress: true
 ingress_class_name: ''
 cluster_issuer: ''
 tls_secret_name: ''

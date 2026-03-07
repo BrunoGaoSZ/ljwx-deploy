@@ -67,6 +67,9 @@ services:
     environment: dev
     template: multi-image-service
     overlay_name: ljwx-dify-dev
+    ingress_profile: traefik-letsencrypt-public
+    public_host: dify.lingjingwanxiang.cn
+    generate_ingress: false
     capabilities:
       - db_init_job
     argocd_order: 82

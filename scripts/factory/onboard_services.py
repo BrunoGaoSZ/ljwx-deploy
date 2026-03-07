@@ -32,6 +32,7 @@ DEFAULT_CAPABILITY_PROFILES_PATH = Path("factory/onboarding/capability-profiles.
 DEFAULT_SERVICE_TEMPLATES_PATH = Path("factory/onboarding/service-templates.yaml")
 DEFAULT_INGRESS_PROFILES_PATH = Path("factory/onboarding/ingress-profiles.yaml")
 DEFAULT_CLUSTER_KUSTOMIZATION_PATH = Path("cluster/kustomization.yaml")
+DEFAULT_PROD_CLUSTER_KUSTOMIZATION_PATH = Path("cluster-prod/kustomization.yaml")
 DEFAULT_DEPLOY_REPO_URL = "https://github.com/BrunoGaoSZ/ljwx-deploy.git"
 DEFAULT_DEPLOY_REF = "main"
 ANNOTATION_PREFIX = "gitops.ljwx.io"
@@ -55,6 +56,7 @@ class OnboardEntry:
     cluster_bootstrap: bool
     ingress_profile: str
     public_host: str
+    generate_ingress: bool
     public_path: str
     public_path_type: str
     public_service_name: str
@@ -568,6 +570,7 @@ def parse_entry(
         raise ValueError(
             f"{service}/{environment} 配置 public_host 时必须提供 ingressClass"
         )
+    generate_ingress = normalize_bool(raw.get("generate_ingress"), True)
 
     namespace_profile_default = (
         service_template.namespace_profile or default_namespace_profile(environment)
@@ -681,6 +684,7 @@ def parse_entry(
         cluster_bootstrap=entry_cluster_bootstrap,
         ingress_profile=ingress_profile_name,
         public_host=public_host,
+        generate_ingress=generate_ingress,
         public_path=public_path,
         public_path_type=public_path_type,
         public_service_name=public_service_name,
@@ -1270,7 +1274,7 @@ def ensure_generated_ingress_artifacts(
     entry: OnboardEntry,
     dry_run: bool,
 ) -> int:
-    if not entry.public_host:
+    if not entry.public_host or not entry.generate_ingress:
         return 0
 
     overlay_path = repo_root / entry.overlay_path
@@ -1352,7 +1356,7 @@ def scaffold_app_manifest(
     overlay_resources = [
         "../../base",
     ]
-    if entry.public_host:
+    if entry.public_host and entry.generate_ingress:
         overlay_resources.append("ingress.yaml")
     overlay_content = dump_yaml_text(
         {
@@ -1465,9 +1469,14 @@ def build_namespace_baseline_documents(
 def ensure_namespace_baseline_file(
     repo_root: Path,
     resolved_entry: ResolvedEntry,
+    cluster_root: Path,
     dry_run: bool,
 ) -> bool:
-    path = repo_root / f"cluster/namespace-{resolved_entry.entry.deploy_namespace}.yaml"
+    path = (
+        repo_root
+        / cluster_root
+        / f"namespace-{resolved_entry.entry.deploy_namespace}.yaml"
+    )
     content = dump_yaml_documents_text(
         build_namespace_baseline_documents(resolved_entry)
     )
@@ -1484,10 +1493,13 @@ def ensure_cluster_application_file(
     entry: OnboardEntry,
     deploy_repo_url: str,
     deploy_ref: str,
+    cluster_root: Path,
     dry_run: bool,
 ) -> bool:
     application_path = (
-        repo_root / f"cluster/{entry.service}-{entry.environment}-application.yaml"
+        repo_root
+        / cluster_root
+        / f"{entry.service}-{entry.environment}-application.yaml"
     )
     source_path = str(Path(entry.overlay_path).parent).replace("\\", "/")
     payload: dict[str, object] = {
@@ -1558,6 +1570,21 @@ def ensure_cluster_kustomization_resources(
     return changed
 
 
+def is_production_environment(environment: str) -> bool:
+    return environment.strip().lower() in {"prod", "production"}
+
+
+def default_cluster_kustomization_for_entry(
+    entry: OnboardEntry,
+    configured_path: Path,
+) -> Path:
+    if configured_path != DEFAULT_CLUSTER_KUSTOMIZATION_PATH:
+        return configured_path
+    if is_production_environment(entry.environment):
+        return DEFAULT_PROD_CLUSTER_KUSTOMIZATION_PATH
+    return configured_path
+
+
 def capability_description(
     capability_name: str,
     definitions: dict[str, CapabilityDefinition],
@@ -1612,9 +1639,39 @@ def secret_example_payload(secret_name: str, namespace: str) -> dict[str, object
     }
 
 
+def extract_custom_readme_notes(
+    existing_readme: str,
+    standard_notes: tuple[str, ...],
+) -> tuple[str, ...]:
+    notes_marker = "## Notes"
+    start_index = existing_readme.find(notes_marker)
+    if start_index == -1:
+        return ()
+
+    notes_section = existing_readme[start_index + len(notes_marker) :]
+    next_heading_index = notes_section.find("\n## ")
+    if next_heading_index != -1:
+        notes_section = notes_section[:next_heading_index]
+
+    standard_set = set(standard_notes)
+    custom_notes: list[str] = []
+    for raw_line in notes_section.splitlines():
+        line = raw_line.strip()
+        if not line or not line.startswith("- "):
+            continue
+        if line.startswith("- Namespace baseline is generated into `cluster"):
+            continue
+        if line in standard_set or line in custom_notes:
+            continue
+        custom_notes.append(line)
+    return tuple(custom_notes)
+
+
 def render_runtime_contract_readme(
     resolved_entry: ResolvedEntry,
     capability_definitions: dict[str, CapabilityDefinition],
+    cluster_root: Path,
+    existing_readme: str,
 ) -> str:
     entry = resolved_entry.entry
     image_pull_secrets = (
@@ -1667,26 +1724,39 @@ def render_runtime_contract_readme(
         else "# No bootstrap command required."
     )
     if entry.public_host:
+        ingress_generation_mode = (
+            "enabled"
+            if entry.generate_ingress
+            else "disabled (managed by existing manifests)"
+        )
         public_endpoint_block = (
             "## Public endpoint\n\n"
             f"- ingress profile: `{entry.ingress_profile}`\n"
             f"- host: `https://{entry.public_host}`\n"
             f"- ingress class: `{entry.ingress_class_name}`\n"
             f"- cluster issuer: `{entry.cluster_issuer or 'none'}`\n"
-            f"- tls secret: `{entry.tls_secret_name or 'none'}`\n\n"
+            f"- tls secret: `{entry.tls_secret_name or 'none'}`\n"
+            f"- ingress artifact generation: `{ingress_generation_mode}`\n\n"
         )
     else:
         public_endpoint_block = ""
     if entry.cluster_bootstrap:
         cluster_note = (
-            "- Namespace baseline is generated into `cluster/namespace-<namespace>.yaml` "
-            "and should remain the source of truth.\n"
+            f"- Namespace baseline is generated into `{cluster_root.as_posix()}/namespace-<namespace>.yaml` "
+            "and should remain the source of truth."
         )
     else:
         cluster_note = (
             "- `cluster_bootstrap` is disabled for this entry; keep the existing cluster "
-            "namespace/application manifests as the current source of truth.\n"
+            "namespace/application manifests as the current source of truth."
         )
+    standard_notes = (
+        "- `runtime-contract/*.secret.example.yaml` are placeholders only and must not contain real credentials.",
+        cluster_note,
+        "- For legacy workloads, migrate deployment manifests gradually to `runtime-infra`, `runtime-llm`, and `runtime-app` instead of app-specific secret names.",
+    )
+    custom_notes = extract_custom_readme_notes(existing_readme, standard_notes)
+    notes_block = "\n".join((*standard_notes, *custom_notes))
     return (
         f"# {entry.service} capability contract ({entry.environment})\n\n"
         "## Namespace baseline\n\n"
@@ -1704,9 +1774,7 @@ def render_runtime_contract_readme(
         f"{commands_block}\n"
         "```\n\n"
         "## Notes\n\n"
-        "- `runtime-contract/*.secret.example.yaml` are placeholders only and must not contain real credentials.\n"
-        f"{cluster_note}"
-        "- For legacy workloads, migrate deployment manifests gradually to `runtime-infra`, `runtime-llm`, and `runtime-app` instead of app-specific secret names.\n"
+        f"{notes_block}\n"
     )
 
 
@@ -1714,6 +1782,7 @@ def ensure_runtime_contract_artifacts(
     repo_root: Path,
     resolved_entry: ResolvedEntry,
     capability_definitions: dict[str, CapabilityDefinition],
+    cluster_root: Path,
     dry_run: bool,
 ) -> int:
     entry = resolved_entry.entry
@@ -1729,6 +1798,7 @@ def ensure_runtime_contract_artifacts(
         "cluster_bootstrap": entry.cluster_bootstrap,
         "ingress_profile": entry.ingress_profile,
         "public_host": entry.public_host,
+        "generate_ingress": entry.generate_ingress,
         "ingress_class_name": entry.ingress_class_name,
         "cluster_issuer": entry.cluster_issuer,
         "tls_secret_name": entry.tls_secret_name,
@@ -1741,11 +1811,15 @@ def ensure_runtime_contract_artifacts(
             resolved_entry.runtime_secret_profile.contract_secret_names,
         ),
     }
+    existing_readme = read_text_file(readme_path) if readme_path.exists() else ""
 
     files_to_write: dict[Path, str] = {
         contract_doc_path: dump_yaml_text(contract_payload),
         readme_path: render_runtime_contract_readme(
-            resolved_entry, capability_definitions
+            resolved_entry,
+            capability_definitions,
+            cluster_root,
+            existing_readme,
         ),
     }
 
@@ -1779,6 +1853,11 @@ def apply_onboarding(
     changed_files = 0
     for entry in entries:
         resolved_entry = resolve_entry(entry, profiles)
+        entry_cluster_kustomization_path = default_cluster_kustomization_for_entry(
+            entry,
+            cluster_kustomization_path,
+        )
+        entry_cluster_root = entry_cluster_kustomization_path.parent
         print(f"[onboard] 处理服务: {entry.service}/{entry.environment}")
 
         for map_key in ("default", *entry.profiles):
@@ -1817,6 +1896,7 @@ def apply_onboarding(
             repo_root,
             resolved_entry,
             profiles.capabilities,
+            entry_cluster_root,
             dry_run,
         )
         if runtime_contract_changes > 0:
@@ -1824,27 +1904,34 @@ def apply_onboarding(
             print(f"  - 已生成 runtime contract: {runtime_contract_changes} 个文件")
 
         if cluster_bootstrap and entry.cluster_bootstrap:
-            if ensure_namespace_baseline_file(repo_root, resolved_entry, dry_run):
+            if ensure_namespace_baseline_file(
+                repo_root,
+                resolved_entry,
+                entry_cluster_root,
+                dry_run,
+            ):
                 changed_files += 1
                 print(
-                    f"  - 已生成 namespace baseline: cluster/namespace-{entry.deploy_namespace}.yaml"
+                    "  - 已生成 namespace baseline: "
+                    f"{entry_cluster_root.as_posix()}/namespace-{entry.deploy_namespace}.yaml"
                 )
             if ensure_cluster_application_file(
                 repo_root,
                 entry,
                 deploy_repo_url,
                 deploy_ref,
+                entry_cluster_root,
                 dry_run,
             ):
                 changed_files += 1
                 print(
                     "  - 已生成 cluster application: "
-                    f"cluster/{entry.service}-{entry.environment}-application.yaml"
+                    f"{entry_cluster_root.as_posix()}/{entry.service}-{entry.environment}-application.yaml"
                 )
 
             cluster_kustomization_changes = ensure_cluster_kustomization_resources(
                 repo_root,
-                cluster_kustomization_path,
+                entry_cluster_kustomization_path,
                 entry,
                 dry_run,
             )
@@ -1915,7 +2002,7 @@ def parse_args() -> argparse.Namespace:
         "--cluster-kustomization",
         type=Path,
         default=DEFAULT_CLUSTER_KUSTOMIZATION_PATH,
-        help="cluster kustomization 路径",
+        help="cluster kustomization 路径（默认 dev/demos 用 cluster/，prod 自动切到 cluster-prod/）",
     )
     parser.add_argument(
         "--deploy-repo-url",

@@ -4,6 +4,7 @@ namespace: ljwx-stock
 cluster_bootstrap: false
 ingress_profile: traefik-letsencrypt-public
 public_host: stock-agent.lingjingwanxiang.cn
+generate_ingress: true
 ingress_class_name: traefik
 cluster_issuer: dnspod-letsencrypt
 tls_secret_name: stock-agent-lingjingwanxiang-cn-tls

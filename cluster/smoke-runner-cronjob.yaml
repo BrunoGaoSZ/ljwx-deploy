@@ -23,6 +23,9 @@ spec:
               image: ghcr.io/brunogao/ljwx-deploy-promoter:main
               imagePullPolicy: Always
               env:
+                # Smoke runs on the local cluster, verifies dev rollout, then hands off prod by
+                # tagging local Harbor artifacts and enqueueing env=prod. Production ArgoCD remains
+                # the only owner that detects and deploys prod overlays.
                 - name: GIT_BRANCH
                   value: main
                 - name: DEPLOY_REPO_URL

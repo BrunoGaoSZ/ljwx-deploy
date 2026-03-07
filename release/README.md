@@ -1,13 +1,16 @@
 # Release Queue (Method-1)
 
-This queue drives dev auto-promotion in `ljwx-deploy`.
+This queue drives dev auto-promotion and prod rollout handoff in `ljwx-deploy`.
 
 ## Flow
 
 1. Service repository appends a `pending` entry into `release/queue.yaml`.
-2. Optional cache layer (Harbor pull replication / proxy cache) prepares upstream images.
-3. Promoter promotes using standard image repository from `source.ghcr` by default.
-4. Promoter updates Argo-consumed overlay (`apps/*/overlays/*/kustomization.yaml`), writes evidence, and moves queue item to `promoted`.
+2. Local Harbor replication / proxy cache prepares upstream images from GHCR.
+3. Dev promoter promotes using standard image repository from `source.ghcr` by default and, when enabled, waits for local Harbor digest readiness.
+4. Dev promoter updates Argo-consumed dev overlay (`apps/*/overlays/*/kustomization.yaml`), writes evidence, and moves queue item to `promoted`.
+5. Smoke may auto-tag the local Harbor artifact as `prod-*` and enqueue a new `env=prod` entry.
+6. Production Harbor (`https://harbor.omniverseai.net/`) receives the production-ready artifact from local Harbor replication.
+7. Prod promoter waits for production Harbor digest readiness, updates prod overlay, and lets production ArgoCD detect and deploy the change.
 
 ## Superseded Semantics
 

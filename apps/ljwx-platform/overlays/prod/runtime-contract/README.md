@@ -25,5 +25,5 @@ kubectl create secret generic runtime-app -n ljwx-platform --from-literal=EXAMPL
 ## Notes
 
 - `runtime-contract/*.secret.example.yaml` are placeholders only and must not contain real credentials.
-- Namespace baseline is generated into `cluster/namespace-<namespace>.yaml` and should remain the source of truth.
+- Namespace baseline is generated into `cluster-prod/namespace-<namespace>.yaml` and should remain the source of truth.
 - For legacy workloads, migrate deployment manifests gradually to `runtime-infra`, `runtime-llm`, and `runtime-app` instead of app-specific secret names.

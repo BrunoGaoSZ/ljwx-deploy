@@ -29,7 +29,8 @@
 - `public_host`, `public_path`
 - `public_service_name`, `public_service_port`
 - `ingress_class_name`, `cluster_issuer`, `tls_secret_name`
-- `cluster_bootstrap`（可选；关闭后不生成 `cluster/namespace-*` 和 `cluster/*-application.yaml`）
+- `generate_ingress`（可选；设为 `false` 时仅登记公网 TLS 合同，不自动生成 overlay `ingress.yaml`）
+- `cluster_bootstrap`（可选；关闭后不生成 cluster baseline；默认 dev/demos 输出到 `cluster/`，prod 输出到 `cluster-prod/`）
 - `scaffold_app`（是否生成应用骨架）
 - `generate_argocd_app` + `argocd_app_file`
 
@@ -69,11 +70,19 @@
 
 当前标准公网 profile 为 `traefik-letsencrypt-public`：
 
-- 统一生成 overlay `ingress.yaml`
+- 默认生成 overlay `ingress.yaml`
 - 默认 `ingressClassName: traefik`
 - 默认启用 TLS 和 `cert-manager.io/cluster-issuer: dnspod-letsencrypt`
 - 默认路径 `/`
 - 默认后端端口 `80`
+
+如果旧 overlay 已经有手写多路径 ingress，可保留原清单并显式设置：
+
+```yaml
+generate_ingress: false
+```
+
+这样 runtime-contract 仍会记录 `public_host` / TLS 信息，但 onboarding 不会追加一个新的单后端 ingress。
 
 兼容旧清单的 issuer 名仍叫 `dnspod-letsencrypt`，但实现已经切到 cert-manager + Traefik HTTP01。
 
@@ -84,6 +93,9 @@
   environment: dev
   template: multi-image-service
   overlay_name: ljwx-dify-dev
+  ingress_profile: traefik-letsencrypt-public
+  public_host: dify.lingjingwanxiang.cn
+  generate_ingress: false
   components:
     - service: ljwx-dify
       image_repo: ljwx-dify-api
@@ -165,14 +177,16 @@ bash scripts/factory/onboard_services.sh factory/onboarding/services.catalog.yam
 
 - `apps/<service>/base/*`
 - `apps/<service>/overlays/<env>/kustomization.yaml`
-- `apps/<service>/overlays/<env>/ingress.yaml`（声明 `public_host` 时）
+- `apps/<service>/overlays/<env>/ingress.yaml`（声明 `public_host` 且 `generate_ingress` 未关闭时）
 - `argocd-apps/*.yaml`
 - `apps/<service>/overlays/<env>/runtime-contract/contract.yaml`
 - `apps/<service>/overlays/<env>/runtime-contract/*.secret.example.yaml`
 - `apps/<service>/overlays/<env>/runtime-contract/README.md`
-- `cluster/namespace-<namespace>.yaml`
-- `cluster/<service>-<env>-application.yaml`
-- `cluster/kustomization.yaml` 中的资源引用
+- `cluster/namespace-<namespace>.yaml`（dev/demos）
+- `cluster/<service>-<env>-application.yaml`（dev/demos）
+- `cluster-prod/namespace-<namespace>.yaml`（prod）
+- `cluster-prod/<service>-<env>-application.yaml`（prod）
+- 对应 `cluster/kustomization.yaml` 或 `cluster-prod/kustomization.yaml` 中的资源引用
 
 如需仅处理 deploy 映射而不生成 cluster baseline，可设置：
 
@@ -201,6 +215,7 @@ bash scripts/verify.sh
 
 - `argocd-apps/03-cert-manager-dev.yaml` 与 `argocd-apps/04-cert-manager-config-dev.yaml` 已同步
 - `kubectl get certificate -A` 中对应域名证书为 `Ready=True`
-- `curl -I https://<public-host>` 返回正常，浏览器访问无证书告警
+- `python3 scripts/ops/public_ingress_access.py probe --host <public-host>` 可从 live Ingress 选择可达地址完成本机 HTTPS 探测
+- 如果当前终端存在 DNS / 公网回环限制，先执行 `python3 scripts/ops/public_ingress_access.py hosts --host <public-host>` 生成推荐映射，再写入 `/etc/hosts` 后做浏览器验收
 
 说明：当前标准只覆盖 `Traefik + cert-manager` 的 k3s 公网接入口径。历史 `nginx`/HTTP-only ingress 暂未自动迁移。
