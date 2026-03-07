@@ -8,5 +8,5 @@ resources:
 
 images:
   - name: ghcr.io/brunogao/ljwx-chat
-    newName: ghcr.io/brunogao/ljwx-chat
-    newTag: latest
+    newName: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-chat
+    newTag: openclaw-ws-20260307-0117
