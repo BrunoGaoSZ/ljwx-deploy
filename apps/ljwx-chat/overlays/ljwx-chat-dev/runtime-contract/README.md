@@ -29,4 +29,4 @@ kubectl create secret generic runtime-app -n ljwx-chat-dev --from-literal=EXAMPL
 - For legacy workloads, migrate deployment manifests gradually to `runtime-infra`, `runtime-llm`, and `runtime-app` instead of app-specific secret names.
 - The current `ljwx-chat` deployment still reads application secrets from the legacy `ljwx-chat-secrets` secret.
 - When `lingjingwanxiang:32b` is routed through OpenClaw, `ljwx-chat-secrets` must include `OPENAI_API_KEY`.
-- `OPENAI_PROXY_URL` is provided by the base ConfigMap and defaults to `https://openclaw.lingjingwanxiang.cn/v1`.
+- `OPENAI_PROXY_URL` is provided by the base ConfigMap and defaults to `http://openclaw.openclaw.svc.cluster.local:18789/v1`.

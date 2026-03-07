@@ -14,7 +14,7 @@ DIFY_INIT_PASSWORD="${DIFY_INIT_PASSWORD:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
 ANTHROPIC_BASE_URL="${ANTHROPIC_BASE_URL:-https://api.anthropic.com}"
 CHAT_OPENAI_API_KEY="${CHAT_OPENAI_API_KEY:-${OPENAI_API_KEY:-}}"
-CHAT_OPENAI_PROXY_URL="${CHAT_OPENAI_PROXY_URL:-https://openclaw.lingjingwanxiang.cn/v1}"
+CHAT_OPENAI_PROXY_URL="${CHAT_OPENAI_PROXY_URL:-http://openclaw.openclaw.svc.cluster.local:18789/v1}"
 
 require_cmd() {
   local cmd="$1"
