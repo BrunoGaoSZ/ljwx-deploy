@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: kline-backfill-1200
+  annotations:
+    argocd.argoproj.io/ignore-healthcheck: "true"
   labels:
     app.kubernetes.io/component: batch
 spec:
