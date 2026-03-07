@@ -1,0 +1,17 @@
+---
+# =============================================================================
+# Root path redirect for ljwx-bookstore public entrypoint
+# =============================================================================
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: root-redirect
+  namespace: ljwx-bookstore
+  labels:
+    app: ljwx-bookstore
+    component: backend
+spec:
+  redirectRegex:
+    regex: ^https?://([^/]+)/?$
+    replacement: https://${1}/fiction/index
+    permanent: true
