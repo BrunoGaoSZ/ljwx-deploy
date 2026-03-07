@@ -89,6 +89,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260307T133107Z-ljwx-core-api-sha-4808d9c
+  service: ljwx-core-api
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogao/ljwx-core-api@sha256:e5ab82d5d53a98937b6dd8deb386a84e3b307db3c37613ac1d864bb038b762a4
+    tag: sha-4808d9c
+    digest: sha256:e5ab82d5d53a98937b6dd8deb386a84e3b307db3c37613ac1d864bb038b762a4
+    gitSha: 4808d9c
+  createdAt: '2026-03-07T13:31:07Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
