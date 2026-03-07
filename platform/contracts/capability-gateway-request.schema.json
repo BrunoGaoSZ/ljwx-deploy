@@ -29,11 +29,17 @@
       "minLength": 1
     },
     "route_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "actor_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "payload": {

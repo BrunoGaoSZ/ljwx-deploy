@@ -18,15 +18,26 @@
       "minLength": 1
     },
     "tenant_id": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "entrypoint": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "channel": {
       "type": "string",
-      "enum": ["web", "api", "im", "system"]
+      "enum": [
+        "web",
+        "api",
+        "im",
+        "system"
+      ]
     },
     "task_type": {
       "type": "string",
@@ -46,7 +57,10 @@
       "type": "boolean"
     },
     "latency_budget_ms": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 1
     },
     "messages": {
@@ -55,11 +69,19 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["role", "content"],
+        "required": [
+          "role",
+          "content"
+        ],
         "properties": {
           "role": {
             "type": "string",
-            "enum": ["system", "user", "assistant", "tool"]
+            "enum": [
+              "system",
+              "user",
+              "assistant",
+              "tool"
+            ]
           },
           "content": {
             "type": "string",

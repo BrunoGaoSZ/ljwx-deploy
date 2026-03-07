@@ -23,7 +23,10 @@
       "minLength": 1
     },
     "entrypoint": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "selected_provider": {
@@ -47,13 +50,23 @@
       }
     },
     "fallback_reason": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "fallback": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "additionalProperties": false,
-      "required": ["provider", "model", "condition"],
+      "required": [
+        "provider",
+        "model",
+        "condition"
+      ],
       "properties": {
         "provider": {
           "type": "string"
@@ -71,22 +84,34 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["kind", "document_id"],
+        "required": [
+          "kind",
+          "document_id"
+        ],
         "properties": {
           "kind": {
             "type": "string",
-            "enum": ["document", "chunk"]
+            "enum": [
+              "document",
+              "chunk"
+            ]
           },
           "document_id": {
             "type": "string",
             "minLength": 1
           },
           "chunk_id": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "minLength": 1
           },
           "uri": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "minLength": 1
           }
         }
@@ -95,7 +120,10 @@
     "decision_basis": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["matched_rules", "reasons"],
+      "required": [
+        "matched_rules",
+        "reasons"
+      ],
       "properties": {
         "matched_rules": {
           "type": "array",

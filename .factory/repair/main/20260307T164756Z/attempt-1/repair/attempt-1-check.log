@@ -1,0 +1,8 @@
+$ cat '.factory/repair/main/20260307T164756Z/attempt-1/check.log' && false
+
+stdout:
+scripts/ci/run_checks.sh: line 4: uvx: command not found
+
+
+stderr:
+

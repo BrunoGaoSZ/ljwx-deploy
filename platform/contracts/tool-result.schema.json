@@ -4,14 +4,21 @@
   "title": "ToolResult",
   "type": "object",
   "additionalProperties": false,
-  "required": ["trace_id", "tool_name", "success"],
+  "required": [
+    "trace_id",
+    "tool_name",
+    "success"
+  ],
   "properties": {
     "trace_id": {
       "type": "string",
       "minLength": 1
     },
     "route_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "minLength": 1
     },
     "tool_name": {
@@ -22,10 +29,20 @@
       "type": "boolean"
     },
     "data": {
-      "type": ["object", "array", "string", "number", "boolean", "null"]
+      "type": [
+        "object",
+        "array",
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
     },
     "error": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "meta": {
       "type": "object",
