@@ -15,11 +15,11 @@ deploy:
   argocdApp: ljwx-bookstore-dev
   overlayPath: apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml
   syncedAt: '2026-03-07T00:50:16Z'
-  smokedAt: '2026-03-07T07:15:07Z'
+  smokedAt: '2026-03-07T07:30:06Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-07T07:15:07Z'
+    checkedAt: '2026-03-07T07:30:06Z'
     details: argocd check skipped; endpoint=200 body='{"status":"UP","components":{"db":{"status":"UP","details":{"database":"MySQL","validationQuery":"SELECT
       1","result":1}}'
 approvals: {}
