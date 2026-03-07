@@ -1,0 +1,34 @@
+version: 0.1.0
+
+profiles:
+  local-k3s:
+    cluster_class: k3s
+    service_map_path: release/services.local-k3s.yaml
+    smoke_targets_path: scripts/smoke/targets.local-k3s.json
+    argocd_auto_sync: true
+    public_https: true
+    release_policy: auto-promote
+  orbstack-k3s-cn:
+    cluster_class: k3s
+    service_map_path: release/services.orbstack-k3s-cn.yaml
+    smoke_targets_path: scripts/smoke/targets.orbstack-k3s-cn.json
+    argocd_auto_sync: true
+    public_https: true
+    release_policy: auto-promote
+  prod-planned:
+    cluster_class: k3s
+    service_map_path: TBD
+    smoke_targets_path: TBD
+    argocd_auto_sync: false
+    public_https: true
+    release_policy: review-gated
+
+environments:
+  dev:
+    default_profile: local-k3s
+    sync_policy: automated
+    approval_required: false
+  prod:
+    default_profile: prod-planned
+    sync_policy: manual
+    approval_required: true

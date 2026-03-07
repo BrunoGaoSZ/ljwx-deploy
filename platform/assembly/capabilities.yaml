@@ -1,0 +1,33 @@
+version: 0.1.0
+
+capabilities:
+  kb.search:
+    executor: retrieval
+    owner_service: knowledge-processor
+    auth: scoped
+    audit: summary
+    timeout_ms: 3000
+  customer.lookup:
+    executor: core-api
+    owner_service: ljwx-core-api
+    auth: required
+    audit: full
+    timeout_ms: 5000
+  ticket.create:
+    executor: n8n
+    owner_service: n8n
+    auth: required
+    audit: full
+    timeout_ms: 8000
+  conversation.audit.write:
+    executor: core-api
+    owner_service: ljwx-core-api
+    auth: internal
+    audit: full
+    timeout_ms: 2000
+  route.execute:
+    executor: openclaw
+    owner_service: openclaw
+    auth: internal
+    audit: full
+    timeout_ms: 15000

@@ -1,0 +1,25 @@
+version: 0.1.0
+
+doc_types:
+  - project_doc
+  - solution_doc
+  - delivery_doc
+  - deployment_doc
+  - readme
+  - faq
+  - support_record
+  - ops_doc
+  - partner_reference
+
+product_areas:
+  - chat
+  - openclaw
+  - dify
+  - n8n
+  - platform
+  - knowledge
+
+visibility_scopes:
+  - public
+  - internal
+  - customer

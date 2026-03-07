@@ -1,0 +1,34 @@
+version: 0.1.0
+
+sources:
+  - id: ljwx-chat-docs
+    type: git_repo
+    repo: ljwx-chat
+    include:
+      - README.md
+      - docs/**
+    visibility: internal
+    owner: team-ai
+  - id: ljwx-deploy-docs
+    type: git_repo
+    repo: ljwx-deploy
+    include:
+      - docs/**
+      - runbooks/**
+    visibility: internal
+    owner: team-platform
+  - id: website-public-faq
+    type: git_repo
+    repo: ljwx-website
+    include:
+      - docs/**
+      - content/faq/**
+    visibility: public
+    owner: team-product
+  - id: customer-delivery-docs
+    type: managed_upload
+    repo: ljwx-knowledge
+    include:
+      - content/customers/**
+    visibility: customer
+    owner: team-delivery

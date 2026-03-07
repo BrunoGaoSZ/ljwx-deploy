@@ -1,0 +1,66 @@
+version: 0.1.0
+default_route: general_chat
+
+routes:
+  - id: general_chat
+    match:
+      task_type: general_chat
+    primary:
+      provider: openai
+      model: gpt-5.4
+    fallback:
+      provider: anthropic
+      model: claude-sonnet-4.6
+      condition: provider_error_or_timeout
+    tool_policy: none
+
+  - id: long_analysis
+    match:
+      task_type: long_analysis
+    primary:
+      provider: anthropic
+      model: claude-sonnet-4.6
+    fallback:
+      provider: openai
+      model: gpt-5.4
+      condition: provider_error_or_timeout
+    tool_policy: none
+
+  - id: knowledge_qa
+    match:
+      task_type: knowledge_qa
+    primary:
+      provider: openai
+      model: gpt-5.4
+    fallback:
+      provider: anthropic
+      model: claude-sonnet-4.6
+      condition: provider_error_or_timeout
+    tool_policy: retrieval_only
+    dataset_scopes:
+      - public
+      - internal
+
+  - id: tool_execution
+    match:
+      task_type: tool_execution
+    primary:
+      provider: openai
+      model: gpt-5.4
+    fallback:
+      provider: anthropic
+      model: claude-sonnet-4.6
+      condition: provider_error_or_timeout
+    tool_policy: capability_registry
+
+  - id: multi_step
+    match:
+      task_type: multi_step
+    primary:
+      provider: openai
+      model: gpt-5.4
+    fallback:
+      provider: anthropic
+      model: claude-sonnet-4.6
+      condition: provider_error_or_timeout
+    tool_policy: capability_registry

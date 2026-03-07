@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingjingwanxiang.cn/schemas/router-decision.schema.json",
+  "title": "RouterDecision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "route_id",
+    "selected_provider",
+    "selected_model",
+    "tool_plan",
+    "decision_basis"
+  ],
+  "properties": {
+    "route_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_plan": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dataset_scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fallback": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["provider", "model", "condition"],
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "condition": {
+          "type": "string"
+        }
+      }
+    },
+    "decision_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matched_rules", "reasons"],
+      "properties": {
+        "matched_rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

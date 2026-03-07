@@ -1,0 +1,45 @@
+version: 0.1.0
+
+services:
+  ljwx-chat:
+    provides:
+      - conversation.ui
+      - session.preferences
+    consumes:
+      - route.execute
+  openclaw:
+    provides:
+      - route.execute
+      - response.stream
+      - tool.orchestrate
+    consumes:
+      - kb.search
+      - customer.lookup
+      - ticket.create
+      - conversation.audit.write
+  ljwx-core-api:
+    provides:
+      - customer.lookup
+      - conversation.audit.write
+      - auth.check
+      - tool.gateway
+    consumes: []
+  n8n:
+    provides:
+      - ticket.create
+      - notification.dispatch
+      - approval.flow
+    consumes:
+      - auth.check
+  ljwx-dify:
+    provides:
+      - rag.answer
+      - dataset.retrieve
+    consumes:
+      - kb.search
+  knowledge-processor:
+    provides:
+      - kb.search
+      - knowledge.publish
+      - knowledge.invalidate
+    consumes: []
