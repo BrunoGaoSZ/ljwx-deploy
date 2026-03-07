@@ -18,3 +18,4 @@
 2. Routing logic goes to `platform/routing/`, not `ljwx-chat`.
 3. Capability ownership is explicit in `platform/assembly/capabilities.yaml`.
 4. Knowledge publication is reversible and auditable.
+5. Runtime-facing capability dispatch goes through `tool.gateway.execute`; `n8n` only owns workflow-style automation capabilities.

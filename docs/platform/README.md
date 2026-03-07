@@ -16,7 +16,9 @@
 3. `platform-repo-design.md`
 4. `routing-strategy.md`
 5. `knowledge-pipeline.md`
-6. `deployment-environments.md`
-7. `bootstrap-and-migration.md`
-8. `engineering-execution-guide.md`
-9. `github-project-plan.md`
+6. `capability-gateway.md`
+7. `observability-contract.md`
+8. `deployment-environments.md`
+9. `bootstrap-and-migration.md`
+10. `engineering-execution-guide.md`
+11. `github-project-plan.md`

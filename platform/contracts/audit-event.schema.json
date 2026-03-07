@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingjingwanxiang.cn/schemas/audit-event.schema.json",
+  "title": "AuditEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "audit_event_id",
+    "timestamp",
+    "component",
+    "event_type",
+    "trace_id"
+  ],
+  "properties": {
+    "audit_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "component": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "route_decision",
+        "knowledge_publication",
+        "capability_execution",
+        "whitelist_violation"
+      ]
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "route_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "capability": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "document_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "selected_model": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "fallback_reason": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "success": {
+      "type": ["boolean", "null"]
+    },
+    "reason": {
+      "type": ["string", "null"]
+    },
+    "actor_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "caller_service": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

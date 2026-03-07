@@ -23,3 +23,13 @@ visibility_scopes:
   - public
   - internal
   - customer
+
+directory_conventions:
+  public: content/public
+  internal: content/internal
+  customer: content/customers/{customer_id}
+
+source_type_defaults:
+  content/public/faq: faq
+  content/internal/platform: repo_doc
+  content/customers: delivery_doc

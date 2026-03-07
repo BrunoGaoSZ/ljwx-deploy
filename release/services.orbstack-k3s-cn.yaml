@@ -124,3 +124,10 @@ services:
         kustomizeImageName: ghcr.io/brunogao/ljwx-shiti
         harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-shiti
         argocdApp: ljwx-shiti-dev
+  ljwx-core-api:
+    envs:
+      dev:
+        overlayPath: apps/ljwx-core-api/overlays/ljwx-core-api-dev/kustomization.yaml
+        kustomizeImageName: ghcr.io/brunogao/ljwx-core-api
+        harborImage: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-core-api
+        argocdApp: ljwx-core-api-dev

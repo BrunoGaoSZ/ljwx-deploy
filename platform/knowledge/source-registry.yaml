@@ -1,6 +1,27 @@
 version: 0.1.0
 
 sources:
+  - id: ljwx-knowledge-public
+    type: git_repo
+    repo: ljwx-knowledge
+    include:
+      - content/public/**
+    visibility: public
+    owner: team-knowledge
+  - id: ljwx-knowledge-internal
+    type: git_repo
+    repo: ljwx-knowledge
+    include:
+      - content/internal/**
+    visibility: internal
+    owner: team-knowledge
+  - id: ljwx-knowledge-customers
+    type: git_repo
+    repo: ljwx-knowledge
+    include:
+      - content/customers/**
+    visibility: customer
+    owner: team-delivery
   - id: ljwx-chat-docs
     type: git_repo
     repo: ljwx-chat
@@ -25,10 +46,3 @@ sources:
       - content/faq/**
     visibility: public
     owner: team-product
-  - id: customer-delivery-docs
-    type: managed_upload
-    repo: ljwx-knowledge
-    include:
-      - content/customers/**
-    visibility: customer
-    owner: team-delivery

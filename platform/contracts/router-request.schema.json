@@ -20,6 +20,10 @@
     "tenant_id": {
       "type": ["string", "null"]
     },
+    "entrypoint": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
     "channel": {
       "type": "string",
       "enum": ["web", "api", "im", "system"]

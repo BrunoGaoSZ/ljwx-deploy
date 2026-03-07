@@ -5,15 +5,25 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "trace_id",
     "route_id",
     "selected_provider",
     "selected_model",
+    "fallback_reason",
     "tool_plan",
     "decision_basis"
   ],
   "properties": {
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
     "route_id": {
       "type": "string",
+      "minLength": 1
+    },
+    "entrypoint": {
+      "type": ["string", "null"],
       "minLength": 1
     },
     "selected_provider": {
@@ -36,6 +46,10 @@
         "type": "string"
       }
     },
+    "fallback_reason": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
     "fallback": {
       "type": ["object", "null"],
       "additionalProperties": false,
@@ -49,6 +63,32 @@
         },
         "condition": {
           "type": "string"
+        }
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "document_id"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["document", "chunk"]
+          },
+          "document_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "chunk_id": {
+            "type": ["string", "null"],
+            "minLength": 1
+          },
+          "uri": {
+            "type": ["string", "null"],
+            "minLength": 1
+          }
         }
       }
     },

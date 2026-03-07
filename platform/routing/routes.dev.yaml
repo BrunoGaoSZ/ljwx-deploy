@@ -1,10 +1,15 @@
-version: 0.1.0
+version: 0.1.2
 default_route: general_chat
 
 routes:
   - id: general_chat
     match:
       task_type: general_chat
+    entrypoints:
+      ljwx_chat:
+        transport: openclaw-gateway
+        visible_models:
+          - lingjingwanxiang:32b
     primary:
       provider: openai
       model: gpt-5.4
@@ -26,9 +31,26 @@ routes:
       condition: provider_error_or_timeout
     tool_policy: none
 
+  - id: solution_design
+    match:
+      task_type: solution_design
+    primary:
+      provider: anthropic
+      model: claude-sonnet-4.6
+    fallback:
+      provider: openai
+      model: gpt-5.4
+      condition: provider_error_or_timeout
+    tool_policy: capability_registry
+
   - id: knowledge_qa
     match:
       task_type: knowledge_qa
+    entrypoints:
+      ljwx_chat:
+        transport: openclaw-gateway
+        visible_models:
+          - lingjingwanxiang:32b
     primary:
       provider: openai
       model: gpt-5.4

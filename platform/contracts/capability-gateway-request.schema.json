@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingjingwanxiang.cn/schemas/capability-gateway-request.schema.json",
+  "title": "CapabilityGatewayRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_id",
+    "caller_service",
+    "capability",
+    "profile_name",
+    "payload"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "caller_service": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "route_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "actor_id": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

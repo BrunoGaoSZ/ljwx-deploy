@@ -2,84 +2,193 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT_DIR"
+KNOWLEDGE_REPO="${KNOWLEDGE_REPO:-$(cd "$ROOT_DIR/.." && pwd)/ljwx-knowledge}"
+CORE_API_REPO="${CORE_API_REPO:-$(cd "$ROOT_DIR/.." && pwd)/ljwx-core-api}"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-echo "[rollback-drill] 准备临时仓库副本: $TMP_DIR/repo"
-cp -R . "$TMP_DIR/repo"
-cd "$TMP_DIR/repo"
+DEPLOY_COPY="$TMP_DIR/ljwx-deploy"
+KNOWLEDGE_COPY="$TMP_DIR/ljwx-knowledge"
+CORE_API_COPY="$TMP_DIR/ljwx-core-api"
 
-echo "[rollback-drill] 选择最近 promoted 条目并构造回滚入列项"
-python3 - <<'PY'
+echo "[rollback-drill] 准备临时副本"
+cp -R "$ROOT_DIR" "$DEPLOY_COPY"
+if [[ -d "$KNOWLEDGE_REPO" ]]; then
+  cp -R "$KNOWLEDGE_REPO" "$KNOWLEDGE_COPY"
+fi
+if [[ -d "$CORE_API_REPO" ]]; then
+  cp -R "$CORE_API_REPO" "$CORE_API_COPY"
+fi
+
+echo "[rollback-drill] 路由配置回滚演练"
+python3 - "$DEPLOY_COPY" <<'PY'
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from pathlib import Path
-import copy
+import sys
+
 import yaml
 
-queue_path = Path("release/queue.yaml")
-payload = yaml.safe_load(queue_path.read_text(encoding="utf-8")) or {}
-promoted = payload.get("promoted", [])
-if not isinstance(promoted, list) or not promoted:
-    raise SystemExit("promoted 列表为空，无法执行回滚演练")
+repo = Path(sys.argv[1])
+path = repo / "platform" / "routing" / "routes.dev.yaml"
+original = path.read_text(encoding="utf-8")
+payload = yaml.safe_load(original)
+routes = payload.get("routes", [])
+if not isinstance(routes, list) or not routes:
+    raise SystemExit("routes.dev.yaml 缺少 routes")
 
-def parse_ts(value: str) -> datetime:
-    if not value:
-        return datetime.min.replace(tzinfo=timezone.utc)
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
-    except ValueError:
-        return datetime.min.replace(tzinfo=timezone.utc)
+for route in routes:
+    if isinstance(route, dict) and route.get("id") == "general_chat":
+        route["tool_policy"] = "capability_registry"
+        break
+else:
+    raise SystemExit("未找到 general_chat route")
 
-candidates = [item for item in promoted if isinstance(item, dict)]
-if not candidates:
-    raise SystemExit("promoted 无有效条目")
-
-candidates.sort(
-    key=lambda item: parse_ts(str(item.get("promotedAt", ""))) or parse_ts(str(item.get("createdAt", ""))),
-    reverse=True,
-)
-base = candidates[0]
-service = str(base.get("service", "")).strip()
-env = str(base.get("env", "")).strip()
-source = copy.deepcopy(base.get("source", {}))
-if not service or not env or not isinstance(source, dict):
-    raise SystemExit("最近 promoted 条目字段不完整，无法演练")
-
-now = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-entry = {
-    "id": f"{now}-{service}-{env}-rollback-drill",
-    "service": service,
-    "env": env,
-    "source": source,
-    "createdAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-    "status": "pending",
-    "attempts": 0,
-    "lastError": "",
-    "promotedAt": "",
-    "supersededAt": "",
-    "failedAt": "",
-}
-
-pending = payload.get("pending", [])
-if not isinstance(pending, list):
-    pending = []
-pending.append(entry)
-payload["pending"] = pending
-
-queue_path.write_text(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8")
-print(f"rollback drill entry created: {entry['id']}")
+path.write_text(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8")
+(repo / ".rollback-route-original.yaml").write_text(original, encoding="utf-8")
+print("route mutation prepared")
 PY
 
-echo "[rollback-drill] 校验队列结构"
-uvx --with pyyaml python scripts/promoter/validate_queue.py --queue release/queue.yaml
+(
+  cd "$DEPLOY_COPY"
+  uvx --with pyyaml --with jsonschema python scripts/platform/validate_router_contracts.py
+)
 
-echo "[rollback-drill] 执行 promoter dry-run（仅模拟，不提交）"
-uvx --with pyyaml --with jsonschema python scripts/promoter/promote.py \
-  --dry-run \
-  --local-repo-dir .
+python3 - "$DEPLOY_COPY" <<'PY'
+from __future__ import annotations
 
-echo "[rollback-drill] 演练完成"
+from pathlib import Path
+import sys
+
+repo = Path(sys.argv[1])
+path = repo / "platform" / "routing" / "routes.dev.yaml"
+original = (repo / ".rollback-route-original.yaml").read_text(encoding="utf-8")
+path.write_text(original, encoding="utf-8")
+if path.read_text(encoding="utf-8") != original:
+    raise SystemExit("路由配置未成功恢复到原始内容")
+print("route rollback restored")
+PY
+
+(
+  cd "$DEPLOY_COPY"
+  uvx --with pyyaml --with jsonschema python scripts/platform/validate_router_contracts.py
+)
+
+echo "[rollback-drill] 知识撤回演练"
+if [[ ! -d "$KNOWLEDGE_COPY" ]]; then
+  echo "[rollback-drill] 跳过知识演练：未找到仓库 $KNOWLEDGE_REPO"
+else
+  (
+    cd "$KNOWLEDGE_COPY"
+    uv run ljwx-knowledge --deploy-root "$DEPLOY_COPY" run --env dev >/tmp/knowledge-run-before.json
+    uv run ljwx-knowledge --deploy-root "$DEPLOY_COPY" invalidate --env dev \
+      --document-id public-routing-faq --reason rollback_drill >/tmp/knowledge-invalidate.json
+  )
+
+  python3 - "$KNOWLEDGE_COPY" <<'PY'
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+
+repo = Path(sys.argv[1])
+dataset_path = repo / "datasets" / "dev" / "public-knowledge.jsonl"
+rows = [
+    json.loads(line)
+    for line in dataset_path.read_text(encoding="utf-8").splitlines()
+    if line.strip()
+]
+if any(row.get("document_id") == "public-routing-faq" for row in rows):
+    raise SystemExit("invalidate 后 public-routing-faq 仍然存在于 dataset")
+print("knowledge invalidate verified")
+PY
+
+  (
+    cd "$KNOWLEDGE_COPY"
+    uv run ljwx-knowledge --deploy-root "$DEPLOY_COPY" run --env dev >/tmp/knowledge-run-after.json
+  )
+
+  python3 - "$KNOWLEDGE_COPY" <<'PY'
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+
+repo = Path(sys.argv[1])
+dataset_path = repo / "datasets" / "dev" / "public-knowledge.jsonl"
+rows = [
+    json.loads(line)
+    for line in dataset_path.read_text(encoding="utf-8").splitlines()
+    if line.strip()
+]
+if not any(row.get("document_id") == "public-routing-faq" for row in rows):
+    raise SystemExit("重新 publish 后 public-routing-faq 未恢复")
+print("knowledge rollback restored")
+PY
+fi
+
+echo "[rollback-drill] gateway profile 回滚演练"
+if [[ ! -d "$CORE_API_COPY" ]]; then
+  echo "[rollback-drill] 跳过 gateway 演练：未找到仓库 $CORE_API_REPO"
+else
+  python3 - "$CORE_API_COPY" <<'PY'
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+import yaml
+
+repo = Path(sys.argv[1])
+path = repo / "config" / "tool_profiles.yaml"
+original = path.read_text(encoding="utf-8")
+payload = yaml.safe_load(original)
+profiles = payload.get("profiles", {})
+default = profiles.get("default")
+if not isinstance(default, dict):
+    raise SystemExit("tool_profiles.yaml 缺少 default profile")
+default["allowed_capabilities"] = ["customer.lookup"]
+path.write_text(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8")
+(repo / ".rollback-gateway-original.yaml").write_text(original, encoding="utf-8")
+print("gateway whitelist mutation prepared")
+PY
+
+  python3 - "$CORE_API_COPY" <<'PY'
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+import yaml
+
+repo = Path(sys.argv[1])
+payload = yaml.safe_load((repo / "config" / "tool_profiles.yaml").read_text(encoding="utf-8"))
+capabilities = payload["profiles"]["default"]["allowed_capabilities"]
+if "conversation.audit.write" in capabilities:
+    raise SystemExit("gateway 白名单变更未生效")
+print("gateway mutation verified")
+PY
+
+  python3 - "$CORE_API_COPY" <<'PY'
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+repo = Path(sys.argv[1])
+path = repo / "config" / "tool_profiles.yaml"
+original = (repo / ".rollback-gateway-original.yaml").read_text(encoding="utf-8")
+path.write_text(original, encoding="utf-8")
+print("gateway rollback restored")
+PY
+
+  (
+    cd "$CORE_API_COPY"
+    uv run pytest tests/test_capability_gateway.py -q
+  )
+fi
+
+echo "[rollback-drill] 三段演练完成"

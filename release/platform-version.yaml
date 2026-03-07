@@ -1,4 +1,4 @@
-platform_version: 0.1.0-draft
+platform_version: 0.2.1-draft
 release_channel: dev
 released_at: null
 
@@ -12,8 +12,8 @@ components:
     config_ref: planned-import
     image: TBD
   ljwx-core-api:
-    delivery_ref: planned
-    config_ref: planned
+    delivery_ref: repo:ljwx-core-api
+    config_ref: repo:ljwx-core-api
     image: TBD
   ljwx-dify:
     delivery_ref: release/services.yaml
@@ -29,14 +29,16 @@ components:
     image: TBD
 
 config_versions:
-  routing_rules: platform/routing/routes.dev.yaml@0.1.0
+  routing_rules: platform/routing/routes.dev.yaml@0.1.2
   model_catalog: platform/routing/model-catalog.yaml@0.1.0
-  capability_registry: platform/assembly/capabilities.yaml@0.1.0
-  service_capability_map: platform/contracts/service-capability-map.yaml@0.1.0
-  knowledge_document_schema: platform/contracts/knowledge-document.schema.yaml@0.1.0
-  knowledge_chunk_schema: platform/contracts/knowledge-chunk.schema.yaml@0.1.0
+  capability_registry: platform/assembly/capabilities.yaml@0.2.1
+  service_capability_map: platform/contracts/service-capability-map.yaml@0.2.1
+  capability_gateway_request: platform/contracts/capability-gateway-request.schema.json@0.1.0
+  audit_event_schema: platform/contracts/audit-event.schema.json@0.1.0
+  knowledge_document_schema: platform/contracts/knowledge-document.schema.yaml@0.1.1
+  knowledge_chunk_schema: platform/contracts/knowledge-chunk.schema.yaml@0.1.1
   workflow_template_version: tracked-in-ljwx-workflow-templates
-  core_contract_version: 0.1.0
+  core_contract_version: 0.2.1
   env_profile: platform/assembly/env-matrix.yaml#local-k3s
 
 notes:

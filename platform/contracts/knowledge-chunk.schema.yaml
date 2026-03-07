@@ -8,6 +8,7 @@ required:
   - document_id
   - chunk_index
   - visibility
+  - acl_expression
   - token_count
   - text_hash
 properties:
@@ -30,6 +31,9 @@ properties:
       - public
       - internal
       - customer
+  acl_expression:
+    type: string
+    minLength: 1
   customer_id:
     type:
       - string
