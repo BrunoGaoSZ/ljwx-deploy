@@ -1,0 +1,22 @@
+evidenceId: 20260307-ljwx-core-api-sha-c443f60
+service: ljwx-core-api
+env: dev
+source:
+  repo: ghcr.io/brunogao/ljwx-core-api
+  commit: c443f60
+  workflowRun: ''
+image:
+  ghcr: ghcr.io/brunogao/ljwx-core-api@sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
+  harbor: harbor.eu.lingjingwanxiang.cn/ljwx/ljwx-core-api@sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
+  deployed: ghcr.io/brunogao/ljwx-core-api@sha256:6349d1b9c9cdf8aad6794c2b65fbc3f98208b3c94adfee628b954f1f929f4c16
+deploy:
+  deployRepoCommit: bc4dbded0a2812c33238bb38dba3e8f930f7ea52
+  queueId: 20260307T134603Z-ljwx-core-api-sha-c443f60
+  argocdApp: ljwx-core-api-dev
+  overlayPath: apps/ljwx-core-api/overlays/ljwx-core-api-dev/kustomization.yaml
+  syncedAt: '2026-03-07T13:46:58Z'
+tests:
+  smoke:
+    status: pending
+    checkedAt: ''
+approvals: {}
