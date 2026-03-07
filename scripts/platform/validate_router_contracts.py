@@ -405,7 +405,9 @@ def validate_release_version_reference(
                 continue
 
             if "@" not in routing_rules:
-                errors.append(f"{path}.config_versions.{key} 必须使用 path@version 格式")
+                errors.append(
+                    f"{path}.config_versions.{key} 必须使用 path@version 格式"
+                )
                 continue
 
             referenced_path, referenced_version = routing_rules.split("@", 1)

@@ -14,6 +14,7 @@ data:
   NEXT_AUTH_SSO_SESSION_STRATEGY: "jwt"
   NEXT_AUTH_SSO_PROVIDERS: ""
   AUTH_TRUST_HOST: "true"
+  DEFAULT_AGENT_CONFIG: 'model=lingjingwanxiang:32b;provider=ollama;systemRole="默认使用中文回答，除非用户明确要求使用其他语言。"'
 
   EMAIL_ENABLED: "false"
 
@@ -21,7 +22,7 @@ data:
   NEXTAUTH_URL: "https://chat.lingjingwanxiang.cn"
 
   S3_BUCKET: "ljwx-chat"
-  S3_ENABLE_PATH_STYLE: "true"
+  S3_ENABLE_PATH_STYLE: "1"
 
   MIDDLEWARE_REWRITE_THROUGH_LOCAL: "1"
 
