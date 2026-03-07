@@ -15,10 +15,10 @@ deploy:
   argocdApp: ljwx-shiti-dev
   overlayPath: apps/ljwx-shiti/overlays/dev/kustomization.yaml
   syncedAt: '2026-03-06T11:26:18Z'
-  smokedAt: '2026-03-07T14:15:10Z'
+  smokedAt: '2026-03-07T14:30:12Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-07T14:15:10Z'
+    checkedAt: '2026-03-07T14:30:12Z'
     details: argocd check skipped; endpoint=200 body='{"status":"healthy"}'
 approvals: {}
