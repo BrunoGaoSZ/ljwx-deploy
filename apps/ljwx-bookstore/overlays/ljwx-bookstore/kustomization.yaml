@@ -6,7 +6,7 @@ resources:
 images:
 - name: harbor.omniverseai.net/ljwx/ljwx-bookstore
   newName: ghcr.io/brunogaosz/ljwx-bookstore
-  digest: sha256:9a5046ac7c7303949a8630919d4bd280c40362b00820a7ae0c98467ab36ec599
+  digest: sha256:7b688c4e973c602859c91aecccdece5d9c3dd1348dea32080b4b1d39481aee0d
 replicas:
 - name: ljwx-bookstore
   count: 1

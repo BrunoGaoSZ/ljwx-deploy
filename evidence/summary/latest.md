@@ -2,6 +2,7 @@
 
 | service | env | deployed digest | syncedAt | smoke | links |
 | --- | --- | --- | --- | --- | --- |
+| ljwx-bookstore | dev | `7b688c4e973c6028` | 2026-03-07T00:50:16Z | pending | - |
 | ljwx-bookstore | dev | `9a5046ac7c730394` | 2026-03-06T12:20:26Z | pass | - |
 | ljwx-bookstore | dev | `21072d47881b2bd3` | 2026-03-06T11:26:18Z | pass | - |
 | ljwx-shiti | dev | `a17b3da43adf6b0a` | 2026-03-06T11:26:18Z | pass | - |

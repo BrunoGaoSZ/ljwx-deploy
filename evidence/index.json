@@ -1,5 +1,35 @@
 [
   {
+    "evidenceId": "20260307-ljwx-bookstore-sha-5979196",
+    "service": "ljwx-bookstore",
+    "env": "dev",
+    "source": {
+      "repo": "ghcr.io/brunogaosz/ljwx-bookstore",
+      "commit": "5979196",
+      "workflowRun": ""
+    },
+    "image": {
+      "ghcr": "ghcr.io/brunogaosz/ljwx-bookstore@sha256:7b688c4e973c602859c91aecccdece5d9c3dd1348dea32080b4b1d39481aee0d",
+      "harbor": "harbor.omniverseai.net/app/ljwx-bookstore@sha256:7b688c4e973c602859c91aecccdece5d9c3dd1348dea32080b4b1d39481aee0d",
+      "deployed": "ghcr.io/brunogaosz/ljwx-bookstore@sha256:7b688c4e973c602859c91aecccdece5d9c3dd1348dea32080b4b1d39481aee0d"
+    },
+    "deploy": {
+      "deployRepoCommit": "bc9c16c6323464e05c88d3f2433732f8fbd9a90b",
+      "queueId": "20260307T004700Z-ljwx-bookstore-sha-5979196",
+      "argocdApp": "ljwx-bookstore-dev",
+      "overlayPath": "apps/ljwx-bookstore/overlays/ljwx-bookstore/kustomization.yaml",
+      "syncedAt": "2026-03-07T00:50:16Z"
+    },
+    "tests": {
+      "smoke": {
+        "status": "pending",
+        "checkedAt": ""
+      }
+    },
+    "approvals": {},
+    "_recordPath": "evidence/records/20260307-ljwx-bookstore-sha-5979196.yaml"
+  },
+  {
     "evidenceId": "20260306-ljwx-bookstore-sha-114e0ee",
     "service": "ljwx-bookstore",
     "env": "dev",
