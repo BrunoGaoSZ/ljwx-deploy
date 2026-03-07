@@ -25,29 +25,13 @@ jobs:
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" > .changed-files.txt
           cat .changed-files.txt
 
-      - name: Enforce allowed directories (unless platform-admin label)
+      - name: Enforce protected directories (unless platform-admin label)
         env:
           GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: |
-          python3 - <<'PY'
-          import json, pathlib, sys
-
-          allowed = (
-              'release/',
-          )
-          changed = [line.strip() for line in pathlib.Path('.changed-files.txt').read_text(encoding='utf-8').splitlines() if line.strip()]
-          event = json.loads(pathlib.Path('${{ github.event_path }}').read_text(encoding='utf-8'))
-          labels = {label.get('name','') for label in event.get('pull_request', {}).get('labels', [])}
-
-          disallowed = [p for p in changed if not p.startswith(allowed)]
-          if disallowed and 'platform-admin' not in labels:
-              print('Disallowed changes detected (missing platform-admin label):')
-              for p in disallowed:
-                  print('-', p)
-              sys.exit(1)
-
-          print('Path gate passed.')
-          PY
+          python3 scripts/ci/check-deploy-repo-path-gate.py \
+            --changed-files .changed-files.txt \
+            --event-path "${{ github.event_path }}"
 
       - name: Setup Python
         uses: actions/setup-python@v5
