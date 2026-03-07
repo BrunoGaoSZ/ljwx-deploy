@@ -1,6 +1,2 @@
 resources:
   - ../../base
-images:
-  - name: nginx
-    newName: harbor.omniverseai.net/dockerhub/library/nginx
-    newTag: "alpine"
