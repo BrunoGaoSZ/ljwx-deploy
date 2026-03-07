@@ -74,6 +74,21 @@ pending:
   promotedAt: ''
   supersededAt: ''
   failedAt: ''
+- id: 20260307T004700Z-ljwx-bookstore-sha-5979196
+  service: ljwx-bookstore
+  env: dev
+  source:
+    ghcr: ghcr.io/brunogaosz/ljwx-bookstore@sha256:7b688c4e973c602859c91aecccdece5d9c3dd1348dea32080b4b1d39481aee0d
+    tag: sha-5979196
+    digest: sha256:7b688c4e973c602859c91aecccdece5d9c3dd1348dea32080b4b1d39481aee0d
+    gitSha: '5979196'
+  createdAt: '2026-03-07T00:47:00Z'
+  status: pending
+  attempts: 0
+  lastError: ''
+  promotedAt: ''
+  supersededAt: ''
+  failedAt: ''
 promoted:
 - id: 2026-03-02T151550Z-ljwx-website-sha-931cfe96df25
   service: ljwx-website
