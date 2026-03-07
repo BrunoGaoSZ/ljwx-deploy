@@ -22,6 +22,7 @@
 - ingress class: `traefik`
 - cluster issuer: `dnspod-letsencrypt`
 - tls secret: `website-lingjingwanxiang-cn-tls`
+- ingress artifact generation: `enabled`
 
 ## Bootstrap commands
 

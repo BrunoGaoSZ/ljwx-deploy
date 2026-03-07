@@ -22,6 +22,9 @@ spec:
               image: ghcr.io/brunogao/ljwx-deploy-promoter:main
               imagePullPolicy: Always
               env:
+                # Production-only promoter: wait for artifacts in production Harbor
+                # (https://harbor.omniverseai.net/) and update prod overlays for the
+                # production ArgoCD instance to detect and deploy.
                 - name: GIT_BRANCH
                   value: main
                 - name: DEPLOY_REPO_URL

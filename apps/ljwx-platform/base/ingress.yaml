@@ -23,6 +23,13 @@ spec:
     - host: platform-admin.lingjingwanxiang.cn
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-platform
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
@@ -33,6 +40,13 @@ spec:
     - host: platform-screen.lingjingwanxiang.cn
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: ljwx-platform
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:

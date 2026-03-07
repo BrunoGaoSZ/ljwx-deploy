@@ -14,6 +14,7 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - root-redirect-middleware.yaml
   - ingress.yaml
   - servicemonitor.yaml
   - db-init-job.yaml

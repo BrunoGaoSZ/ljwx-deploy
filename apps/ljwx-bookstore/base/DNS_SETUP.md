@@ -84,6 +84,15 @@ curl -I http://bookstore.lingjingwanxiang.cn
 # HTTPS 访问
 curl -I https://bookstore.lingjingwanxiang.cn
 
+# 如果当前终端存在 DNS / 公网回环限制，改用 live Ingress 探测
+python3 scripts/ops/public_ingress_access.py probe \
+  --host bookstore.lingjingwanxiang.cn \
+  --path /fiction/index
+
+# 需要浏览器本机验收时，先生成推荐 hosts 映射
+python3 scripts/ops/public_ingress_access.py hosts \
+  --host bookstore.lingjingwanxiang.cn
+
 # 浏览器访问
 open https://bookstore.lingjingwanxiang.cn/fiction/index
 ```

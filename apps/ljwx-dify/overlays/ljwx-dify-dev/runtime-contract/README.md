@@ -16,6 +16,15 @@
 - runtime_app_secret (application): Standardize service-specific runtime secret as runtime-app.
 - db_init_job (application): Declare that the workload uses a database initialization or migration hook job.
 
+## Public endpoint
+
+- ingress profile: `traefik-letsencrypt-public`
+- host: `https://dify.lingjingwanxiang.cn`
+- ingress class: `traefik`
+- cluster issuer: `dnspod-letsencrypt`
+- tls secret: `dify-lingjingwanxiang-cn-tls`
+- ingress artifact generation: `disabled (managed by existing manifests)`
+
 ## Bootstrap commands
 
 ```bash

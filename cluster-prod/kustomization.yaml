@@ -1,6 +1,8 @@
 resources:
   - namespace-dev.yaml
   - default-sa.yaml
+  - namespace-ljwx-platform.yaml
+  - ljwx-platform-prod-application.yaml
   - namespace-ljwx-website-prod.yaml
   - website-prod-application.yaml
   - deploy-promoter-prod-cronjob.yaml

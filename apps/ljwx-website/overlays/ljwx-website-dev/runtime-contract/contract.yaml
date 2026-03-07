@@ -4,6 +4,7 @@ namespace: ljwx-website-dev
 cluster_bootstrap: false
 ingress_profile: traefik-letsencrypt-public
 public_host: website.lingjingwanxiang.cn
+generate_ingress: true
 ingress_class_name: traefik
 cluster_issuer: dnspod-letsencrypt
 tls_secret_name: website-lingjingwanxiang-cn-tls
