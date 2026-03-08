@@ -15,11 +15,11 @@ deploy:
   argocdApp: ljwx-dify-dev
   overlayPath: apps/ljwx-dify/overlays/ljwx-dify-dev/kustomization.yaml
   syncedAt: '2026-03-05T07:50:07Z'
-  smokedAt: '2026-03-08T03:15:09Z'
+  smokedAt: '2026-03-08T03:30:11Z'
 tests:
   smoke:
     status: pass
-    checkedAt: '2026-03-08T03:15:09Z'
+    checkedAt: '2026-03-08T03:30:11Z'
     details: 'argocd check skipped; endpoint=200 body=''{"pid": 7, "status": "ok",
       "version": "1.11.1"}'''
 approvals: {}
