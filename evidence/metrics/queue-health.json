@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-08T03:03:19Z",
+  "generatedAt": "2026-03-08T03:18:17Z",
   "counts": {
     "pending": 7,
     "promoted": 44,
@@ -8,7 +8,7 @@
   },
   "pending": {
     "oldestCreatedAt": "2026-03-05T13:08:20Z",
-    "maxAgeSeconds": 222899,
+    "maxAgeSeconds": 223797,
     "staleThresholdSeconds": 1800,
     "staleIds": [
       "20260305T130820Z-ljwx-stock-qlib-bootstrap-sha-887d1b0",
